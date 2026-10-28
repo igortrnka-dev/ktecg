@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: ktechnology
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /en
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+
+  # Daily AI prospecting: runs every active campaign at 06:00 UTC.
+  - type: cron
+    name: ktechnology-prospecting
+    runtime: node
+    plan: starter
+    region: frankfurt
+    schedule: "0 6 * * *"
+    buildCommand: "true"
+    startCommand: 'curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/cron/prospect"'
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: ktechnology
+          envVarKey: CRON_SECRET
