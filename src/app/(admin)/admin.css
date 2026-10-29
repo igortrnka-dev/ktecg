@@ -61,6 +61,17 @@ p {
 .error {
   color: var(--red);
 }
+.notice {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.notice code {
+  font-size: 12px;
+}
 .back {
   text-decoration: none;
   font-size: 13px;

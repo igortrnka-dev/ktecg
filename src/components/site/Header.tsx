@@ -1,0 +1,230 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Dictionary } from "@/i18n";
+import type { Locale } from "@/i18n/config";
+import { localeNames, locales } from "@/i18n/config";
+
+type Nav = Dictionary["nav"];
+
+/**
+ * Floating pill navbar. Desktop: wordmark, links with a sliding hover highlight and
+ * scroll-spy active state, language dropdown, glowing CTA. Below 900px the links,
+ * languages and CTA move into a sheet opened by the burger.
+ */
+export default function Header({ nav, locale }: { nav: Nav; locale: Locale }) {
+  const links = [
+    ["services", nav.services],
+    ["trades", nav.trades],
+    ["sectors", nav.sectors],
+    ["process", nav.process],
+    ["faq", nav.faq],
+    ["contact", nav.contact],
+  ] as const;
+
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
+  const [langOpen, setLangOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hl, setHl] = useState<{ x: number; w: number; on: boolean }>({ x: 0, w: 0, on: false });
+
+  const linksRef = useRef<HTMLElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+
+  // Tighten the bar once the page has scrolled a little.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Scroll-spy: the section crossing the upper-middle band of the viewport is active.
+  useEffect(() => {
+    const sections = links
+      .map(([id]) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    const visible = new Set<string>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.add(e.target.id);
+          else visible.delete(e.target.id);
+        }
+        const first = links.find(([id]) => visible.has(id));
+        setActive(first ? first[0] : null);
+      },
+      { rootMargin: "-35% 0px -55% 0px" },
+    );
+    sections.forEach((s) => io.observe(s));
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Close the language dropdown on outside click.
+  useEffect(() => {
+    if (!langOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!langRef.current?.contains(e.target as Node)) setLangOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [langOpen]);
+
+  // Esc closes whatever is open; the mobile sheet locks body scroll.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (menuOpen) {
+        setMenuOpen(false);
+        burgerRef.current?.focus();
+      }
+      setLangOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  // Close the sheet if the viewport grows past the mobile breakpoint.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 900px)");
+    const onChange = () => mq.matches && setMenuOpen(false);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const moveHighlight = useCallback((el: HTMLElement | null) => {
+    const box = linksRef.current;
+    if (!el || !box) return setHl((h) => ({ ...h, on: false }));
+    setHl({ x: el.offsetLeft, w: el.offsetWidth, on: true });
+  }, []);
+
+  return (
+    <>
+      <header className={`nav${scrolled ? " is-scrolled" : ""}${menuOpen ? " is-open" : ""}`}>
+        <a href={`/${locale}`} className="nav__mark" aria-label="KTechnology">
+          KTechnology<span className="nav__dot" aria-hidden />
+        </a>
+
+        <nav
+          ref={linksRef}
+          className="nav__links"
+          aria-label="Main"
+          onMouseLeave={() => moveHighlight(null)}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) moveHighlight(null);
+          }}
+        >
+          <span
+            className={`nav__hl${hl.on ? " is-on" : ""}`}
+            style={{ transform: `translateX(${hl.x}px)`, width: hl.w }}
+            aria-hidden
+          />
+          {links.map(([id, label]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className={active === id ? "is-active" : undefined}
+              aria-current={active === id ? "location" : undefined}
+              onMouseEnter={(e) => moveHighlight(e.currentTarget)}
+              onFocus={(e) => moveHighlight(e.currentTarget)}
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="nav__end">
+          <div className="lang" ref={langRef}>
+            <button
+              type="button"
+              className="lang__btn mono"
+              aria-haspopup="true"
+              aria-expanded={langOpen}
+              aria-controls="lang-menu"
+              aria-label={`${nav.language}: ${localeNames[locale]}`}
+              onClick={() => setLangOpen((o) => !o)}
+            >
+              {locale.toUpperCase()}
+              <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="lang__caret">
+                <path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            </button>
+            {langOpen && (
+              <ul className="lang__menu" id="lang-menu">
+                {locales.map((l) => (
+                  <li key={l}>
+                    <a
+                      href={`/${l}`}
+                      hrefLang={l}
+                      lang={l}
+                      className={l === locale ? "is-active" : undefined}
+                      aria-current={l === locale ? "page" : undefined}
+                    >
+                      <span className="mono">{l.toUpperCase()}</span>
+                      {localeNames[l]}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <a href="#contact" className="glow-btn nav__cta">
+            <span className="glow-btn__glow" aria-hidden />
+            <span className="glow-btn__fill">{nav.cta}</span>
+          </a>
+
+          <button
+            ref={burgerRef}
+            type="button"
+            className="nav__burger"
+            aria-label={nav.menu}
+            aria-expanded={menuOpen}
+            aria-controls="nav-sheet"
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            <span aria-hidden />
+            <span aria-hidden />
+          </button>
+        </div>
+      </header>
+
+      <div className={`sheet${menuOpen ? " is-open" : ""}`} id="nav-sheet" hidden={!menuOpen}>
+        <nav className="sheet__links" aria-label="Main">
+          {links.map(([id, label]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className={active === id ? "is-active" : undefined}
+              onClick={() => setMenuOpen(false)}
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+        <ul className="sheet__langs" aria-label={nav.language}>
+          {locales.map((l) => (
+            <li key={l}>
+              <a href={`/${l}`} hrefLang={l} className={`mono${l === locale ? " is-active" : ""}`} aria-current={l === locale ? "page" : undefined}>
+                {l.toUpperCase()}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a href="#contact" className="glow-btn sheet__cta" onClick={() => setMenuOpen(false)}>
+          <span className="glow-btn__glow" aria-hidden />
+          <span className="glow-btn__fill">{nav.cta}</span>
+        </a>
+      </div>
+    </>
+  );
+}

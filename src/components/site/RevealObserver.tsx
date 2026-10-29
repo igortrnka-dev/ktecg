@@ -2,9 +2,13 @@
 
 import { useEffect } from "react";
 
-/** Adds `is-in` to every [data-reveal] element once it scrolls into view. */
+/**
+ * Adds `is-in` to every [data-reveal] element once it scrolls into view. Elements are
+ * only hidden once `html.js` is set here, so the page stays readable without JS.
+ */
 export default function RevealObserver() {
   useEffect(() => {
+    document.documentElement.classList.add("js");
     const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
     const io = new IntersectionObserver(
       (entries) => {

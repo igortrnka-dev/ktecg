@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import * as z from "zod/v4";
 import { db } from "@/lib/supabase/admin";
+import { supabaseConfigured } from "@/lib/supabase/config";
 import { qualifyInquiry } from "@/lib/ai/leads";
 
 const Inquiry = z.object({
@@ -22,6 +23,8 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const { website, ...data } = parsed.data;
   if (website) return NextResponse.json({ ok: true }); // bot
+
+  if (!supabaseConfigured()) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
   const clean = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v === "" ? null : v]));
   const { data: row, error } = await db().from("inquiries").insert(clean).select("id").single();

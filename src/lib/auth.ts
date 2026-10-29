@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createAuthClient } from "./supabase/server";
+import { supabaseConfigured } from "./supabase/config";
 
 function allowedEmails(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")
@@ -9,6 +10,7 @@ function allowedEmails(): string[] {
 }
 
 export async function getAdmin() {
+  if (!supabaseConfigured()) return null;
   const supabase = await createAuthClient();
   const { data } = await supabase.auth.getUser();
   const email = data.user?.email?.toLowerCase();

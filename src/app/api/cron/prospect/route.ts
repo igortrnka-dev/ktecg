@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/supabase/admin";
+import { missingSupabaseEnv } from "@/lib/supabase/config";
 import { executeRun } from "@/lib/ai/prospect";
 
 /** Called by the Render cron job. Runs every active campaign one after another. */
@@ -8,6 +9,9 @@ export async function POST(request: Request) {
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const missing = [...missingSupabaseEnv(), ...(process.env.ANTHROPIC_API_KEY ? [] : ["ANTHROPIC_API_KEY"])];
+  if (missing.length) return NextResponse.json({ error: "not_configured", missing }, { status: 503 });
 
   const { data: campaigns } = await db().from("campaigns").select("id").eq("active", true);
   const ids = (campaigns ?? []).map((c) => c.id as string);

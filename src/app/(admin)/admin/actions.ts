@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createAuthClient } from "@/lib/supabase/server";
+import { missingSupabaseEnv } from "@/lib/supabase/config";
 import { db } from "@/lib/supabase/admin";
 import { startRun } from "@/lib/ai/prospect";
 import { enrichLead, writeOutreach } from "@/lib/ai/leads";
@@ -15,6 +16,8 @@ const list = (v: FormDataEntryValue | null) =>
     .filter(Boolean);
 
 export async function signIn(_: string | null, form: FormData): Promise<string | null> {
+  const missing = missingSupabaseEnv();
+  if (missing.length) return `Admin ešte nie je nastavený – v .env.local chýba ${missing.join(", ")}.`;
   const supabase = await createAuthClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: String(form.get("email")),
@@ -25,6 +28,7 @@ export async function signIn(_: string | null, form: FormData): Promise<string |
 }
 
 export async function signOut() {
+  if (missingSupabaseEnv().length) redirect("/admin/login");
   const supabase = await createAuthClient();
   await supabase.auth.signOut();
   redirect("/admin/login");
