@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/supabase/admin";
 import { fmtDate, fmtDay } from "@/components/admin/ui";
-import { shiftLabel, type ShiftPattern } from "@/lib/inquiries";
+import { NEXT_ACTION, shiftLabel, type ShiftPattern } from "@/lib/inquiries";
 
 // The route links an inquiry to a lead before it answers, so one still unlinked after this has failed.
 const LINK_TIMEOUT_MS = 10 * 60 * 1000;
@@ -17,7 +17,7 @@ export default async function Inquiries() {
       <header className="page-head">
         <div className="page-head__text">
           <h1>Dopyty z webu</h1>
-          <p className="page-sub">Každý dopyt z formulára na webe sa hneď uloží ako lead s úlohou „Odpovedať na dopyt“ na dnes.</p>
+          <p className="page-sub">Každý dopyt z formulára na webe sa hneď uloží ako lead s úlohou „{NEXT_ACTION}“ na dnes.</p>
         </div>
       </header>
       <div className="card">

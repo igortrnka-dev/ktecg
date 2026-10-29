@@ -1,6 +1,7 @@
 import type * as z from "zod/v4";
 import { db } from "@/lib/supabase/admin";
-import { replacedDraftNote, type ShiftPattern } from "@/lib/inquiries";
+import { replacedDraftNote, type InquiryRow, type ShiftPattern } from "@/lib/inquiries";
+import { plural } from "@/lib/plural";
 import { getCompanyProfile } from "./client";
 import { AiStepError, aiErrorText } from "./errors";
 import { extract, webResearch, type Usage } from "./research";
@@ -53,6 +54,20 @@ function mergeSignals(current: Signal[], found: Signal[]): Signal[] {
   return [...current, ...fresh];
 }
 
+/** A website inquiry as prompt text. */
+function inquiryBlock(q: InquiryRow): string {
+  return `<inquiry>
+Company: ${q.company}
+Contact: ${q.name} <${q.email}> ${q.phone ?? ""}
+Project country: ${q.country ?? "-"}
+Positions: ${q.positions ?? "-"}
+Duration: ${q.duration ?? "-"}
+Shift pattern: ${SHIFT_EN[q.shift_pattern as ShiftPattern] ?? "-"}${q.headcount ? `\nHeadcount: ${q.headcount}` : ""}
+Start: ${q.start_date ?? "-"}
+Message: ${q.message ?? "-"}
+</inquiry>`;
+}
+
 /**
  * Scores an inbound lead (already created or attached by linkInquiry) and drafts the reply.
  * A failure is recorded on the lead, which stays in the pipeline either way.
@@ -75,16 +90,7 @@ Write the reply in the language of the request (website locale: ${q.locale ?? "e
 The reply should thank them, confirm what we understood, ask the 2-3 most important missing questions,
 and propose a short call.
 
-<inquiry>
-Company: ${q.company}
-Contact: ${q.name} <${q.email}> ${q.phone ?? ""}
-Project country: ${q.country ?? "-"}
-Positions: ${q.positions ?? "-"}
-Duration: ${q.duration ?? "-"}
-Shift pattern: ${SHIFT_EN[q.shift_pattern as ShiftPattern] ?? "-"}${q.headcount ? `\nHeadcount: ${q.headcount}` : ""}
-Start: ${q.start_date ?? "-"}
-Message: ${q.message ?? "-"}
-</inquiry>
+${inquiryBlock(q)}
 <what_we_know_already>${JSON.stringify({ status: lead.status, qualification: lead.qualification, signals: lead.signals })}</what_we_know_already>`,
     });
 
@@ -168,26 +174,52 @@ ${findings}
   await logEvent(
     leadId,
     "ai",
-    `Preskúmané s Claude (${usage.web_searches} vyhľadávaní). Skóre ${result.score}, tier ${result.tier}. ` +
+    `Preskúmané s Claude (${usage.web_searches} ${plural(usage.web_searches, "vyhľadávanie", "vyhľadávania", "vyhľadávaní")}). Skóre ${result.score}, tier ${result.tier}. ` +
       `Nové kontakty: ${mergedContacts.length - currentContacts.length}, nové signály: ${mergedSignals.length - currentSignals.length}.`,
   );
 }
 
-/** Rewrites the outreach e-mail for a lead in the given language and tone. */
+/**
+ * Rewrites the lead's current e-mail draft in the given language and tone, keeping its purpose (a reply to an
+ * inquiry stays a reply), or writes a first outreach e-mail when there is no draft. The replaced draft is kept
+ * in the history.
+ */
 export async function writeOutreach(leadId: string, language: string, instructions: string) {
   const { data: lead } = await db().from("leads").select("*").eq("id", leadId).single();
   if (!lead) throw new AiStepError("Lead sa nenašiel.");
   const profile = await getCompanyProfile();
+  const hasDraft = Boolean(lead.outreach_subject || lead.outreach_body);
+  // The latest website inquiry, when the lead came from (or got) one: the draft may be the reply to it.
+  const { data: inquiry } = await db()
+    .from("inquiries")
+    .select("*")
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<InquiryRow>();
+
+  const task = hasDraft
+    ? `Rewrite the current e-mail below in language "${language}". Keep its purpose: if it answers the customer's
+inquiry, it must still answer it (thank them, keep what it confirms and the questions it asks) and must not turn
+into a sales pitch; if it is a first outreach e-mail, it stays one. Keep the facts it states.`
+    : `Write a short, personal first outreach e-mail to this prospect in language "${language}".
+Reference their concrete signal, offer the roles we recommend, and end with a simple call to action.`;
+  const context = [
+    hasDraft ? `<current_email>\nSubject: ${lead.outreach_subject ?? ""}\n\n${lead.outreach_body ?? ""}\n</current_email>` : "",
+    inquiry ? `The customer's latest inquiry:\n${inquiryBlock(inquiry)}` : "",
+  ]
+    .filter(Boolean)
+    .map((block) => `${block}\n\n`)
+    .join("");
 
   const result = await extract({
     system: SYSTEM(profile),
     schema: Outreach,
     usage: newUsage(),
-    prompt: `Write a short, personal first outreach e-mail to this prospect in language "${language}".
-Reference their concrete signal, offer the roles we recommend, and end with a simple call to action.
+    prompt: `${task}
 ${instructions ? `Extra instructions: ${instructions}` : ""}
 
-<lead>${JSON.stringify({
+${context}<lead>${JSON.stringify({
       company: lead.company_name,
       country: lead.country,
       industry: lead.industry,
@@ -199,6 +231,14 @@ ${instructions ? `Extra instructions: ${instructions}` : ""}
     })}</lead>`,
   });
 
+  // Read again: during the rewrite an inquiry may have put a reply there; whatever is replaced goes to the history.
+  const { data: current } = await db()
+    .from("leads")
+    .select("outreach_language, outreach_subject, outreach_body")
+    .eq("id", leadId)
+    .single();
+  if (!current) throw new AiStepError("Lead bol medzitým zmazaný.");
+  if (current.outreach_subject || current.outreach_body) await logEvent(leadId, "outreach", replacedDraftNote(current, "rewrite"));
   await db().from("leads").update(result).eq("id", leadId);
   await logEvent(leadId, "outreach", `E-mail prepísaný s Claude (${language.toUpperCase()}).`);
 }

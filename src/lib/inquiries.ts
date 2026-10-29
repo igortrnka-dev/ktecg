@@ -41,7 +41,10 @@ type Lead = {
   next_action_at: string | null;
 };
 
-const NEXT_ACTION = "Odpovedať na dopyt";
+/** The task every website inquiry sets on its lead, due today. */
+export const NEXT_ACTION = "Odpovedať na dopyt";
+/** What "Označiť ako oslovený" puts in place of NEXT_ACTION once the reply is sent. */
+export const FOLLOW_UP = "Ozvať sa, ak neodpovedia";
 
 // Exact matches only: a substring test also catches company domains such as monetti.it or lazetech.sk.
 const FREE_MAIL = new Set([
@@ -82,14 +85,18 @@ export function inquirySummary(q: InquiryRow): string {
     .join(" · ");
 }
 
-/** History text that keeps the outreach draft an inquiry reply replaces. */
-export function replacedDraftNote(draft: {
-  outreach_language?: string | null;
-  outreach_subject?: string | null;
-  outreach_body?: string | null;
-}): string {
+/** History text that keeps the outreach draft an inquiry reply or a rewrite with Claude replaces. */
+export function replacedDraftNote(
+  draft: {
+    outreach_language?: string | null;
+    outreach_subject?: string | null;
+    outreach_body?: string | null;
+  },
+  by: "inquiry" | "rewrite" = "inquiry",
+): string {
   const language = draft.outreach_language ? ` (${draft.outreach_language.toUpperCase()})` : "";
-  return `Predchádzajúci návrh e-mailu${language} nahradila odpoveď na dopyt. Predmet: ${draft.outreach_subject || "–"}. Text: ${draft.outreach_body || "–"}`;
+  const replacedBy = by === "rewrite" ? "nahradil e-mail prepísaný s Claude" : "nahradila odpoveď na dopyt";
+  return `Predchádzajúci návrh e-mailu${language} ${replacedBy}. Predmet: ${draft.outreach_subject || "–"}. Text: ${draft.outreach_body || "–"}`;
 }
 
 function details(q: InquiryRow): string {

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { AI_ERROR } from "../ai/errors";
 import { runLog } from "../ai/runlog";
+import { NEXT_ACTION } from "../inquiries";
 
 /*
  * Sample data for the local admin preview. Every company is fictional and uses the
@@ -21,11 +22,18 @@ const COMPANY_PROFILE = `KTechnology s.r.o. (based in Slovakia) provides industr
 
 Trades: welders (MIG/MAG, TIG, MMA; steel and stainless), pipe fitters, steel fitters, industrial electricians, automation technicians (PLC), mechanics and millwrights, CNC and machine operators, assembly operators and logistics operators. Every worker passes a practical skills test before deployment.
 
-We handle recruiting, employment contracts, A1 forms and work permits, insurance, travel and accommodation, plus a project coordinator and fast replacement. The customer gets one contact and one invoice.
+We handle recruiting, employment contracts, A1 forms and work permits, insurance, travel and accommodation, plus a project coordinator and fast replacement. The workers are employed by KTechnology and leased to the customer, who gets one contact and one invoice. We send a quote within one business day, and a crew is typically on site in about 14 days.
 
 Ideal customers: manufacturers, automotive suppliers, metalworking companies, energy and power plants (outages and shutdowns), shipyards and offshore, electrical and automation contractors, EPC and installation contractors, mid-size and larger, in the countries above, who struggle to hire skilled blue-collar staff.
 
 Strong buying signals: many open job ads for skilled trades, new plant/line/expansion announcements, large project wins or contracts, planned outages/shutdowns, labour-shortage statements, subcontracting tenders.`;
+
+/** An excerpt of the web research notes a real run stores in its log (sample companies and people). */
+const RESEARCH_NOTES = `1. Brenner Achsentechnik GmbH (brenner-achsen.example), Zwickau, Germany – axles and chassis modules, ~1,000 employees.
+   Signals: 14 open positions for MAG welders and maintenance technicians (https://brenner-achsen.example/karriere); new welding line, series production from Q1 (https://brenner-achsen.example/news/neue-linie).
+   Decision makers: Thomas Weidner, Leiter Produktion, t.weidner@brenner-achsen.example, +49 375 555 0140; Sabine Kroll, Personalleiterin, s.kroll@brenner-achsen.example.
+2. Alpenstahl Montage GmbH (alpenstahl.example), Linz, Austria – steel structures and installation.
+   Decision makers: Stefan Gruber, Geschäftsführer, s.gruber@alpenstahl.example.`;
 
 /** Prospects the simulated AI run "finds" (see ai.ts), taken in order. */
 export const PROSPECT_POOL: Row[] = [
@@ -182,7 +190,14 @@ export function seed(): Record<string, Row[]> {
       error: AI_ERROR.overloaded,
       usage: { web_searches: 6 },
     }),
-    run(de, "cron", 9, 5, 4),
+    // Like a real run, the log keeps the research notes with the people found (deleteLead redacts them).
+    run(de, "cron", 9, 5, 4, {
+      log: [
+        runLog.researching("Zvárači – Nemecko a Rakúsko, automotive"),
+        `${runLog.researched(19)}\n\n${RESEARCH_NOTES}\n`,
+        runLog.saved(4, 5),
+      ].join("\n"),
+    }),
   ];
 
   type LeadSeed = Row & { events?: [type: string, body: string, hoursAgo: number][] };
@@ -477,7 +492,7 @@ export function seed(): Record<string, Row[]> {
       outreach_body: "Sehr geehrte Frau Berger,\n\nvielen Dank für Ihre Anfrage. Für drei Monate ab Anfang Dezember können wir Ihnen vier erfahrene WIG-Schweißer für Edelstahl anbieten und senden Ihnen gerne kurzfristig passende Profile. Anreise, Unterkunft und Koordination vor Ort übernehmen wir.\n\nPasst Ihnen ein kurzes Telefonat morgen Vormittag?\n\nMit freundlichen Grüßen\nIhr KTechnology-Team",
       status: "new",
       source: "inbound",
-      next_action: "Odpovedať na dopyt",
+      next_action: NEXT_ACTION,
       next_action_at: day(0),
       created_at: ago(0, 5),
       events: [["created", "Dopyt z webu. Skóre 82, tier A.", 5]],

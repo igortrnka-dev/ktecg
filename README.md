@@ -15,8 +15,9 @@ admin that uses Claude to find, qualify and draft outreach to sales leads.
     Active campaigns also run daily via the Render cron job.
   - *Nastavenia*: the company profile / ideal-customer text Claude works from. Claude is told to use only
     the facts in it. 0001_init.sql seeds it once, so a project that ran an older 0001 still has the old
-    default text (it mentioned Switzerland, the UK, "certified" welders and engagement sizes): edit it in
-    *Nastavenia* to match what the website says.
+    default text (it mentioned Switzerland, the UK, "certified" welders and engagement sizes, and lacked the
+    quote within one business day and the crew on site in about 14 days): edit it in *Nastavenia* to match
+    what the website says.
 
 Stack: Next.js 15 (App Router), Supabase (Postgres + Auth), Anthropic API (`claude-opus-5-5` with web search), Render.
 
@@ -47,5 +48,11 @@ prospecting cron job. Fill in the env vars marked `sync: false` in the Render da
   A campaign runs at most once at a time. Runs live in the web server process, so a run cut off by a
   restart or deploy is marked failed ("Beh sa prerušil") after an hour; its research notes stay in the run log.
 - The inquiry endpoint takes at most 5 requests per 10 minutes per visitor address (CF-Connecting-IP, which
-  Render's Cloudflare edge sets), 5 inquiries per 10 minutes per sender company domain (the whole address
-  for free-mail) and 30 inquiries per 10 minutes in total; over a limit it answers 429.
+  Render's Cloudflare edge sets; IPv6 counted per /64) and 5 inquiries per 10 minutes per sender company
+  domain (the whole address for free-mail); over either limit it answers 429. Above 30 inquiries in 10 minutes
+  in total, inquiries are still saved and put into the pipeline, but Claude does not assess them (the lead's
+  history says so and the server log warns once per 10 minutes), so a flood cannot lock real buyers out.
+  On a validation error it answers 400 `{"error":"invalid","fields":[…]}` with the failing field names.
+- *Zmazať lead* deletes the lead with its history, every website inquiry linked to it or sent from one of its
+  contacts' e-mail addresses, and replaces the contacts' e-mails and full names in all AI prospecting run logs
+  with "[vymazané]". A later prospecting run can find the company again from public sources.

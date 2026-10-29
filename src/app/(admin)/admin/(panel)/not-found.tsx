@@ -13,7 +13,7 @@ export default function PanelNotFound() {
       </header>
       <section className="card">
         <div className="card__body">
-          <p>Lead mohol byť zmazaný alebo je odkaz neplatný. Firmu nájdete v zozname leadov.</p>
+          <p>Stránka alebo záznam neexistuje. Ak ste hľadali lead, mohol byť zmazaný alebo je odkaz neplatný – firmu nájdete v zozname leadov.</p>
         </div>
         <div className="card__foot">
           <Link className="abtn abtn--primary" href="/admin/leads"><Icon name="back" />Späť na leady</Link>
