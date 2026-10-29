@@ -20,7 +20,10 @@ Stack: Next.js 15 (App Router), Supabase (Postgres + Auth), Anthropic API (`clau
 ## Setup
 
 1. **Supabase** – create a project, then run `supabase/migrations/0001_init.sql` in the SQL editor.
-   In *Authentication → Users* add the admin user(s) with a password.
+   In *Authentication → Users* add the admin user(s) with a password and tick *Auto Confirm User*
+   (the admin only accepts confirmed e-mails listed in `ADMIN_EMAILS`).
+   Then in *Authentication → Sign In / Providers* turn off *Allow new users to sign up* (it is on by default)
+   and leave *Confirm email* on, so nobody can create an account with the public anon key.
 2. **Env vars** – copy `.env.example` to `.env.local` and fill in the values.
 3. `npm install && npm run dev` → http://localhost:3000 and http://localhost:3000/admin
 
@@ -36,3 +39,5 @@ prospecting cron job. Fill in the env vars marked `sync: false` in the Render da
 - Card and portrait visuals are CSS compositions; replace them with real photography
   (`src/components/site/Art.tsx`, `.portrait` in `site.css`) when available.
 - AI runs cost API credits: each prospecting run uses up to ~25 web searches plus two Claude calls.
+  A campaign runs at most once at a time. Runs live in the web server process, so a run cut off by a
+  restart or deploy is marked failed ("interrupted") after an hour; its research notes stay in the run log.

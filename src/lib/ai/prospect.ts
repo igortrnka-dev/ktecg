@@ -23,18 +23,48 @@ You find and qualify B2B prospects that are likely to lease skilled industrial s
 Only use facts you can support with a source; never invent companies, people, e-mails or phone numbers.
 Prefer companies with fresh (last 6 months) buying signals.`;
 
-/** Starts a prospecting run in the background and returns its id. */
-export async function startRun(campaignId: string, trigger: "manual" | "cron"): Promise<string> {
+const STALE_RUN_MS = 60 * 60 * 1000;
+
+/**
+ * Runs live only as a promise in this process, so a run still "running" after an hour was cut off
+ * by a restart or deploy. Closing it keeps the campaign startable and stops the page polling.
+ */
+export async function closeStaleRuns() {
+  await db()
+    .from("lead_runs")
+    .update({ status: "failed", error: "interrupted", finished_at: new Date().toISOString() })
+    .eq("status", "running")
+    .lt("started_at", new Date(Date.now() - STALE_RUN_MS).toISOString());
+}
+
+export async function runInProgress(campaignId: string): Promise<boolean> {
+  await closeStaleRuns();
+  const { count } = await db()
+    .from("lead_runs")
+    .select("id", { count: "exact", head: true })
+    .eq("campaign_id", campaignId)
+    .eq("status", "running");
+  return Boolean(count);
+}
+
+/** Creates the run row, or returns null when the campaign already has a run going. */
+export async function createRun(campaignId: string, trigger: "manual" | "cron"): Promise<string | null> {
+  if (await runInProgress(campaignId)) return null;
   const { data: run, error } = await db()
     .from("lead_runs")
     .insert({ campaign_id: campaignId, trigger })
     .select("id")
     .single();
   if (error || !run) throw new Error(error?.message ?? "Could not create run");
-
-  // Render runs a long-lived Node server, so the promise keeps going after the response.
-  void executeRun(run.id, campaignId).catch(() => {});
   return run.id;
+}
+
+/** Starts a prospecting run in the background and returns its id, or null if one is already running. */
+export async function startRun(campaignId: string, trigger: "manual" | "cron"): Promise<string | null> {
+  const runId = await createRun(campaignId, trigger);
+  // Render runs a long-lived Node server, so the promise keeps going after the response.
+  if (runId) void executeRun(runId, campaignId).catch(() => {});
+  return runId;
 }
 
 export async function executeRun(runId: string, campaignId: string) {
@@ -72,7 +102,8 @@ the concrete buying signals with source URLs (job ads for the roles above, expan
 large project wins, outages/shutdowns, labour-shortage statements), and publicly listed decision makers
 (HR/recruiting, plant or project managers, procurement) with their role and any public contact details.`,
     });
-    await note(`Research done (${usage.web_searches} searches). Qualifying…`);
+    // Saved before extraction so the paid-for research survives a failed or interrupted step.
+    await note(`Research done (${usage.web_searches} searches). Qualifying…\n\n${findings}\n`);
 
     const lang = campaign.outreach_language === "auto"
       ? "the main business language of the company's country"
@@ -129,10 +160,11 @@ ${findings}
     await db().from("campaigns").update({ last_run_at: new Date().toISOString() }).eq("id", campaignId);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await note(`Failed: ${message}`);
+    log.push(`${new Date().toISOString().slice(11, 19)}  Failed: ${message}`);
+    // One write, so the run cannot be left "running" by a failed log update.
     await db()
       .from("lead_runs")
-      .update({ status: "failed", error: message, finished_at: new Date().toISOString(), usage })
+      .update({ status: "failed", error: message, log: log.join("\n"), finished_at: new Date().toISOString(), usage })
       .eq("id", runId);
   }
 }

@@ -494,6 +494,13 @@ textarea {
 .filters select {
   width: auto;
 }
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
 .abtn {
   display: inline-flex;
   align-items: center;

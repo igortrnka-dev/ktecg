@@ -108,15 +108,19 @@ class Query implements PromiseLike<Result> {
   private filters: ((r: Row) => boolean)[] = [];
   private orders: Order[] = [];
   private max: number | null = null;
+  private offset = 0;
   private one: "single" | "maybe" | null = null;
   private head = false;
+  private counting = false;
 
   constructor(private table: string) {}
 
   select(cols = "*", opts?: { count?: string; head?: boolean }) {
     this.cols = cols;
-    if (this.op === "select") this.head = Boolean(opts?.head);
-    else this.returning = true;
+    if (this.op === "select") {
+      this.head = Boolean(opts?.head);
+      this.counting = Boolean(opts?.count);
+    } else this.returning = true;
     return this;
   }
   insert(values: Row | Row[]) {
@@ -156,8 +160,13 @@ class Query implements PromiseLike<Result> {
     return this.where((r) => (r[col] ?? null) === value);
   }
   not(col: string, operator: string, value: unknown) {
-    if (operator !== "is") throw new Error(`Demo database: not.${operator} is not supported`);
-    return this.where((r) => (r[col] ?? null) !== value);
+    if (operator === "is") return this.where((r) => (r[col] ?? null) !== value);
+    if (operator === "in") {
+      // PostgREST takes a raw list, e.g. not("status", "in", "(won,lost)"); NULL is never "not in" a list.
+      const list = String(value).replace(/^\(|\)$/g, "").split(",").map((v) => v.trim().replace(/^"|"$/g, ""));
+      return this.where((r) => r[col] != null && !list.includes(String(r[col])));
+    }
+    throw new Error(`Demo database: not.${operator} is not supported`);
   }
   ilike(col: string, pattern: string) {
     const source = pattern.split("%").map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".*");
@@ -170,6 +179,9 @@ class Query implements PromiseLike<Result> {
   lte(col: string, value: unknown) {
     return this.where((r) => r[col] != null && r[col] <= (value as string));
   }
+  lt(col: string, value: unknown) {
+    return this.where((r) => r[col] != null && r[col] < (value as string));
+  }
   contains(col: string, values: unknown[]) {
     return this.where((r) => Array.isArray(r[col]) && values.every((v) => r[col].includes(v)));
   }
@@ -181,6 +193,11 @@ class Query implements PromiseLike<Result> {
   }
   limit(n: number) {
     this.max = n;
+    return this;
+  }
+  range(from: number, to: number) {
+    this.offset = from;
+    this.max = to - from + 1;
     return this;
   }
   single() {
@@ -221,8 +238,14 @@ class Query implements PromiseLike<Result> {
     switch (this.op) {
       case "select": {
         const found = sorted(matching(), this.orders);
-        if (this.head) return { data: null, error: null, count: found.length };
-        out = this.max == null ? found : found.slice(0, this.max);
+        const count = this.counting ? found.length : null;
+        if (this.head) return { data: null, error: null, count };
+        // Like PostgREST: with a count, an offset past the last row is a 416.
+        if (this.counting && this.offset > found.length) {
+          return { data: null, error: { code: "PGRST103", message: "Requested range not satisfiable" }, count: null };
+        }
+        out = found.slice(this.offset, this.max == null ? undefined : this.offset + this.max);
+        if (!this.one) return { data: out.map((r) => project(r, this.cols)), error: null, count };
         break;
       }
       case "insert": {

@@ -1,8 +1,10 @@
+import { requireAdmin } from "@/lib/auth";
 import { getCompanyProfile } from "@/lib/ai/client";
 import SubmitButton from "@/components/admin/SubmitButton";
 import { saveSettings } from "../../actions";
 
 export default async function Settings() {
+  await requireAdmin();
   const profile = await getCompanyProfile();
   const ready = {
     supabase: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
