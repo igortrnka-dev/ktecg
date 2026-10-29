@@ -6,8 +6,8 @@ import SectionHead from "./SectionHead";
 
 const icons: IconName[] = ["people", "chart", "route"];
 /**
- * null shows the art: service-mobilisation.jpg (welder without PPE or fall protection)
- * stays off until a photo of our own crew replaces it.
+ * null shows the art until a photo of our own crew in full PPE replaces it. The same goes for the "All included"
+ * panel: the stock shots showed work without gloves, face shield or fall protection, next to "PPE included".
  */
 const photos = ["service-leasing", "service-outages", null];
 
@@ -39,7 +39,7 @@ export default function Services({ t }: { t: Dictionary }) {
           <h3 className="included__title">{t.included.title}</h3>
           <p className="muted">{t.included.lead}</p>
           <div className="included__media">
-            <Photo slug="included" variant={5} />
+            <Art variant={5} />
           </div>
         </div>
         <ul className="included__list">

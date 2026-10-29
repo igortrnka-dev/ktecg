@@ -257,14 +257,17 @@ p {
 }
 
 /* ---------- floating pill nav ---------- */
+/* The bar is 1080px (or the viewport minus 32px) wide and only grows past that when its content needs it, e.g. with
+   user text-spacing styles. Likewise it is at least, not exactly, 56px tall. */
 .nav {
   position: fixed;
   top: 16px;
   left: 50%;
   z-index: 60;
-  width: calc(100% - 32px);
-  max-width: 1080px;
-  height: 56px;
+  width: max-content;
+  min-width: min(1080px, calc(100% - 32px));
+  max-width: calc(100% - 32px);
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -278,12 +281,12 @@ p {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
   transform: translateX(-50%);
   animation: navIn 0.9s var(--spring) 0.3s both;
-  transition: height 0.5s var(--spring), top 0.5s var(--spring), max-width 0.5s var(--spring), background 0.3s var(--ease);
+  transition: min-height 0.5s var(--spring), top 0.5s var(--spring), min-width 0.5s var(--spring), background 0.3s var(--ease);
 }
 .nav.is-scrolled {
   top: 10px;
-  height: 50px;
-  max-width: 1040px;
+  min-height: 50px;
+  min-width: min(1040px, calc(100% - 32px));
   background: rgba(20, 20, 21, 0.82);
 }
 @keyframes navIn {
@@ -314,10 +317,14 @@ p {
   background: var(--accent);
   box-shadow: 0 0 10px rgba(255, 77, 46, 0.7);
 }
+/* The links only wrap to a second row when the text needs more room than usual (user text spacing). */
 .nav__links {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
+  min-width: 0;
   font-size: 14px;
   color: var(--muted);
 }
@@ -589,6 +596,15 @@ p {
     padding: 8px 10px;
   }
 }
+/* The full desktop bar has no slack here, so it uses the short CTA. */
+@media (min-width: 960px) and (max-width: 1199px) {
+  .nav__cta-long {
+    display: none;
+  }
+  .nav__cta-short {
+    display: inline;
+  }
+}
 @media (max-width: 959px) {
   .nav {
     padding-left: 20px;
@@ -602,15 +618,16 @@ p {
   .nav__cta-short {
     display: inline;
   }
-  /* A long translation truncates instead of pushing the burger out of the bar. */
+  /* A long translation (or user text spacing) wraps instead of pushing the burger out of the bar. */
   .nav__end,
   .nav__cta {
     min-width: 0;
   }
   .nav__cta .glow-btn__fill {
     padding: 10px 16px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
   }
   .nav.is-open .nav__cta {
     visibility: hidden;
@@ -647,6 +664,29 @@ p {
     transition: none;
   }
 }
+/* Windows contrast themes drop backgrounds and colours: keep the burger lines and the X visible, outline the
+   buttons, and mark the current language and section by underline instead of colour. */
+@media (forced-colors: active) {
+  .nav__burger,
+  .lang__btn,
+  .glow-btn__fill,
+  .btn {
+    border: 1px solid ButtonText;
+  }
+  .nav__burger span {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+  .sheet__langs a[aria-current="page"],
+  .footer__langs a[aria-current="page"],
+  .lang__menu a[aria-current="page"],
+  .nav__links a[aria-current],
+  .sheet__links a[aria-current] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+}
 
 /* ---------- hero ---------- */
 .hero {
@@ -671,9 +711,13 @@ p {
   letter-spacing: -0.035em;
   margin-left: -0.03em;
   text-wrap: balance;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
+/* max-width lets a word that is wider than the column (narrow phone plus text spacing) break instead of overflowing */
 .hero__word {
   display: inline-block;
+  max-width: 100%;
   animation: word 1s var(--spring) both;
 }
 @keyframes word {
@@ -728,9 +772,10 @@ p {
 }
 .req__head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 6px 12px;
 }
 .req__status {
   display: inline-flex;
@@ -884,6 +929,8 @@ p {
   line-height: 1.06;
   letter-spacing: -0.03em;
   text-wrap: balance;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 .shead__lead {
   font-size: 18px;
@@ -990,6 +1037,13 @@ p {
 .note {
   color: var(--muted);
   font-size: 15px;
+}
+/* Links inside running text are underlined, not told apart by colour alone. */
+.note .tlink,
+.form__error .tlink {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 .note .tlink {
   margin-left: 6px;
@@ -1516,9 +1570,9 @@ p {
   gap: 4px;
   min-width: 0;
 }
+/* Contact.tsx allows a break only after the @ */
 .contact__addr {
   font-size: 18px;
-  overflow-wrap: anywhere;
 }
 .contact__tips {
   display: flex;
@@ -1531,7 +1585,7 @@ p {
   color: var(--muted);
 }
 
-/* form: one column; six tracks (halves and thirds) once the form column is wide enough */
+/* form: one column; six tracks (halves and thirds) once a third is wide enough for the longest shift option */
 .contact__form {
   container-type: inline-size;
 }
@@ -1540,7 +1594,7 @@ p {
   grid-template-columns: minmax(0, 1fr);
   gap: 18px 16px;
 }
-@container (min-width: 540px) {
+@container (min-width: 560px) {
   .form__grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
@@ -1594,14 +1648,16 @@ p {
 .field select {
   height: 48px;
 }
+/* Narrow caret gutter so the longest option fits a third of the form; ellipsis only as a last resort. */
 .field select {
   appearance: none;
   -webkit-appearance: none;
-  padding-right: 40px;
+  padding-right: 34px;
+  text-overflow: ellipsis;
   cursor: pointer;
   background: var(--bg)
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 10 10'><path d='M2 3.5 5 6.5 8 3.5' fill='none' stroke='%238d8d9a' stroke-width='1.4' stroke-linecap='round'/></svg>")
-    no-repeat right 16px center;
+    no-repeat right 12px center;
 }
 .field input:focus,
 .field select:focus,
@@ -1679,6 +1735,32 @@ p {
 }
 
 /* ---------- responsive ---------- */
+/* Short laptop screens (1536×730, 1366×650 with scaling): a tighter hero, so the facts bar with the country list
+   starts on the first screen. Screens 900px tall or more keep the full hero. */
+@media (min-width: 1024px) and (max-height: 860px) {
+  .hero {
+    padding-top: 16px;
+    row-gap: 24px;
+  }
+  .hero__copy {
+    gap: 20px;
+  }
+  .hero__title {
+    font-size: clamp(40px, min(4.4vw, 7vh), 74px);
+  }
+  .hero__lead {
+    font-size: 17px;
+  }
+  .hero__media {
+    min-height: 380px;
+  }
+  .facts-bar > div {
+    padding: 16px 20px;
+  }
+  .facts-bar dd {
+    font-size: 15px;
+  }
+}
 @media (max-width: 1199px) {
   .grid--4,
   .steps {
@@ -1769,6 +1851,10 @@ p {
   .form .glow-btn__fill,
   .notfound .glow-btn__fill {
     padding-inline: 24px;
+    white-space: normal;
+  }
+  .hero__ctas .glow-btn__fill,
+  .hero__ctas .btn {
     white-space: normal;
   }
 }

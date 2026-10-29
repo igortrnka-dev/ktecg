@@ -1,6 +1,7 @@
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { localeNames, locales } from "@/i18n/config";
+import { EMAIL } from "./email";
 
 export default function Footer({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
@@ -8,7 +9,7 @@ export default function Footer({ t, locale }: { t: Dictionary; locale: Locale })
       <div className="footer__brand">
         <span className="footer__name">{t.footer.company}</span>
         <span className="muted">{t.footer.tagline}</span>
-        <a href="mailto:office@ktechnology.sk" className="mono faint">office@ktechnology.sk</a>
+        <a href={`mailto:${EMAIL}`} className="mono faint">{EMAIL}</a>
       </div>
       <nav className="footer__langs" aria-label={t.nav.language}>
         {locales.map((l) => (
