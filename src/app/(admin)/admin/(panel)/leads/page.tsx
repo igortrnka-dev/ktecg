@@ -5,6 +5,8 @@ import { Due, Score, Status, STATUSES, statusLabel, sourceLabel, fmtDay } from "
 import Icon from "@/components/admin/Icon";
 import { addLead } from "../../actions";
 import SubmitButton from "@/components/admin/SubmitButton";
+import PageNotice from "@/components/admin/PageNotice";
+import { REDACTED } from "@/lib/erase";
 
 type Search = { status?: string; tier?: string; source?: string; q?: string; page?: string; deleted?: string };
 
@@ -59,9 +61,10 @@ export default async function Leads({ searchParams }: { searchParams: Promise<Se
       </header>
 
       {sp.deleted !== undefined && (
-        <p className="notice notice--info page-notice" role="status">
-          Lead {sp.deleted ? `„${sp.deleted}“ ` : ""}bol zmazaný spolu s históriou a dopytmi z webu.
-        </p>
+        <PageNotice param="deleted">
+          Lead {sp.deleted ? `„${sp.deleted}“ ` : ""}bol zmazaný spolu s históriou a dopytmi z webu od jeho kontaktov.
+          Ich mená a e-maily v logoch AI vyhľadávania nahradil text „{REDACTED}“.
+        </PageNotice>
       )}
 
       <div className="card">

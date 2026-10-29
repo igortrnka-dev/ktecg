@@ -1,14 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { allowedEmails, isAdminUser, requireAdmin } from "@/lib/auth";
 import { createAuthClient } from "@/lib/supabase/server";
 import { missingSupabaseEnv } from "@/lib/supabase/config";
 import { db } from "@/lib/supabase/admin";
 import { runInProgress, startRun } from "@/lib/ai/prospect";
 import { normalizeDomain } from "@/lib/ai/client";
+import { aiErrorText } from "@/lib/ai/errors";
 import { enrichLead, writeOutreach } from "@/lib/ai/leads";
+import { FOLLOW_UP, NEXT_ACTION } from "@/lib/inquiries";
+import { leadInquiryIds, redactRunLogs } from "@/lib/erase";
+import { fmtDay, PRE_CONTACT } from "@/components/admin/ui";
 import { isDemo, simulateAi } from "@/lib/demo/mode";
 import { demoSignIn, demoSignOut } from "@/lib/demo/session";
 import { simulateEnrich, simulateOutreach, simulateRun } from "@/lib/demo/ai";
@@ -144,24 +148,41 @@ export async function addLead(form: FormData) {
   redirect(`/admin/leads/${data.id}`);
 }
 
-/** Deletes a lead with its history and the website inquiries linked to it (spam, test records, erasure requests). */
+/**
+ * Deletes a lead with its history (spam, test records, erasure requests), the website inquiries linked to it
+ * or sent from its contacts' addresses, and the contacts' e-mails and full names in the prospecting run logs.
+ */
 export async function deleteLead(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id"));
-  const { data: lead } = await db().from("leads").select("company_name").eq("id", id).maybeSingle();
+  const { data: lead } = await db().from("leads").select("company_name, contacts").eq("id", id).maybeSingle();
   if (!lead) redirect("/admin/leads");
-  check(await db().from("inquiries").delete().eq("lead_id", id));
+  const inquiryIds = await leadInquiryIds(id, lead.contacts);
+  if (inquiryIds.length) check(await db().from("inquiries").delete().in("id", inquiryIds));
+  await redactRunLogs(lead.contacts);
   check(await db().from("lead_events").delete().eq("lead_id", id));
   check(await db().from("leads").delete().eq("id", id));
   revalidatePath("/admin", "layout");
   redirect(`/admin/leads?deleted=${encodeURIComponent(lead.company_name)}`);
 }
 
+/** Records a failed Claude step in the lead's history, where the admin sees the reason, instead of the generic error page. */
+async function logAiFailure(leadId: string, what: string, err: unknown) {
+  unstable_rethrow(err); // redirect() and notFound() are not failures
+  console.error(`${what}:`, err);
+  const { error } = await db().from("lead_events").insert({ lead_id: leadId, type: "ai", body: `${what}: ${aiErrorText(err)}` });
+  if (error) console.error("Could not log the AI failure", error);
+}
+
 export async function enrich(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id"));
-  if (simulateAi()) await simulateEnrich(id);
-  else await enrichLead(id);
+  try {
+    if (simulateAi()) await simulateEnrich(id);
+    else await enrichLead(id);
+  } catch (err) {
+    await logAiFailure(id, "Claude lead nepreskúmal", err);
+  }
   revalidatePath(`/admin/leads/${id}`);
 }
 
@@ -170,16 +191,42 @@ export async function rewriteOutreach(form: FormData) {
   const id = String(form.get("id"));
   const language = String(form.get("language") || "en");
   const instructions = String(form.get("instructions") ?? "");
-  if (simulateAi()) await simulateOutreach(id, language, instructions);
-  else await writeOutreach(id, language, instructions);
+  try {
+    if (simulateAi()) await simulateOutreach(id, language, instructions);
+    else await writeOutreach(id, language, instructions);
+  } catch (err) {
+    await logAiFailure(id, "Claude e-mail neprepísal", err);
+  }
   revalidatePath(`/admin/leads/${id}`);
 }
 
+/** `days` from today (UTC, like the inquiry task), moved to Monday when it falls on a weekend. */
+function workdayIn(days: number): string {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + days);
+  const weekday = date.getUTCDay();
+  if (weekday === 6 || weekday === 0) date.setUTCDate(date.getUTCDate() + (weekday === 6 ? 2 : 1));
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * "Označiť ako oslovený" / "E-mail odoslaný": records the sent e-mail. Only a new or qualified lead moves to
+ * contacted (a won customer or a meeting keeps its status), and an answered inquiry task becomes a follow-up.
+ */
 export async function logContacted(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id"));
-  check(await db().from("leads").update({ status: "contacted" }).eq("id", id));
-  check(await db().from("lead_events").insert({ lead_id: id, type: "outreach", body: "Oslovovací e-mail odoslaný." }));
+  const { data: before } = await db().from("leads").select("status, next_action").eq("id", id).maybeSingle();
+  if (!before) {
+    revalidatePath(`/admin/leads/${id}`);
+    return;
+  }
+  const promote = PRE_CONTACT.includes(before.status);
+  const followUp = before.next_action === NEXT_ACTION ? { next_action: FOLLOW_UP, next_action_at: workdayIn(3) } : null;
+  if (promote || followUp) check(await db().from("leads").update({ ...(promote ? { status: "contacted" } : {}), ...followUp }).eq("id", id));
+  if (promote) check(await db().from("lead_events").insert({ lead_id: id, type: "status", body: `${before.status} → contacted` }));
+  const next = followUp ? ` Ďalší krok „${NEXT_ACTION}“ sa zmenil na „${FOLLOW_UP}“ s termínom ${fmtDay(followUp.next_action_at)}.` : "";
+  check(await db().from("lead_events").insert({ lead_id: id, type: "outreach", body: `E-mail odoslaný.${next}` }));
   revalidatePath(`/admin/leads/${id}`);
 }
 

@@ -49,7 +49,14 @@ export async function simulateRun(campaignId: string) {
       created++;
       await logEvent(row.id, "created", runLog.foundEvent(campaign.name, p.score, p.tier));
     }
-    log.push(runLog.researched(12), picks.length ? runLog.saved(created, picks.length) : "Ukážkové firmy sa minuli, ostrý beh by hľadal nové.");
+    // Like the real run, the log keeps the research notes with the people found.
+    const notes = picks
+      .map((p, i) => `${i + 1}. ${p.company_name} (${p.domain}), ${p.city}, ${p.country}. Kontakty: ${p.contacts.map((c: { name: string; role: string; email: string }) => `${c.name}, ${c.role}, ${c.email}`).join("; ")}.`)
+      .join("\n");
+    log.push(
+      notes ? `${runLog.researched(12)}\n\n${notes}\n` : runLog.researched(12),
+      picks.length ? runLog.saved(created, picks.length) : "Ukážkové firmy sa minuli, ostrý beh by hľadal nové.",
+    );
     await db()
       .from("lead_runs")
       .update({ status: "done", found: picks.length, created, log: log.join("\n"), usage: { web_searches: 12 }, finished_at: now() })
@@ -64,11 +71,26 @@ export async function simulateEnrich(leadId: string) {
   await logEvent(leadId, "ai", `${NOTE} Claude by teraz prehľadal web, doplnil signály a kontakty a nanovo ohodnotil firmu.`);
 }
 
-/** Mirrors writeOutreach: switches the language and records the instructions. */
+/**
+ * Mirrors writeOutreach: a reply to an inquiry stays a reply (the plain placeholder reply, in Slovak for SK and
+ * otherwise in English), any other draft keeps its text; the language switches and a replaced draft goes to the history.
+ */
 export async function simulateOutreach(leadId: string, language: string, instructions: string) {
   await wait(1500);
-  await db().from("leads").update({ outreach_language: language }).eq("id", leadId);
-  await logEvent(leadId, "outreach", `${NOTE} Claude by prepísal e-mail v jazyku ${language.toUpperCase()}${instructions ? ` podľa pokynov: „${instructions}“` : ""}.`);
+  const { data: lead } = await db()
+    .from("leads")
+    .select("outreach_language, outreach_subject, outreach_body")
+    .eq("id", leadId)
+    .single();
+  if (!lead) throw new Error("Lead not found");
+  const { data: q } = await db().from("inquiries").select("*").eq("lead_id", leadId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const reply = q ? placeholderReply({ ...q, locale: language }) : null;
+  if (reply && (lead.outreach_subject || lead.outreach_body)) await logEvent(leadId, "outreach", replacedDraftNote(lead, "rewrite"));
+  await db()
+    .from("leads")
+    .update(reply ? { outreach_subject: reply.outreach_subject, outreach_body: reply.outreach_body, outreach_language: language } : { outreach_language: language })
+    .eq("id", leadId);
+  await logEvent(leadId, "outreach", `${NOTE} Claude by prepísal e-mail v jazyku ${language.toUpperCase()}${instructions ? ` podľa pokynov: „${instructions}“` : ""}${reply ? " a ponechal by ho ako odpoveď na dopyt" : ""}.`);
 }
 
 /** A plain reply in Slovak for the Slovak site, otherwise in English; Claude writes it in the visitor's language. */
@@ -83,7 +105,7 @@ function placeholderReply(q: { name: string; positions: string | null; locale: s
   return {
     outreach_language: "en",
     outreach_subject: `Your inquiry: ${q.positions || "staff for your project"}`,
-    outreach_body: `Dear ${q.name},\n\nthank you for your inquiry. We will check availability and send you suitable profiles and a quote.\n\nCould you tell us the exact project location and working hours? A short call would help as well.\n\nBest regards,\nThe KTechnology team`,
+    outreach_body: `Dear ${q.name},\n\nThank you for your inquiry. We will check availability and send you suitable profiles and a quote.\n\nCould you tell us the exact project location and working hours? A short call would help as well.\n\nBest regards,\nThe KTechnology team`,
   };
 }
 

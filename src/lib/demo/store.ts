@@ -180,8 +180,16 @@ class Query implements PromiseLike<Result> {
     }
     throw new Error(`Demo database: not.${operator} is not supported`);
   }
+  /** ILIKE as PostgREST runs it: % (or *) any text, also across lines, _ one character, \ escapes the next one. */
   ilike(col: string, pattern: string) {
-    const source = pattern.split("%").map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".*");
+    let source = "";
+    for (let i = 0; i < pattern.length; i++) {
+      const ch = pattern[i];
+      if (ch === "\\" && i + 1 < pattern.length) source += pattern[++i].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      else if (ch === "%" || ch === "*") source += "[\\s\\S]*";
+      else if (ch === "_") source += "[\\s\\S]";
+      else source += ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
     const re = new RegExp(`^${source}$`, "i");
     return this.where((r) => re.test(String(r[col] ?? "")));
   }

@@ -29,8 +29,8 @@ body {
   font: 14px/1.55 var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-/* Only where digits line up: in Inter, tabular figures also widen hyphens. */
-.table td,
+/* Only where digits line up: in Inter, tabular figures also widen hyphens (names, e-mails), so not on every table cell. */
+.table td.nowrap,
 .kpi__value,
 .pipeline__step strong,
 .score,
@@ -1073,6 +1073,8 @@ textarea {
 @media (max-width: 760px) {
   .shell {
     grid-template-columns: minmax(0, 1fr);
+    /* On a short page only the content row grows, not the top bar. */
+    grid-template-rows: auto 1fr;
     background: var(--bg);
   }
   .side {

@@ -2,6 +2,9 @@ import { plural } from "@/lib/plural";
 
 export const STATUSES = ["new", "qualified", "contacted", "replied", "meeting", "won", "lost", "disqualified"] as const;
 
+/** Statuses before the first e-mail; "Označiť ako oslovený" moves only these to contacted. */
+export const PRE_CONTACT: string[] = ["new", "qualified"];
+
 export const statusLabel: Record<string, string> = {
   new: "Nový",
   qualified: "Kvalifikovaný",

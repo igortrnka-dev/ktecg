@@ -6,7 +6,7 @@ import { qualifyInquiry } from "@/lib/ai/leads";
 import { linkInquiry, SHIFT_PATTERNS, type InquiryRow } from "@/lib/inquiries";
 import { isDemo, simulateAi } from "@/lib/demo/mode";
 import { simulateInquiry } from "@/lib/demo/ai";
-import { inquiryLimited, ipLimited, readBody } from "./guard";
+import { floodReached, ipLimited, readBody, senderLimited } from "./guard";
 
 const MAX_BODY = 20 * 1024;
 
@@ -25,6 +25,12 @@ const Inquiry = z.object({
   locale: z.string().max(5).optional(),
   website: z.string().optional(), // honeypot
 });
+
+/** Top-level form fields that failed validation, for the form to mark; never the submitted values. */
+function invalidFields(error: z.ZodError): string[] {
+  const known = new Set(Object.keys(Inquiry.shape).filter((key) => key !== "website"));
+  return [...new Set(error.issues.map((issue) => String(issue.path[0] ?? "")))].filter((key) => known.has(key));
+}
 
 function parseJson(text: string): unknown {
   try {
@@ -55,13 +61,14 @@ export async function POST(request: Request) {
   if (body === null) return tooLarge();
 
   const parsed = Inquiry.safeParse(parseJson(body));
-  if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
+  if (!parsed.success) return NextResponse.json({ error: "invalid", fields: invalidFields(parsed.error) }, { status: 400 });
   const { website, ...data } = parsed.data;
   if (website) return NextResponse.json({ ok: true }); // bot
   // Counted only for inquiries that would be saved, so typos and bots do not use up a sender's quota.
-  if (inquiryLimited(data.email)) return tooMany();
+  if (senderLimited(data.email)) return tooMany();
 
   if (!supabaseConfigured() && !isDemo()) return NextResponse.json({ error: "not_configured" }, { status: 503 });
+  const flood = floodReached();
 
   const clean = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v === "" ? null : v]));
   const { data: row, error } = await db().from("inquiries").insert(clean).select("*").single<InquiryRow>();
@@ -76,7 +83,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  if (simulateAi()) {
+  if (flood && (simulateAi() || process.env.ANTHROPIC_API_KEY)) {
+    await db().from("lead_events").insert({
+      lead_id: leadId,
+      type: "ai",
+      body: "Veľa dopytov naraz – Claude tento dopyt nevyhodnotil. Odpovedzte ručne alebo použite „Preskúmať znova s Claude“.",
+    });
+  } else if (simulateAi()) {
     void simulateInquiry(row.id, leadId).catch((err) => console.error("simulateInquiry failed", err));
   } else if (process.env.ANTHROPIC_API_KEY) {
     const cap = aiDailyCap();
