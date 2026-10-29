@@ -7,7 +7,7 @@ const display = Inter_Tight({ subsets: ["latin", "latin-ext"], weight: ["600"], 
 const mono = JetBrains_Mono({ subsets: ["latin", "latin-ext"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "KTechnology Sales",
+  title: "KTechnology – obchod a leady",
   robots: { index: false, follow: false },
 };
 

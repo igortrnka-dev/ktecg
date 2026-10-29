@@ -18,7 +18,8 @@ export default async function Dashboard() {
       countLeads().gte("created_at", weekAgo),
       countLeads().eq("tier", "A").in("status", HOT_STATUSES),
       db().from("leads").select("id, company_name, country, score, tier, status, source").eq("tier", "A").in("status", HOT_STATUSES).order("score", { ascending: false, nullsFirst: false }).limit(8),
-      db().from("leads").select("id, company_name, next_action, next_action_at").lte("next_action_at", today).not("status", "in", "(won,lost,disqualified)").order("next_action_at"),
+      // Won leads stay: a repeat inquiry from a customer sets a task on a won lead.
+      db().from("leads").select("id, company_name, next_action, next_action_at").lte("next_action_at", today).not("status", "in", "(lost,disqualified)").order("next_action_at"),
       db().from("lead_runs").select("id, status, created, started_at, campaigns(name)").order("started_at", { ascending: false }).limit(5),
       db().from("inquiries").select("id", { count: "exact", head: true }),
       db().from("inquiries").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),

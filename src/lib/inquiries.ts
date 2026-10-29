@@ -1,7 +1,7 @@
 import { db } from "@/lib/supabase/admin";
 import { normalizeDomain } from "@/lib/ai/client";
 
-/** Keys of t.contact.form.shifts on the site form. */
+/** Keys of t.contact.form.shifts on the site form; "unsure" is its empty choice, so it usually arrives empty. */
 export const SHIFT_PATTERNS = ["unsure", "single", "double", "triple", "rotation"] as const;
 export type ShiftPattern = (typeof SHIFT_PATTERNS)[number];
 
@@ -10,7 +10,7 @@ export const shiftLabel: Record<ShiftPattern, string> = {
   single: "1 zmena",
   double: "2 zmeny",
   triple: "3 zmeny",
-  rotation: "12 h rotácia",
+  rotation: "zmeny po 12 h",
 };
 
 export type InquiryRow = {
@@ -82,36 +82,65 @@ export function inquirySummary(q: InquiryRow): string {
     .join(" · ");
 }
 
+/** History text that keeps the outreach draft an inquiry reply replaces. */
+export function replacedDraftNote(draft: {
+  outreach_language?: string | null;
+  outreach_subject?: string | null;
+  outreach_body?: string | null;
+}): string {
+  const language = draft.outreach_language ? ` (${draft.outreach_language.toUpperCase()})` : "";
+  return `Predchádzajúci návrh e-mailu${language} nahradila odpoveď na dopyt. Predmet: ${draft.outreach_subject || "–"}. Text: ${draft.outreach_body || "–"}`;
+}
+
 function details(q: InquiryRow): string {
   const summary = inquirySummary(q);
   return `${summary ? `: ${summary}` : ""}.${q.message ? ` Správa: „${q.message}“` : ""}`;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
+const sameEmail = (a?: string | null, b?: string | null) => Boolean(a && b && a.trim().toLowerCase() === b.trim().toLowerCase());
 
 async function logEvent(leadId: string, type: string, body: string) {
   await db().from("lead_events").insert({ lead_id: leadId, type, body });
 }
 
-async function leadByDomain(domain: string): Promise<Lead | null> {
-  const { data } = await db()
-    .from("leads")
-    .select("id, status, country, contacts, signals, next_action, next_action_at")
-    .eq("domain", domain)
-    .maybeSingle();
-  return data as Lead | null;
+async function leadIdByDomain(domain: string): Promise<string | null> {
+  const { data } = await db().from("leads").select("id").eq("domain", domain).maybeSingle();
+  return data?.id ?? null;
 }
 
 /**
- * Puts a website inquiry into the pipeline without AI: attaches it to the lead that already has
- * the sender's company domain, or creates a new inbound lead. Returns the lead id.
+ * The open inbound lead that already has this address among its contacts: free-mail senders have no
+ * company domain, so this is how their next inquiry finds the first one. Contacts from the form are
+ * stored lowercased; the address as typed also finds rows saved before that.
+ */
+async function leadIdByEmail(email: string): Promise<string | null> {
+  for (const address of new Set([email.trim().toLowerCase(), email.trim()])) {
+    const { data } = await db()
+      .from("leads")
+      .select("id")
+      .eq("source", "inbound")
+      .not("status", "in", "(lost,disqualified)")
+      .contains("contacts", JSON.stringify([{ email: address }]))
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) return data.id;
+  }
+  return null;
+}
+
+/**
+ * Puts a website inquiry into the pipeline without AI: attaches it to the lead that already has the
+ * sender's company domain (for free-mail: the sender's address), or creates a new inbound lead.
+ * Returns the lead id.
  */
 export async function linkInquiry(q: InquiryRow): Promise<string> {
   const domain = companyDomain(q.email);
-  const contact: Contact = { name: q.name, role: "", email: q.email, phone: q.phone ?? "", linkedin: "" };
+  const contact: Contact = { name: q.name, role: "", email: q.email.trim().toLowerCase(), phone: q.phone ?? "", linkedin: "" };
   const signal: Signal = { type: "inbound_request", detail: inquirySummary(q) || "Dopyt z webu", url: "" };
 
-  const existing = domain ? await leadByDomain(domain) : null;
+  const existing = domain ? await leadIdByDomain(domain) : await leadIdByEmail(q.email);
   if (existing) return attach(existing, q, contact, signal);
 
   const { data: lead, error } = await db()
@@ -131,7 +160,7 @@ export async function linkInquiry(q: InquiryRow): Promise<string> {
     .single();
   if (error?.code === "23505" && domain) {
     // A parallel inquiry from the same company created the lead after our lookup.
-    const raced = await leadByDomain(domain);
+    const raced = await leadIdByDomain(domain);
     if (raced) return attach(raced, q, contact, signal);
   }
   if (error || !lead) throw new Error(error?.message ?? "Lead was not created");
@@ -141,15 +170,26 @@ export async function linkInquiry(q: InquiryRow): Promise<string> {
   return lead.id;
 }
 
-async function attach(lead: Lead, q: InquiryRow, contact: Contact, signal: Signal): Promise<string> {
+async function attach(leadId: string, q: InquiryRow, contact: Contact, signal: Signal): Promise<string> {
+  // Read right before the write, so contacts and signals added meanwhile (e.g. by enrichLead) are kept.
+  const { data: lead, error: readError } = await db()
+    .from("leads")
+    .select("id, status, country, contacts, signals, next_action, next_action_at")
+    .eq("id", leadId)
+    .single<Lead>();
+  if (readError || !lead) throw new Error(readError?.message ?? "Lead not found");
   const contacts = lead.contacts ?? [];
-  const known = contacts.some((c) => c.email?.toLowerCase() === q.email.toLowerCase());
+  const known = contacts.find((c) => sameEmail(c.email, contact.email));
+  // The inquirer goes first, so "Otvoriť v pošte" on the lead page writes to the person who just asked.
+  const inquirer = known
+    ? { ...known, name: contact.name || known.name, email: contact.email, phone: contact.phone || known.phone }
+    : contact;
   // A closed lead that asks again is a new opportunity, so it goes back into the active pipeline.
   const reopen = lead.status === "lost" || lead.status === "disqualified";
   const { error } = await db()
     .from("leads")
     .update({
-      contacts: known ? contacts : [...contacts, contact],
+      contacts: [inquirer, ...contacts.filter((c) => !sameEmail(c.email, contact.email))],
       signals: [...(lead.signals ?? []), signal],
       country: lead.country || q.country,
       ...(reopen ? { status: "new" } : {}),

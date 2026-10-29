@@ -1,5 +1,6 @@
 import { db } from "../supabase/admin";
-import { inquirySummary } from "../inquiries";
+import { inquirySummary, replacedDraftNote } from "../inquiries";
+import { runLog } from "../ai/runlog";
 import { PROSPECT_POOL } from "./seed";
 
 /*
@@ -19,7 +20,7 @@ async function logEvent(leadId: string, type: string, body: string) {
 export async function simulateRun(campaignId: string) {
   const { data: campaign } = await db().from("campaigns").select("*").eq("id", campaignId).single();
   if (!campaign) throw new Error("Campaign not found");
-  const log = [`Researching: ${campaign.name}`, NOTE];
+  const log = [runLog.researching(campaign.name), NOTE];
   const { data: run } = await db()
     .from("lead_runs")
     .insert({ campaign_id: campaignId, trigger: "manual", log: log.join("\n") })
@@ -46,9 +47,9 @@ export async function simulateRun(campaignId: string) {
         .single();
       if (!row) continue;
       created++;
-      await logEvent(row.id, "created", `Nájdené AI prospectingom (${campaign.name}). Skóre ${p.score}, tier ${p.tier}.`);
+      await logEvent(row.id, "created", runLog.foundEvent(campaign.name, p.score, p.tier));
     }
-    log.push(picks.length ? `Saved ${created} new leads of ${picks.length} found.` : "Ukážkové firmy sa minuli, ostrý beh by hľadal nové.");
+    log.push(runLog.researched(12), picks.length ? runLog.saved(created, picks.length) : "Ukážkové firmy sa minuli, ostrý beh by hľadal nové.");
     await db()
       .from("lead_runs")
       .update({ status: "done", found: picks.length, created, log: log.join("\n"), usage: { web_searches: 12 }, finished_at: now() })
@@ -70,16 +71,40 @@ export async function simulateOutreach(leadId: string, language: string, instruc
   await logEvent(leadId, "outreach", `${NOTE} Claude by prepísal e-mail v jazyku ${language.toUpperCase()}${instructions ? ` podľa pokynov: „${instructions}“` : ""}.`);
 }
 
+/** A plain reply in Slovak for the Slovak site, otherwise in English; Claude writes it in the visitor's language. */
+function placeholderReply(q: { name: string; positions: string | null; locale: string | null }) {
+  if (q.locale === "sk") {
+    return {
+      outreach_language: "sk",
+      outreach_subject: `Váš dopyt: ${q.positions || "pracovníci na váš projekt"}`,
+      outreach_body: `Dobrý deň,\n\nďakujeme za váš dopyt. Preveríme dostupnosť ľudí a pošleme vám vhodné profily a cenovú ponuku.\n\nNapíšete nám ešte presné miesto projektu a pracovný čas? Pomohol by aj krátky telefonát.\n\nS pozdravom\ntím KTechnology`,
+    };
+  }
+  return {
+    outreach_language: "en",
+    outreach_subject: `Your inquiry: ${q.positions || "staff for your project"}`,
+    outreach_body: `Dear ${q.name},\n\nthank you for your inquiry. We will check availability and send you suitable profiles and a quote.\n\nCould you tell us the exact project location and working hours? A short call would help as well.\n\nBest regards,\nThe KTechnology team`,
+  };
+}
+
 /** Mirrors qualifyInquiry: the route has already created or linked the lead, this adds the AI step. */
 export async function simulateInquiry(inquiryId: string, leadId: string) {
   await wait(1500);
   const [{ data: q }, { data: lead }] = await Promise.all([
     db().from("inquiries").select("*").eq("id", inquiryId).single(),
-    db().from("leads").select("qualification").eq("id", leadId).single(),
+    db().from("leads").select("qualification, outreach_language, outreach_subject, outreach_body").eq("id", leadId).single(),
   ]);
   if (!q || !lead) return;
-  if (!lead.qualification) {
-    await db().from("leads").update({ qualification: `Dopyt z webu: ${inquirySummary(q) || q.company}. ${NOTE}` }).eq("id", leadId);
-  }
-  await logEvent(leadId, "ai", `${NOTE} Claude by teraz dopyt ohodnotil a navrhol odpoveď v jazyku ${String(q.locale || "en").toUpperCase()}.`);
+  // Like the real step: the reply becomes the e-mail to send, an earlier draft stays in the history.
+  const reply = placeholderReply(q);
+  await db()
+    .from("leads")
+    .update({ ...reply, ...(lead.qualification ? {} : { qualification: `Dopyt z webu: ${inquirySummary(q) || q.company}. ${NOTE}` }) })
+    .eq("id", leadId);
+  if (lead.outreach_subject || lead.outreach_body) await logEvent(leadId, "outreach", replacedDraftNote(lead));
+  await logEvent(
+    leadId,
+    "ai",
+    `${NOTE} Claude by teraz dopyt ohodnotil. Jednoduchý návrh odpovede (${reply.outreach_language.toUpperCase()}) je v časti „E-mail na oslovenie“.`,
+  );
 }

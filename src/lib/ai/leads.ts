@@ -1,7 +1,8 @@
 import type * as z from "zod/v4";
 import { db } from "@/lib/supabase/admin";
-import type { ShiftPattern } from "@/lib/inquiries";
+import { replacedDraftNote, type ShiftPattern } from "@/lib/inquiries";
 import { getCompanyProfile } from "./client";
+import { AiStepError, aiErrorText } from "./errors";
 import { extract, webResearch, type Usage } from "./research";
 import { Contact as ContactSchema, Enrichment, Outreach, Qualification, Signal as SignalSchema } from "./schemas";
 
@@ -15,7 +16,9 @@ const SYSTEM = (profile: string) => `You are the sales assistant of KTechnology 
 About KTechnology:
 ${profile}
 
-Be factual and concise. Never invent people, e-mails or phone numbers.`;
+Be factual and concise. Never invent people, e-mails or phone numbers.
+About KTechnology, use only the facts in the profile above; never invent certifications, figures, prices, countries or references.
+In German texts, avoid construction-site wording (Baustelle, Bau-).`;
 
 async function logEvent(leadId: string, type: string, body: string) {
   await db().from("lead_events").insert({ lead_id: leadId, type, body });
@@ -26,7 +29,7 @@ const SHIFT_EN: Record<ShiftPattern, string> = {
   single: "1 shift",
   double: "2 shifts",
   triple: "3 shifts",
-  rotation: "12 h rotation",
+  rotation: "12-hour shifts",
 };
 
 const sameKey = (a?: string, b?: string) => {
@@ -85,22 +88,23 @@ Message: ${q.message ?? "-"}
 <what_we_know_already>${JSON.stringify({ status: lead.status, qualification: lead.qualification, signals: lead.signals })}</what_we_know_already>`,
     });
 
-    // Admin-edited or already sent outreach stays; the drafted reply then goes into the activity log.
+    // The reply to this inquiry is the e-mail to send now; an earlier draft (e.g. a cold e-mail) is kept in the history.
     const { outreach_language, outreach_subject, outreach_body, ...assessment } = result;
-    const keepOutreach = Boolean(lead.outreach_subject || lead.outreach_body);
-    await db()
+    const { data: before } = await db()
       .from("leads")
-      .update({ ...assessment, ...(keepOutreach ? {} : { outreach_language, outreach_subject, outreach_body }) })
-      .eq("id", leadId);
+      .select("outreach_language, outreach_subject, outreach_body")
+      .eq("id", leadId)
+      .single();
+    await db().from("leads").update({ ...assessment, outreach_language, outreach_subject, outreach_body }).eq("id", leadId);
+    if (before?.outreach_subject || before?.outreach_body) await logEvent(leadId, "outreach", replacedDraftNote(before));
     await logEvent(
       leadId,
       "ai",
-      `Dopyt vyhodnotený s Claude. Skóre ${result.score}, tier ${result.tier}.` +
-        (keepOutreach ? ` Oslovenie ostalo bez zmeny, návrh odpovede (${outreach_language}): ${outreach_subject} – ${outreach_body}` : ""),
+      `Dopyt vyhodnotený s Claude. Skóre ${result.score}, tier ${result.tier}. ` +
+        `Návrh odpovede (${outreach_language.toUpperCase()}) je v časti „E-mail na oslovenie“.`,
     );
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    await logEvent(leadId, "ai", `Claude dopyt nevyhodnotil (${message}). Odpovedzte ručne alebo skúste „Preskúmať znova s Claude“.`);
+    await logEvent(leadId, "ai", `Claude dopyt nevyhodnotil: ${aiErrorText(err)} Odpovedzte ručne alebo skúste „Preskúmať znova s Claude“.`);
     throw err;
   }
 }
@@ -108,7 +112,7 @@ Message: ${q.message ?? "-"}
 /** Researches one lead on the web and adds to its signals and contacts, rescores it and drafts outreach if it has none. */
 export async function enrichLead(leadId: string) {
   const { data: lead } = await db().from("leads").select("*").eq("id", leadId).single();
-  if (!lead) throw new Error("Lead not found");
+  if (!lead) throw new AiStepError("Lead sa nenašiel.");
   const profile = await getCompanyProfile();
   const usage = newUsage();
 
@@ -137,12 +141,19 @@ ${findings}
   });
 
   const { contacts, signals, company_size, description, outreach_language, outreach_subject, outreach_body, ...assessment } = result;
-  const currentContacts: Contact[] = lead.contacts ?? [];
-  const currentSignals: Signal[] = lead.signals ?? [];
+  // Read again: during the research an inquiry may have added a contact, a signal or a reply draft.
+  const { data: fresh } = await db()
+    .from("leads")
+    .select("contacts, signals, outreach_subject, outreach_body")
+    .eq("id", leadId)
+    .single();
+  if (!fresh) throw new AiStepError("Lead bol medzitým zmazaný.");
+  const currentContacts: Contact[] = fresh.contacts ?? [];
+  const currentSignals: Signal[] = fresh.signals ?? [];
   const mergedContacts = mergeContacts(currentContacts, contacts);
   const mergedSignals = mergeSignals(currentSignals, signals);
   // Outreach is only drafted here when there is none; rewriteOutreach replaces it on request.
-  const keepOutreach = Boolean(lead.outreach_subject || lead.outreach_body);
+  const keepOutreach = Boolean(fresh.outreach_subject || fresh.outreach_body);
   await db()
     .from("leads")
     .update({
@@ -165,7 +176,7 @@ ${findings}
 /** Rewrites the outreach e-mail for a lead in the given language and tone. */
 export async function writeOutreach(leadId: string, language: string, instructions: string) {
   const { data: lead } = await db().from("leads").select("*").eq("id", leadId).single();
-  if (!lead) throw new Error("Lead not found");
+  if (!lead) throw new AiStepError("Lead sa nenašiel.");
   const profile = await getCompanyProfile();
 
   const result = await extract({
@@ -189,5 +200,5 @@ ${instructions ? `Extra instructions: ${instructions}` : ""}
   });
 
   await db().from("leads").update(result).eq("id", leadId);
-  await logEvent(leadId, "outreach", `Outreach rewritten (${language}).`);
+  await logEvent(leadId, "outreach", `E-mail prepísaný s Claude (${language.toUpperCase()}).`);
 }

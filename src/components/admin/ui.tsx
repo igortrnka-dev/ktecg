@@ -1,3 +1,5 @@
+import { plural } from "@/lib/plural";
+
 export const STATUSES = ["new", "qualified", "contacted", "replied", "meeting", "won", "lost", "disqualified"] as const;
 
 export const statusLabel: Record<string, string> = {
@@ -26,8 +28,13 @@ export function Status({ status }: { status: string }) {
   return <span className={`chip chip--${status}`}>{statusLabel[status] ?? status}</span>;
 }
 
+/** "+1 nový", "+3 nové", "+5 nových"; a run that found nothing new says so. */
+function newLeads(n: number) {
+  return n === 0 ? "žiadne nové" : `+${n} ${plural(n, "nový", "nové", "nových")}`;
+}
+
 export function RunStatus({ status, created }: { status: string; created?: number | null }) {
-  const label = status === "running" ? "Beží" : status === "done" ? `+${created ?? 0} nových` : "Chyba";
+  const label = status === "running" ? "Beží" : status === "done" ? newLeads(created ?? 0) : "Chyba";
   return <span className={`chip chip--run-${status}`}>{label}</span>;
 }
 

@@ -1,6 +1,8 @@
 import { db } from "@/lib/supabase/admin";
 import { getCompanyProfile, normalizeDomain } from "./client";
+import { AiStepError, aiErrorText } from "./errors";
 import { extract, webResearch, type Usage } from "./research";
+import { runLog } from "./runlog";
 import { ProspectBatch } from "./schemas";
 
 export type Campaign = {
@@ -21,9 +23,15 @@ ${profile}
 
 You find and qualify B2B prospects that are likely to lease skilled industrial staff from KTechnology.
 Only use facts you can support with a source; never invent companies, people, e-mails or phone numbers.
+About KTechnology itself, use only the facts in the profile above; never invent certifications, figures, prices,
+countries or references. In German texts, avoid construction-site wording (Baustelle, Bau-).
 Prefer companies with fresh (last 6 months) buying signals.`;
 
 const STALE_RUN_MS = 60 * 60 * 1000;
+
+/** Where KTechnology deploys (the website's country list), for campaigns that name no countries. */
+const TARGET_COUNTRIES =
+  "Germany, Austria, the Nordics (Sweden, Norway, Finland, Denmark), Benelux, France, Poland, Czechia, Slovakia, UAE";
 
 /**
  * Runs live only as a promise in this process, so a run still "running" after an hour was cut off
@@ -32,7 +40,7 @@ const STALE_RUN_MS = 60 * 60 * 1000;
 export async function closeStaleRuns() {
   await db()
     .from("lead_runs")
-    .update({ status: "failed", error: "interrupted", finished_at: new Date().toISOString() })
+    .update({ status: "failed", error: runLog.interrupted, finished_at: new Date().toISOString() })
     .eq("status", "running")
     .lt("started_at", new Date(Date.now() - STALE_RUN_MS).toISOString());
 }
@@ -77,20 +85,20 @@ export async function executeRun(runId: string, campaignId: string) {
 
   try {
     const { data: campaign, error } = await db().from("campaigns").select("*").eq("id", campaignId).single<Campaign>();
-    if (error || !campaign) throw new Error("Campaign not found");
+    if (error || !campaign) throw new AiStepError("Kampaň sa nenašla, možno bola zmazaná.");
 
     const profile = await getCompanyProfile();
     const { data: existing } = await db().from("leads").select("domain").not("domain", "is", null);
     const known = (existing ?? []).map((r) => r.domain as string);
 
-    await note(`Researching: ${campaign.name}`);
+    await note(runLog.researching(campaign.name));
     const findings = await webResearch({
       system: SALES_SYSTEM(profile),
       maxSearches: Math.min(25, campaign.leads_per_run * 2 + 5),
       usage,
       prompt: `Find ${campaign.leads_per_run} companies that are good prospects for KTechnology right now.
 
-Target countries: ${campaign.countries.join(", ") || "any (EU/EEA, Switzerland, UK, Nordics, Middle East)"}
+Target countries: ${campaign.countries.join(", ") || TARGET_COUNTRIES}
 Target industries: ${campaign.industries.join(", ") || "any industrial sector"}
 Roles we want to place: ${campaign.roles.join(", ") || "skilled trades (welders, fitters, electricians, mechanics, operators)"}
 ${campaign.notes ? `Extra instructions: ${campaign.notes}` : ""}
@@ -103,7 +111,7 @@ large project wins, outages/shutdowns, labour-shortage statements), and publicly
 (HR/recruiting, plant or project managers, procurement) with their role and any public contact details.`,
     });
     // Saved before extraction so the paid-for research survives a failed or interrupted step.
-    await note(`Research done (${usage.web_searches} searches). Qualifying…\n\n${findings}\n`);
+    await note(`${runLog.researched(usage.web_searches)}\n\n${findings}\n`);
 
     const lang = campaign.outreach_language === "auto"
       ? "the main business language of the company's country"
@@ -140,7 +148,9 @@ ${findings}
         .select("id")
         .single();
       if (insertError || !row) {
-        await note(`Skipped ${lead.company_name}: ${insertError?.message}`);
+        console.error("Prospecting: lead not saved", lead.company_name, insertError);
+        const reason = insertError?.code === "23505" ? "firma s touto doménou už je v zozname" : "chyba databázy";
+        await note(runLog.skipped(lead.company_name, reason));
         continue;
       }
       if (domain) known.push(domain);
@@ -148,19 +158,20 @@ ${findings}
       await db().from("lead_events").insert({
         lead_id: row.id,
         type: "created",
-        body: `Found by AI prospecting (${campaign.name}). Score ${lead.score}, tier ${lead.tier}.`,
+        body: runLog.foundEvent(campaign.name, lead.score, lead.tier),
       });
     }
 
-    await note(`Saved ${created} new leads of ${batch.leads.length} found.`);
+    await note(runLog.saved(created, batch.leads.length));
     await db()
       .from("lead_runs")
       .update({ status: "done", found: batch.leads.length, created, finished_at: new Date().toISOString(), usage })
       .eq("id", runId);
     await db().from("campaigns").update({ last_run_at: new Date().toISOString() }).eq("id", campaignId);
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    log.push(`${new Date().toISOString().slice(11, 19)}  Failed: ${message}`);
+    console.error("Prospecting run failed", runId, err);
+    const message = aiErrorText(err);
+    log.push(`${new Date().toISOString().slice(11, 19)}  ${runLog.failed(message)}`);
     // One write, so the run cannot be left "running" by a failed log update.
     await db()
       .from("lead_runs")

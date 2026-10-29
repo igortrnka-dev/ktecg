@@ -2,6 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type * as z from "zod/v4";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { anthropic, FALLBACK, MODEL, textOf } from "./client";
+import { AiStepError } from "./errors";
 
 export type Usage = { input_tokens: number; output_tokens: number; web_searches: number };
 
@@ -36,7 +37,7 @@ export async function webResearch(opts: {
     const message = await stream.finalMessage();
     addUsage(opts.usage, message.usage);
 
-    if (message.stop_reason === "refusal") throw new Error("Claude declined this research request.");
+    if (message.stop_reason === "refusal") throw new AiStepError("Claude tento prieskum odmietol.");
     if (message.stop_reason === "pause_turn") {
       messages.push({ role: "assistant", content: message.content });
       continue;
@@ -48,7 +49,7 @@ export async function webResearch(opts: {
       .join("\n");
     return `${earlier}\n${textOf(message.content)}`.trim();
   }
-  throw new Error("Web research did not finish.");
+  throw new AiStepError("Prieskum na webe sa nedokončil.");
 }
 
 /**
@@ -74,13 +75,13 @@ export async function extract<T extends z.ZodType>(opts: {
   });
   const message = await stream.finalMessage();
   addUsage(opts.usage, message.usage);
-  if (message.stop_reason === "refusal") throw new Error("Claude declined this request.");
-  if (message.stop_reason === "max_tokens") throw new Error("Claude's answer hit the output limit before it was complete.");
+  if (message.stop_reason === "refusal") throw new AiStepError("Claude túto požiadavku odmietol.");
+  if (message.stop_reason === "max_tokens") throw new AiStepError("Odpoveď Claude bola príliš dlhá a nie je úplná.");
   // After a mid-stream fallback the answer continues in a second text block, so join them.
   const text = message.content
     .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text")
     .map((b) => b.text)
     .join("");
-  if (!text) throw new Error(`Claude returned no answer (stop_reason: ${message.stop_reason}).`);
+  if (!text) throw new AiStepError(`Claude nevrátil odpoveď (${message.stop_reason}).`);
   return parse(text) as z.infer<T>;
 }

@@ -119,9 +119,13 @@ alter table settings enable row level security;
 
 insert into settings (key, value) values (
   'company_profile',
-  to_jsonb($$KTechnology s.r.o. (Slovakia) provides industrial staff leasing worldwide: certified welders (MIG/MAG, TIG), pipe fitters, steel fitters, mechanics, electricians, PLC/automation technicians, CNC operators and production/logistics operators. We handle recruiting, practical skills tests, certifications, contracts, A1 / work permits, travel and accommodation, plus an on-site coordinator. Typical engagements: 3–40 people for 1–12 months, plant ramp-ups, outages/shutdowns, shipyard and steel-structure projects.
+  to_jsonb($$KTechnology s.r.o. (based in Slovakia) provides industrial staff leasing for projects across Europe and worldwide. We deploy to Germany, Austria, the Nordics (Sweden, Norway, Finland, Denmark), Benelux, France, Poland, Czechia, Slovakia and the UAE.
 
-Ideal customers: manufacturers, EPC and installation contractors, shipyards, energy/power plants and their subcontractors, automotive suppliers, mid-size to large (50+ employees), in the EU/EEA, Switzerland, UK, Nordics and the Middle East, who are struggling to hire skilled blue-collar staff.
+Trades: welders (MIG/MAG, TIG, MMA; steel and stainless), pipe fitters, steel fitters, industrial electricians, automation technicians (PLC), mechanics and millwrights, CNC and machine operators, assembly operators and logistics operators. Every worker passes a practical skills test before deployment.
+
+We handle recruiting, employment contracts, A1 forms and work permits, insurance, travel and accommodation, plus a project coordinator and fast replacement. The customer gets one contact and one invoice.
+
+Ideal customers: manufacturers, automotive suppliers, metalworking companies, energy and power plants (outages and shutdowns), shipyards and offshore, electrical and automation contractors, EPC and installation contractors, mid-size and larger, in the countries above, who struggle to hire skilled blue-collar staff.
 
 Strong buying signals: many open job ads for skilled trades, new plant/line/expansion announcements, large project wins or contracts, planned outages/shutdowns, labour-shortage statements, subcontracting tenders.$$::text)
 );
