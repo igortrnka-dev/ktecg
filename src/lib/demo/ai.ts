@@ -1,4 +1,5 @@
 import { db } from "../supabase/admin";
+import { inquirySummary } from "../inquiries";
 import { PROSPECT_POOL } from "./seed";
 
 /*
@@ -69,24 +70,16 @@ export async function simulateOutreach(leadId: string, language: string, instruc
   await logEvent(leadId, "outreach", `${NOTE} Claude by prepísal e-mail v jazyku ${language.toUpperCase()}${instructions ? ` podľa pokynov: „${instructions}“` : ""}.`);
 }
 
-/** Mirrors qualifyInquiry: turns a website inquiry into an unscored inbound lead. */
-export async function simulateInquiry(inquiryId: string) {
-  const { data: q } = await db().from("inquiries").select("*").eq("id", inquiryId).single();
-  if (!q) return;
-  const { data: lead } = await db()
-    .from("leads")
-    .insert({
-      company_name: q.company,
-      country: q.country,
-      source: "inbound",
-      qualification: `Dopyt z webu: ${[q.positions, q.headcount && `${q.headcount} osôb`, q.start_date && `nástup ${q.start_date}`].filter(Boolean).join(", ")}. ${NOTE}`,
-      contacts: [{ name: q.name, role: "", email: q.email, phone: q.phone ?? "", linkedin: "" }],
-      next_action: "Odpovedať na dopyt",
-      next_action_at: now().slice(0, 10),
-    })
-    .select("id")
-    .single();
-  if (!lead) return;
-  await db().from("inquiries").update({ lead_id: lead.id }).eq("id", inquiryId);
-  await logEvent(lead.id, "created", "Dopyt z webu.");
+/** Mirrors qualifyInquiry: the route has already created or linked the lead, this adds the AI step. */
+export async function simulateInquiry(inquiryId: string, leadId: string) {
+  await wait(1500);
+  const [{ data: q }, { data: lead }] = await Promise.all([
+    db().from("inquiries").select("*").eq("id", inquiryId).single(),
+    db().from("leads").select("qualification").eq("id", leadId).single(),
+  ]);
+  if (!q || !lead) return;
+  if (!lead.qualification) {
+    await db().from("leads").update({ qualification: `Dopyt z webu: ${inquirySummary(q) || q.company}. ${NOTE}` }).eq("id", leadId);
+  }
+  await logEvent(leadId, "ai", `${NOTE} Claude by teraz dopyt ohodnotil a navrhol odpoveď v jazyku ${String(q.locale || "en").toUpperCase()}.`);
 }

@@ -35,8 +35,8 @@ const DEFAULTS: Record<string, () => Row> = {
   }),
   lead_events: () => ({ body: "", created_at: now() }),
   inquiries: () => ({
-    phone: null, country: null, positions: null, headcount: null, start_date: null, message: null, locale: null,
-    lead_id: null, created_at: now(),
+    phone: null, country: null, positions: null, headcount: null, duration: null, shift_pattern: null, start_date: null,
+    message: null, locale: null, lead_id: null, created_at: now(),
   }),
   settings: () => ({ updated_at: now() }),
 };
