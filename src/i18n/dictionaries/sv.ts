@@ -2,9 +2,9 @@ import type { Dictionary } from "..";
 
 const sv: Dictionary = {
   meta: {
-    title: "KTechnology — Personaluthyrning för industrin: svetsare, montörer, elektriker",
+    title: "KTechnology – Personaluthyrning för industrin: svetsare, montörer, elektriker",
     description:
-      "KTechnology s.r.o. hyr ut certifierade svetsare, rörmontörer, elektriker, mekaniker och operatörer till industriprojekt i hela Europa och världen. Kompetenstestad personal. Vi ordnar A1-intyg, resor och boende – team på plats inom cirka 14 dagar.",
+      "KTechnology s.r.o. hyr ut kompetenstestade svetsare, rörmontörer, elektriker, mekaniker och operatörer till industriprojekt i hela Europa och världen. Vi ordnar A1-intyg, resor och boende – team på plats inom cirka 14 dagar.",
   },
   nav: {
     services: "Tjänster",
@@ -22,15 +22,15 @@ const sv: Dictionary = {
   },
   hero: {
     eyebrow: "Personaluthyrning för industrin · Europa & världen",
-    title: "Yrkeskunniga svetsare, montörer och elektriker på plats hos er inom cirka 14 dagar",
+    title: "Yrkeskunniga svetsare, montörer och elektriker på plats hos er inom cirka 14\u00a0dagar",
     lead:
-      "Vi hyr ut kompetenstestade yrkesarbetare inom industrin till tillverkare, entreprenörer och EPC-företag i hela Europa och sköter avtal, A1-intyg eller arbetstillstånd, försäkring, resor och boende. En kontakt, en faktura.",
+      "Vi hyr ut kompetenstestade yrkesarbetare inom industrin till tillverkare, entreprenörer och EPC-företag i hela Europa. Vi sköter avtal, A1-intyg eller arbetstillstånd, försäkring, resor och boende. En kontakt, en faktura.",
     primary: "Beställ personal",
     secondary: "Se våra yrken",
     facts: [
       { k: "Yrken", v: "Svetsare, montörer, elektriker, mekaniker, operatörer" },
       { k: "Var", v: "Tyskland, Österrike, Norden, Benelux, Frankrike, PL/CZ/SK, Arabemiraten" },
-      { k: "Uppstart", v: "Team på plats inom cirka 14 dagar" },
+      { k: "Uppstart", v: "Offert inom 1\u00a0arbetsdag, team på plats inom cirka 14\u00a0dagar" },
       { k: "Ingår", v: "A1 & tillstånd, resor, boende, koordinator" },
     ],
     card: {
@@ -43,7 +43,7 @@ const sv: Dictionary = {
       ],
       meta: [
         { k: "Projekt", v: "Revisionsstopp" },
-        { k: "Start", v: "inom ~14 dagar" },
+        { k: "Start", v: "inom ~14\u00a0dagar" },
       ],
       status: "Team förbereds",
     },
@@ -55,7 +55,7 @@ const sv: Dictionary = {
     items: [
       {
         title: "Personaluthyrning",
-        body: "Vi hyr ut kvalificerade yrkesarbetare till er så länge uppdraget pågår. De arbetar under er arbetsledning – vi förblir deras arbetsgivare.",
+        body: "Vi hyr ut kvalificerade yrkesarbetare till er så länge uppdraget pågår. De arbetar under er arbetsledning\u00a0– vi förblir deras arbetsgivare.",
         points: ["Enskilda specialister eller hela team", "Korta och långa uppdrag", "Ingen rekrytering eller HR-administration för er"],
       },
       {
@@ -85,12 +85,12 @@ const sv: Dictionary = {
       { name: "Monteringsoperatörer", skills: ["Linjemontering", "Kvalitetskontroll", "Skiftarbete"] },
       { name: "Logistikpersonal", skills: ["Truck", "Lager & plock", "Linjeförsörjning"] },
     ],
-    note: "Behöver ni en annan yrkesgrupp? Fråga oss – vårt nätverk täcker de flesta industriyrken.",
+    note: "Behöver ni en annan yrkesgrupp? Fråga oss\u00a0– vårt nätverk täcker de flesta industriyrken.",
   },
   included: {
     label: "Allt ingår",
     title: "Vi sköter allt runt ert team",
-    lead: "Ni får produktiv personal på plats – vi sköter rekrytering, administration, resor och stöd.",
+    lead: "Ni får produktiv personal på plats\u00a0– vi tar hand om rekrytering, administration, resor och stöd.",
     items: [
       "Sökning & urval",
       "Praktiska kompetenstester",
@@ -132,7 +132,7 @@ const sv: Dictionary = {
       },
       {
         period: "Dag 7–14",
-        title: "Juridik & mobilisering",
+        title: "Formalia & mobilisering",
         body: "Vi ordnar avtal, A1-intyg eller arbetstillstånd, försäkring, skyddsutrustning, resor och boende.",
       },
       {
@@ -146,7 +146,7 @@ const sv: Dictionary = {
     label: "Varför KTechnology",
     title: "En bemanningspartner, inte bara en CV-leverantör",
     items: [
-      { title: "En partner för allt", body: "Rekrytering, pappersarbete, resor, boende och stöd på plats – via en och samma kontakt." },
+      { title: "En partner för allt", body: "Rekrytering, pappersarbete, resor, boende och stöd på plats\u00a0– via en och samma kontakt." },
       { title: "Testade före uppdraget", body: "Varje specialist har klarat ett praktiskt test, så att er tidplan inte drabbas av överraskningar." },
       { title: "Flexibel kapacitet", body: "Skala upp inför ett stopp eller en upprampning och ner när projektet är klart." },
       { title: "Snabbt byte av personal", body: "Om någon inte lever upp till era krav byter vi snabbt ut personen." },
@@ -154,7 +154,7 @@ const sv: Dictionary = {
   },
   reach: {
     label: "Var vi arbetar",
-    title: "Med bas i Slovakien – på arbetsplatser i hela Europa och utanför",
+    title: "Med bas i Slovakien\u00a0– på arbetsplatser i hela Europa och utanför",
     countries: [
       "Tyskland", "Österrike", "Sverige", "Norge", "Finland", "Danmark",
       "Nederländerna", "Belgien", "Frankrike", "Polen", "Tjeckien", "Slovakien", "Förenade Arabemiraten",
@@ -166,11 +166,11 @@ const sv: Dictionary = {
     items: [
       {
         q: "Hur fungerar personaluthyrning?",
-        a: "Personalen är anställd av KTechnology och hyrs ut till er så länge projektet pågår. De arbetar under er arbetsledning; vi sköter avtal, löner, försäkring och all administration – och ni får allt samlat på en faktura.",
+        a: "Personalen är anställd av KTechnology och hyrs ut till er så länge projektet pågår. De arbetar under er arbetsledning; vi sköter avtal, löner, försäkring och all administration\u00a0– och ni får allt samlat på en faktura.",
       },
       {
         q: "Hur snabbt kan personalen börja?",
-        a: "Vanligtvis inom cirka två veckor från förfrågan: några dagar för urval och tester, sedan avtal, A1-intyg och resor. Vid akuta stopp, ange ert datum så säger vi ärligt vad som är möjligt.",
+        a: "Vanligtvis inom cirka två veckor från förfrågan: några dagar för urval och tester, sedan avtal, A1-intyg och resor. Gäller det ett akut stopp? Ange ert datum, så säger vi ärligt vad som är möjligt.",
       },
       {
         q: "I vilka länder arbetar ni?",
@@ -196,30 +196,30 @@ const sv: Dictionary = {
     body: "Skicka er förfrågan så återkommer en projektkoordinator inom en arbetsdag med tillgänglighet och offert.",
     emailLabel: "Eller mejla oss direkt",
     tipsTitle: "Bra att ange",
-    tips: ["Yrken och antal", "Projektort och startdatum", "Beräknad uppdragslängd och skiftschema"],
+    tips: ["Arbetsort (stad) och arbetstider", "Certifikat som krävs, t.ex. svetsmetod och standard", "Arbetsspråk och nödvändiga säkerhetsintyg"],
     form: {
       company: "Företag",
       name: "Ditt namn",
       email: "E-post",
       phone: "Telefon",
       country: "Projektland",
-      positions: "Yrken (t.ex. 6× TIG-svetsare)",
-      duration: "Uppdragslängd (t.ex. 6 veckor)",
+      positions: "Yrken (t.ex. 6×\u00a0TIG-svetsare)",
+      duration: "Längd (t.ex. 6\u00a0veckor)",
       shift: "Skiftschema",
       shifts: {
-        unsure: "Inte bestämt ännu",
+        unsure: "Inte bestämt än",
         single: "Enskift",
         double: "Tvåskift",
         triple: "Treskift",
-        rotation: "Rullande 12-timmarsskift",
+        rotation: "12-timmarsskift",
       },
       required: "* Obligatoriska fält",
       start: "Planerad start",
       message: "Projektdetaljer",
       submit: "Skicka förfrågan",
       sending: "Skickar…",
-      success: "Tack. Vi har tagit emot er förfrågan och hör av oss inom kort.",
-      error: "Något gick fel. Mejla oss gärna direkt.",
+      success: "Tack. En projektkoordinator återkommer inom en arbetsdag med tillgänglighet och offert.",
+      error: "Din förfrågan kunde inte skickas. Dina uppgifter finns kvar i formuläret\u00a0– mejla dem gärna till oss:",
       consent: "Vi använder dina personuppgifter enbart för att besvara förfrågan och ta fram en offert.",
     },
   },
