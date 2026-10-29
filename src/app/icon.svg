@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- The header mark as a tile: the K in the site's text colour on its background, with the accent dot on the
+       baseline. The dark tile keeps it visible on light and dark browser chrome. -->
+  <rect width="32" height="32" rx="7" fill="#0a0a0b"/>
+  <path fill="#f5f5f0" d="M5.5 7h3.6v8.4L17.1 7h4.8l-7.55 7.93L21.9 25h-5l-5.35-7.13-2.45 2.57V25H5.5z"/>
+  <circle cx="25.3" cy="22.6" r="2.4" fill="#ff4d2e"/>
+</svg>

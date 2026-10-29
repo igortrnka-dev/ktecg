@@ -22,7 +22,7 @@ const pl: Dictionary = {
   },
   hero: {
     eyebrow: "Leasing pracowników dla przemysłu\u00a0· Europa i świat",
-    title: "Wykwalifikowani spawacze, monterzy i elektrycy na miejscu w ciągu około 14\u00a0dni",
+    title: "Wykwali\u00adfiko\u00adwani spawacze, monterzy i elektrycy na miejscu w ciągu około 14\u00a0dni",
     lead:
       "W ramach leasingu pracowników zapewniamy sprawdzonych fachowców producentom, wykonawcom i firmom EPC w całej Europie. Zajmujemy się umowami, zaświadczeniami A1 lub zezwoleniami na pracę, ubezpieczeniem, dojazdem i zakwaterowaniem. Jedna osoba kontaktowa, jedna faktura.",
     primary: "Zamów pracowników",
@@ -30,7 +30,7 @@ const pl: Dictionary = {
     facts: [
       { k: "Zawody", v: "Spawacze, monterzy, elektrycy, mechanicy, operatorzy" },
       { k: "Gdzie", v: "Niemcy, Austria, kraje nordyckie, Beneluks, Francja, PL/CZ/SK, ZEA" },
-      { k: "Czas", v: "Wycena w ciągu 1\u00a0dnia roboczego, zespół na miejscu w ciągu ok.\u00a014\u00a0dni" },
+      { k: "Czas", v: "Wycena w ciągu 1\u00a0dnia roboczego, zespół na miejscu w ok.\u00a014\u00a0dni" },
       { k: "W cenie", v: "A1 i zezwolenia, dojazd, zakwaterowanie, koordynator" },
     ],
     card: {
@@ -203,7 +203,7 @@ const pl: Dictionary = {
       email: "E-mail",
       phone: "Telefon",
       country: "Kraj projektu",
-      positions: "Potrzebne stanowiska (np.\u00a06×\u00a0spawacz TIG)",
+      positions: "Potrzebne stanowiska (np.\u00a06×\u00a0spawacz\u00a0TIG)",
       duration: "Okres (np.\u00a06\u00a0tygodni)",
       shift: "System zmianowy",
       shifts: {
@@ -220,6 +220,8 @@ const pl: Dictionary = {
       sending: "Wysyłanie…",
       success: "Dziękujemy. Koordynator projektu odpowie w ciągu jednego dnia roboczego, podając dostępność pracowników i wycenę.",
       error: "Nie udało się wysłać zapytania. Wprowadzone dane pozostały w formularzu – prosimy przesłać je e-\u2060mailem na adres:",
+      invalid: "Prosimy sprawdzić zaznaczone pola.",
+      emailHint: "np. imie@firma.pl",
       consent: "Państwa dane wykorzystujemy wyłącznie w celu odpowiedzi na zapytanie i przygotowania wyceny.",
     },
   },

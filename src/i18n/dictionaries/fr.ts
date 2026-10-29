@@ -203,7 +203,7 @@ const fr: Dictionary = {
       email: "E-mail",
       phone: "Téléphone",
       country: "Pays du projet",
-      positions: "Postes recherchés (ex.\u00a06×\u00a0soudeur TIG)",
+      positions: "Postes recherchés (ex.\u00a06×\u00a0soudeur\u00a0TIG)",
       duration: "Durée (ex.\u00a06\u00a0semaines)",
       shift: "Rythme de travail",
       shifts: {
@@ -220,6 +220,8 @@ const fr: Dictionary = {
       sending: "Envoi…",
       success: "Merci. Un coordinateur de projet vous répondra sous un jour ouvré avec les disponibilités et un devis.",
       error: "Votre demande n’a pas pu être envoyée. Les informations saisies sont toujours dans le formulaire\u202f; merci de nous les envoyer par e-\u2060mail\u00a0:",
+      invalid: "Veuillez vérifier les champs signalés.",
+      emailHint: "ex. nom@entreprise.fr",
       consent: "Nous utilisons vos données uniquement pour répondre à cette demande et établir un devis.",
     },
   },

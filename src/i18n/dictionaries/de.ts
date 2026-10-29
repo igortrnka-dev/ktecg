@@ -21,7 +21,7 @@ const de: Dictionary = {
     ctaShort: "Anfragen",
   },
   hero: {
-    eyebrow: "Arbeitnehmerüberlassung für die Industrie · Europa & weltweit",
+    eyebrow: "Arbeitnehmerüberlassung für die Industrie\u00a0· Europa\u00a0&\u00a0weltweit",
     title: "Schweißer, Monteure und Elektriker in rund 14\u00a0Tagen bei Ihnen vor Ort",
     lead:
       "Wir überlassen geprüfte Industriefachkräfte an Hersteller, Anlagenbauer und EPC-Unternehmen in ganz Europa\u00a0– und übernehmen Verträge, A1/Genehmigungen, Versicherung, Anreise und Unterkunft. Ein Ansprechpartner, eine Rechnung.",
@@ -194,7 +194,7 @@ const de: Dictionary = {
     label: "Kontakt",
     title: "Sagen Sie uns, wen Sie brauchen",
     body: "Senden Sie uns Ihre Anfrage, und ein Projektkoordinator meldet sich innerhalb eines Werktags mit Verfügbarkeit und Angebot.",
-    emailLabel: "Oder direkt per E-Mail",
+    emailLabel: "Oder direkt per E-\u2060Mail",
     tipsTitle: "Hilfreiche Angaben",
     tips: ["Einsatzort (Stadt) und Arbeitszeiten", "Erforderliche Zertifikate, z.\u00a0B. Schweißverfahren und Norm", "Arbeitssprache und notwendige Sicherheitsnachweise"],
     form: {
@@ -219,7 +219,9 @@ const de: Dictionary = {
       submit: "Anfrage senden",
       sending: "Wird gesendet…",
       success: "Vielen Dank. Ein Projektkoordinator meldet sich innerhalb eines Werktags mit Verfügbarkeit und Angebot.",
-      error: "Ihre Anfrage konnte nicht gesendet werden. Ihre Angaben stehen noch im Formular\u00a0– bitte senden Sie sie uns per E-Mail an:",
+      error: "Ihre Anfrage konnte nicht gesendet werden. Ihre Angaben stehen noch im Formular\u00a0– bitte senden Sie sie uns per E-\u2060Mail an:",
+      invalid: "Bitte prüfen Sie die markierten Felder.",
+      emailHint: "z.\u00a0B. name@firma.de",
       consent: "Ihre Angaben verwenden wir ausschließlich, um Ihre Anfrage zu beantworten und ein Angebot zu erstellen.",
     },
   },

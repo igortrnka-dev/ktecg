@@ -33,6 +33,13 @@ export async function middleware(request: NextRequest) {
   const locale = localeOf(first);
   const url = request.nextUrl.clone();
 
+  // Dotted paths outside a locale are files and metadata routes (/icon.svg, /robots.txt, /.well-known/…) and are
+  // left to Next. Page-like ones such as old-site links (/kontakt.html, /index.php) go on to the localized 404 like
+  // any unprefixed path; a page-like file added to public/ (e.g. a verification .html) would need an exception here.
+  if (!locale && pathname.includes(".") && !/\.(?:html?|php\d?|aspx?|jsp|cfm)$/i.test(pathname)) {
+    return NextResponse.next();
+  }
+
   if (!locale) {
     url.pathname = `/${preferredLocale(request)}${pathname === "/" ? "" : pathname}`;
     return NextResponse.redirect(url);
@@ -53,7 +60,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Everything but API routes, Next assets and files (paths with a dot), plus every path under a locale, so that
-  // /de/kontakt.html still gets the 404 status. Keep the locale list in sync with src/i18n/config.ts.
-  matcher: ["/((?!api|_next|.*\\..*).*)", "/(en|de|fr|sv|sk|pl)/:path*"],
+  // Everything but API routes, Next assets and the images in public/img. Other dotted paths are sorted out above.
+  matcher: ["/((?!api|_next|img/).*)"],
 };

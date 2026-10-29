@@ -21,7 +21,7 @@ const sv: Dictionary = {
     ctaShort: "Begär offert",
   },
   hero: {
-    eyebrow: "Personaluthyrning för industrin · Europa & världen",
+    eyebrow: "Personaluthyrning för industrin\u00a0· Europa\u00a0&\u00a0världen",
     title: "Yrkeskunniga svetsare, montörer och elektriker på plats hos er inom cirka 14\u00a0dagar",
     lead:
       "Vi hyr ut kompetenstestade yrkesarbetare inom industrin till tillverkare, entreprenörer och EPC-företag i hela Europa. Vi sköter avtal, A1-intyg eller arbetstillstånd, försäkring, resor och boende. En kontakt, en faktura.",
@@ -30,7 +30,7 @@ const sv: Dictionary = {
     facts: [
       { k: "Yrken", v: "Svetsare, montörer, elektriker, mekaniker, operatörer" },
       { k: "Var", v: "Tyskland, Österrike, Norden, Benelux, Frankrike, PL/CZ/SK, Arabemiraten" },
-      { k: "Uppstart", v: "Offert inom 1\u00a0arbetsdag, team på plats inom cirka 14\u00a0dagar" },
+      { k: "Ledtid", v: "Offert inom 1\u00a0arbetsdag, team på plats inom cirka 14\u00a0dagar" },
       { k: "Ingår", v: "A1 & tillstånd, resor, boende, koordinator" },
     ],
     card: {
@@ -220,6 +220,8 @@ const sv: Dictionary = {
       sending: "Skickar…",
       success: "Tack. En projektkoordinator återkommer inom en arbetsdag med tillgänglighet och offert.",
       error: "Din förfrågan kunde inte skickas. Dina uppgifter finns kvar i formuläret\u00a0– mejla dem gärna till oss:",
+      invalid: "Kontrollera de markerade fälten.",
+      emailHint: "t.ex. namn@foretag.se",
       consent: "Vi använder dina personuppgifter enbart för att besvara förfrågan och ta fram en offert.",
     },
   },
@@ -230,7 +232,7 @@ const sv: Dictionary = {
   },
   footer: {
     company: "KTechnology s.r.o.",
-    tagline: "Personaluthyrning för industrin från Slovakien, för projekt i hela Europa och världen.",
+    tagline: "Personaluthyrning från Slovakien till industriprojekt i hela Europa och världen.",
     rights: "Alla rättigheter förbehållna.",
     top: "Till toppen",
   },

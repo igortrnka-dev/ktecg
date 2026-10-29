@@ -19,7 +19,7 @@ const en = {
     ctaShort: "Get a quote",
   },
   hero: {
-    eyebrow: "Industrial staff leasing · Europe & worldwide",
+    eyebrow: "Industrial staff leasing\u00a0· Europe\u00a0&\u00a0worldwide",
     title: "Skilled welders, fitters and electricians on your site in about 14\u00a0days",
     lead:
       "We lease tested industrial tradespeople to manufacturers, contractors and EPC companies across Europe, and handle contracts, A1/permits, insurance, travel and housing. One contact, one invoice.",
@@ -217,7 +217,9 @@ const en = {
       submit: "Send request",
       sending: "Sending…",
       success: "Thank you. A project coordinator will reply within one business day with availability and a quote.",
-      error: "Your request could not be sent. Your entries are still in the form\u00a0– please e-mail them to us:",
+      error: "Your request could not be sent. Your entries are still in the form\u00a0– please e-\u2060mail them to us:",
+      invalid: "Please check the highlighted fields.",
+      emailHint: "e.g. name@company.com",
       consent: "We use your details only to answer this request and prepare a quote.",
     },
   },
