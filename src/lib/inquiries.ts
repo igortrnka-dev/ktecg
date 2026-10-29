@@ -72,14 +72,18 @@ export function companyDomain(email: string): string | null {
   return domain;
 }
 
-/** Positions, duration, shifts and start in one line, e.g. "4× TIG · 6 týždňov · 2 zmeny · nástup 2026-12-01". */
+/** "2026-11-02" → "2. 11. 2026", as the admin shows dates. */
+const skDay = (date: string) =>
+  new Date(`${date.slice(0, 10)}T12:00:00Z`).toLocaleDateString("sk-SK", { day: "numeric", month: "numeric", year: "numeric" });
+
+/** Positions, duration, shifts and start in one line, e.g. "4× TIG · 6 týždňov · 2 zmeny · nástup 1. 12. 2026". */
 export function inquirySummary(q: InquiryRow): string {
   return [
     q.positions,
     q.duration,
     q.shift_pattern && (shiftLabel[q.shift_pattern as ShiftPattern] ?? q.shift_pattern),
     q.headcount && `počet ${q.headcount}`,
-    q.start_date && `nástup ${q.start_date}`,
+    q.start_date && `nástup ${skDay(q.start_date)}`,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -105,9 +109,6 @@ function details(q: InquiryRow): string {
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
-/** "2026-11-02" → "2. 11. 2026", as the admin shows dates. */
-const skDay = (date: string) =>
-  new Date(`${date.slice(0, 10)}T12:00:00Z`).toLocaleDateString("sk-SK", { day: "numeric", month: "numeric", year: "numeric" });
 const sameEmail = (a?: string | null, b?: string | null) => Boolean(a && b && a.trim().toLowerCase() === b.trim().toLowerCase());
 
 async function logEvent(leadId: string, type: string, body: string) {

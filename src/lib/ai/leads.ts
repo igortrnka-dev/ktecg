@@ -215,9 +215,12 @@ export async function writeOutreach(leadId: string, language: string, instructio
   const replying = Boolean(inquiry) && (lead.next_action === NEXT_ACTION || !hasDraft);
 
   const task = replying
-    ? `Draft our reply to the customer's inquiry below in language "${language}": ${REPLY_TASK}.
-If the current e-mail is already such a reply, keep what it confirms and asks; if it is a cold outreach e-mail,
-do not reuse it. It must not read as a sales pitch.`
+    ? hasDraft
+      ? `Rewrite the current e-mail below in language "${language}". If it is our reply to the inquiry, keep what it
+confirms, the questions it asks and the facts it states, and it must not read as a sales pitch; if it is a cold
+outreach e-mail, replace it with our reply to the inquiry: ${REPLY_TASK}.`
+      : `Draft our reply to the customer's inquiry below in language "${language}": ${REPLY_TASK}.
+It must not read as a sales pitch.`
     : hasDraft
       ? `Rewrite the current e-mail below in language "${language}". Keep its purpose: if it answers the customer's
 inquiry, it must still answer it (thank them, keep what it confirms and the questions it asks) and must not turn

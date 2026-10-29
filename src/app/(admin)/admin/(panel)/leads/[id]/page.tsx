@@ -8,6 +8,7 @@ import PageNotice from "@/components/admin/PageNotice";
 import Icon from "@/components/admin/Icon";
 import { plural } from "@/lib/plural";
 import { erasureTerms, leadInquiryIds, otherLeadsWithContacts, REDACTED } from "@/lib/erase";
+import { NEXT_ACTION } from "@/lib/inquiries";
 import { deleteLead, enrich, logContacted, rewriteOutreach, updateLead } from "../../../actions";
 
 type Signal = { type: string; detail: string; url: string };
@@ -52,7 +53,7 @@ export default async function LeadDetail({
   const [{ data: lead }, { data: events }, { data: inquiry }] = await Promise.all([
     db().from("leads").select("*, campaigns(name)").eq("id", id).single(),
     db().from("lead_events").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
-    db().from("inquiries").select("locale").eq("lead_id", id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    db().from("inquiries").select("locale, created_at").eq("lead_id", id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
   if (!lead) notFound();
 
@@ -68,12 +69,21 @@ export default async function LeadDetail({
   const inquiries = (await leadInquiryIds(lead.id, contacts)).length;
   const terms = erasureTerms(contacts);
   const others = await otherLeadsWithContacts(lead.id, contacts);
+  const otherLabel = (o: (typeof others)[number]) => `${statusLabel[o.status] ?? o.status}, pridaný ${fmtDay(o.created_at)}`;
+  const othersIntro = `Rovnaký e-mail kontaktu má aj ${others.length === 1 ? "lead" : "leady"}`;
+  const othersAdvice = `pri žiadosti o vymazanie údajov ${others.length === 1 ? "zmažte aj ten" : "zmažte aj tie"}.`;
   const othersText = others.length
-    ? `Rovnaký e-mail kontaktu má aj ${others.length === 1 ? "lead" : "leady"} ${others.map((o) => `„${o.company_name}“`).join(", ")} – ` +
-      `pri žiadosti o vymazanie údajov ${others.length === 1 ? "zmažte aj ten" : "zmažte aj tie"}.`
+    ? `${othersIntro} ${others.map((o) => `„${o.company_name}“ (${otherLabel(o)})`).join(", ")} – ${othersAdvice}`
     : "";
-  // Without a draft, Claude writes in the language the customer used on the website.
-  const draftLanguage = lead.outreach_language ?? (LANGS.includes(inquiry?.locale ?? "") ? inquiry!.locale : "en");
+  // While the inquiry still waits for a reply that nobody has drafted (e.g. the AI step was skipped), Claude
+  // replies in the language the customer used on the website, even over an older cold outreach draft.
+  const inquiryAt = inquiry?.created_at ? Date.parse(inquiry.created_at) : NaN;
+  const replyDrafted = (events ?? []).some(
+    (e) => Date.parse(e.created_at) > inquiryAt && (e.type === "outreach" || (e.type === "ai" && /návrh odpovede/i.test(e.body ?? ""))),
+  );
+  const inquiryLanguage =
+    lead.next_action === NEXT_ACTION && !replyDrafted && LANGS.includes(inquiry?.locale ?? "") ? inquiry!.locale : null;
+  const draftLanguage = inquiryLanguage ?? lead.outreach_language ?? "en";
   const deleteConfirm = [
     `Naozaj zmazať lead „${lead.company_name}“?`,
     `Zmaže sa lead s kontaktmi a signálmi, jeho história (${eventCount} ${plural(eventCount, "záznam", "záznamy", "záznamov")})` +
@@ -286,7 +296,18 @@ export default async function LeadDetail({
                   vyhľadávania nahradí mená, e-maily, telefónne čísla a LinkedIn profily kontaktov textom „{REDACTED}“.
                   Ďalšie AI vyhľadávanie môže firmu z verejných zdrojov nájsť znova.
                 </p>
-                {othersText && <p className="notice notice--demo" style={{ marginTop: 10 }}>{othersText}</p>}
+                {others.length > 0 && (
+                  <p className="notice notice--demo" style={{ marginTop: 10 }}>
+                    {othersIntro}{" "}
+                    {others.map((o, i) => (
+                      <span key={o.id}>
+                        {i > 0 && ", "}
+                        <Link href={`/admin/leads/${o.id}`}>„{o.company_name}“</Link> ({otherLabel(o)})
+                      </span>
+                    ))}{" "}
+                    – {othersAdvice}
+                  </p>
+                )}
               </div>
             </div>
             <div className="card__foot">

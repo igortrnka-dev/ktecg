@@ -62,8 +62,8 @@ export default async function Leads({ searchParams }: { searchParams: Promise<Se
 
       {sp.deleted !== undefined && (
         <PageNotice param="deleted">
-          Lead {sp.deleted ? `„${sp.deleted}“ ` : ""}bol zmazaný spolu s históriou a dopytmi z webu od jeho kontaktov.
-          Ich mená a e-maily v logoch AI vyhľadávania nahradil text „{REDACTED}“.
+          Lead {sp.deleted ? `„${sp.deleted}“ ` : ""}bol zmazaný spolu s históriou a dopytmi z webu, ktoré k nemu patrili.
+          Mená, e-maily, telefónne čísla a LinkedIn profily jeho kontaktov v logoch AI vyhľadávania nahradil text „{REDACTED}“.
         </PageNotice>
       )}
 

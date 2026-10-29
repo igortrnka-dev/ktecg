@@ -16,17 +16,35 @@ const ROLE_WORDS = new Set(
     "manager management managing director head chief lead team department dept office hr human resources " +
     "sales purchasing procurement operations plant production maintenance engineering recruiting recruitment " +
     "contact info support general abteilung personal personalabteilung leitung leiter leiterin einkauf vertrieb " +
-    "produktion werk kontakt geschäftsführer geschäftsführung oddelenie vedúci riaditeľ nákup výroba personálne"
+    "produktion werk kontakt geschäftsführer geschäftsführerin geschäftsführung betrieb technik " +
+    "directeur directrice responsable achats service ressources humaines " +
+    "kierownik kierowniczka dyrektor dyrektorka dział działu zakupów produkcji kadr " +
+    "chef vd inköp personalavdelning " +
+    "oddelenie oddelenia vedúci vedúca riaditeľ riaditeľka nákup nákupu výroba výroby personálne personálneho ľudských zdrojov"
   ).split(" "),
 );
+/** Joining words inside a title ("Head of Production", "Leiter für Einkauf", "vedúci pre nákup"). */
+const CONNECTORS = new Set("of and & for the der die des für fur de du la le pre a i och".split(" "));
+/** Compound titles ("Produktionsleiter", "Einkaufsabteilung", "inköpschef"). */
+const ROLE_SUFFIX = /(leiter|leiterin|leitung|abteilung|manager|managerin|direktor|direktorin|chef|chefin)$/;
+const isRoleWord = (w: string) => ROLE_WORDS.has(w) || CONNECTORS.has(w) || ROLE_SUFFIX.test(w);
 
 const digitsOf = (s: string) => s.replace(/\D/g, "");
+/**
+ * A phone number as its digits, without the trunk "(0)" and with "+" for an international number:
+ * "+49 (0) 375 555-0140" and "0049 375 5550140" → "+493755550140", "0375 5550140" → "03755550140".
+ */
+const phoneDigits = (phone: string) => {
+  const p = phone.replace(/\(\s*0\s*\)/g, "").trim();
+  return /^(\+|00)/.test(p) ? `+${digitsOf(p).replace(/^00/, "")}` : digitsOf(p);
+};
 /** "https://www.linkedin.com/in/thomas-weidner-123/" → "thomas-weidner-123". */
 const linkedinSlug = (url: string) => url.match(/linkedin\.com\/in\/([^/?#\s]+)/i)?.[1]?.toLowerCase() ?? "";
 
 /**
  * The contacts' e-mail addresses (lowercased), full names (two words or more, and not a job title: a lone first
- * name or a role would also hit unrelated text), phone numbers (as digits, 7 or more) and LinkedIn profile slugs.
+ * name or a role would also hit unrelated text), phone numbers (see phoneDigits, 7 digits or more) and LinkedIn
+ * profile slugs.
  */
 export function erasureTerms(contacts: Contact[] | null) {
   const list = contacts ?? [];
@@ -35,10 +53,10 @@ export function erasureTerms(contacts: Contact[] | null) {
     .filter((c) => {
       const name = String(c.name ?? "").trim();
       const words = name.toLowerCase().split(/\s+/);
-      return words.length >= 2 && !words.every((w) => ROLE_WORDS.has(w)) && name.toLowerCase() !== String(c.role ?? "").trim().toLowerCase();
+      return words.length >= 2 && !words.every(isRoleWord) && name.toLowerCase() !== String(c.role ?? "").trim().toLowerCase();
     })
     .map((c) => String(c.name).trim());
-  const phones = list.map((c) => digitsOf(String(c.phone ?? ""))).filter((d) => d.length >= 7);
+  const phones = list.map((c) => phoneDigits(String(c.phone ?? ""))).filter((p) => digitsOf(p).length >= 7);
   const profiles = list.map((c) => linkedinSlug(String(c.linkedin ?? ""))).filter(Boolean);
   const unique = (a: string[]) => [...new Set(a)];
   return { emails: unique(emails), names: unique(names), phones: unique(phones), profiles: unique(profiles) };
@@ -72,25 +90,48 @@ export async function leadInquiryIds(leadId: string, contacts: Contact[] | null)
 }
 
 /** Other leads that list one of these contacts' e-mail addresses: an erasure request has to cover them too. */
-export async function otherLeadsWithContacts(leadId: string, contacts: Contact[] | null): Promise<{ id: string; company_name: string }[]> {
-  const found = new Map<string, string>();
+type OtherLead = { id: string; company_name: string; status: string; created_at: string };
+
+export async function otherLeadsWithContacts(leadId: string, contacts: Contact[] | null): Promise<OtherLead[]> {
+  const found = new Map<string, OtherLead>();
   for (const email of erasureTerms(contacts).emails) {
     for (const address of new Set([email, ...(contacts ?? []).map((c) => String(c.email ?? "").trim()).filter((e) => e.toLowerCase() === email)])) {
-      const list = rows<{ id: string; company_name: string }>(
-        await db().from("leads").select("id, company_name").contains("contacts", JSON.stringify([{ email: address }])),
+      const list = rows<OtherLead>(
+        await db().from("leads").select("id, company_name, status, created_at").contains("contacts", JSON.stringify([{ email: address }])),
       );
-      for (const l of list) if (l.id !== leadId) found.set(l.id, l.company_name);
+      for (const l of list) if (l.id !== leadId) found.set(l.id, l);
     }
   }
-  return [...found].map(([id, company_name]) => ({ id, company_name }));
+  return [...found.values()];
 }
 
-/** Matches the digits of a phone number with the usual separators between them ("+49 375 555-0140", "0049 (375) 5550140"). */
-function phonePattern(digits: string) {
-  const sep = "[\\s\\-./()]*";
-  // The same number written with 00 instead of + or the other way round.
-  const core = digits.replace(/^00/, "");
-  return new RegExp(`(?<![\\d])(?:\\+|00)?${sep}${core.split("").join(sep)}(?![\\d])`, "g");
+/** Separators between the digits of a phone number, including the trunk "(0)" of "+49 (0) 375 …". */
+const SEP = "(?:[\\s\\-./()]|\\(0\\))*";
+const PREFIX = `(?:\\+|00)${SEP}`;
+
+/**
+ * Matches a phone number with the usual separators between its digits ("+49 375 555-0140", "0049 (375) 5550140"),
+ * also written the other way: an international number nationally ("0375 5550140", "375 5550140") and a national one with a
+ * country code. Separators before the number only count after + or 00, so the text around it keeps its spaces;
+ * an attached extension ("…0140-12") goes with the number.
+ */
+function phonePattern(phone: string) {
+  const join = (digits: string) => digits.split("").join(SEP);
+  const forms: string[] = [];
+  if (phone.startsWith("+")) {
+    const digits = phone.slice(1);
+    forms.push(`(?:${PREFIX})?${join(digits)}`);
+    // The country code is 1–3 digits; the national form puts the trunk 0 in its place, or nothing ("(212) 555-0140").
+    for (const k of [1, 2, 3]) {
+      if (digits.length - k >= 6) forms.push(join(`0${digits.slice(k)}`));
+      if (digits.length - k >= 9) forms.push(join(digits.slice(k)));
+    }
+  } else if (/^0[1-9]/.test(phone)) {
+    forms.push(join(phone), `${PREFIX}\\d{1,3}${SEP}${join(phone.slice(1))}`);
+  } else {
+    forms.push(`(?:${PREFIX})?${join(phone)}`);
+  }
+  return new RegExp(`(?<!\\d)(?:${forms.join("|")})(?:[\\-./]\\d{1,5})?(?!\\d)`, "g");
 }
 
 /** Replaces the contacts' e-mails, names, phone numbers and LinkedIn profiles with REDACTED in every run log; returns how many logs changed. */
@@ -108,8 +149,8 @@ export async function redactRunLogs(contacts: Contact[] | null): Promise<number>
   const searches = [
     ...emails.map(likeLiteral),
     ...words.map((w) => w.map(likeLiteral).join("%")),
-    // The last four digits are written together in nearly every format; the regex then checks the whole number.
-    ...phones.map((d) => d.slice(-4)),
+    // The last seven digits in order, with anything between them ("555 01 40"); the regex then checks the whole number.
+    ...phones.map((p) => digitsOf(p).slice(-7).split("").join("%")),
     ...profiles.map((s) => `/in/${likeLiteral(s)}`),
   ];
   const logs = new Map<string, string>();
