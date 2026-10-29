@@ -5,7 +5,9 @@ import Header from "@/components/site/Header";
 import Footer from "@/components/site/Footer";
 
 export default async function NotFound() {
-  // not-found pages get no params; the middleware passes the locale on as a request header.
+  // not-found pages get no params, so the middleware passes the locale on as a request header. This file sits in
+  // the catch-all segment rather than in [locale], because there it would be rendered with every page and
+  // reading headers() would stop the locale pages from being prerendered.
   const value = (await headers()).get("x-locale") ?? "";
   const locale = isLocale(value) ? value : defaultLocale;
   const t = getDictionary(locale);

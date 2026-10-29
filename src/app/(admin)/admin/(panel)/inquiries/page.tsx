@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/supabase/admin";
 import { fmtDate } from "@/components/admin/ui";
 import { shiftLabel, type ShiftPattern } from "@/lib/inquiries";
@@ -7,6 +8,7 @@ import { shiftLabel, type ShiftPattern } from "@/lib/inquiries";
 const LINK_TIMEOUT_MS = 10 * 60 * 1000;
 
 export default async function Inquiries() {
+  await requireAdmin();
   const { data } = await db().from("inquiries").select("*").order("created_at", { ascending: false }).limit(200);
   const now = Date.now();
   return (
