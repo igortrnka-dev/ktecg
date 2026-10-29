@@ -8,7 +8,7 @@ import pl from "./dictionaries/pl";
 
 export type Dictionary = typeof en;
 
-const NBSP = " ";
+const NBSP = "\u00a0";
 
 /** One-letter prepositions and conjunctions stay with the next word, and a dash never starts a line. */
 function bindShortWords(letters: string) {
