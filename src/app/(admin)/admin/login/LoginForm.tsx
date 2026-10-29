@@ -3,18 +3,23 @@
 import { useActionState } from "react";
 import { signIn } from "../actions";
 
-export default function LoginForm({ missing }: { missing: string[] }) {
+export default function LoginForm({ missing, demo }: { missing: string[]; demo: boolean }) {
   const [error, action, pending] = useActionState(signIn, null);
   const off = missing.length > 0;
   return (
     <main className="login">
       <form action={action} className="login__card">
         <div className="brand">KTechnology<sup>®</sup> <span>Sales</span></div>
+        {demo && !off && (
+          <p className="notice notice--demo" role="status">
+            Ukážkový režim: vymyslené firmy a testovacie dáta, beží len na tomto počítači.
+          </p>
+        )}
         {off && (
           <p className="notice" role="status">
             Admin ešte nie je nastavený: v <code>.env.local</code> chýba {missing.map((m, i) => (
               <span key={m}>{i > 0 && ", "}<code>{m}</code></span>
-            ))}. Doplňte kľúče zo Supabase a reštartujte server.
+            ))}. {demo ? "Doplňte heslo pre ukážkový admin." : "Doplňte kľúče zo Supabase a reštartujte server."}
           </p>
         )}
         <label className="afield">

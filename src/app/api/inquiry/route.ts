@@ -3,6 +3,8 @@ import * as z from "zod/v4";
 import { db } from "@/lib/supabase/admin";
 import { supabaseConfigured } from "@/lib/supabase/config";
 import { qualifyInquiry } from "@/lib/ai/leads";
+import { isDemo, simulateAi } from "@/lib/demo/mode";
+import { simulateInquiry } from "@/lib/demo/ai";
 
 const Inquiry = z.object({
   company: z.string().trim().min(1).max(200),
@@ -24,13 +26,15 @@ export async function POST(request: Request) {
   const { website, ...data } = parsed.data;
   if (website) return NextResponse.json({ ok: true }); // bot
 
-  if (!supabaseConfigured()) return NextResponse.json({ error: "not_configured" }, { status: 503 });
+  if (!supabaseConfigured() && !isDemo()) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
   const clean = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v === "" ? null : v]));
   const { data: row, error } = await db().from("inquiries").insert(clean).select("id").single();
   if (error || !row) return NextResponse.json({ error: "db" }, { status: 500 });
 
-  if (process.env.ANTHROPIC_API_KEY) {
+  if (simulateAi()) {
+    void simulateInquiry(row.id).catch((err) => console.error("simulateInquiry failed", err));
+  } else if (process.env.ANTHROPIC_API_KEY) {
     void qualifyInquiry(row.id).catch((err) => console.error("qualifyInquiry failed", err));
   }
   return NextResponse.json({ ok: true });

@@ -2,12 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/auth";
+import { allowedEmails, requireAdmin } from "@/lib/auth";
 import { createAuthClient } from "@/lib/supabase/server";
 import { missingSupabaseEnv } from "@/lib/supabase/config";
 import { db } from "@/lib/supabase/admin";
 import { startRun } from "@/lib/ai/prospect";
 import { enrichLead, writeOutreach } from "@/lib/ai/leads";
+import { isDemo, simulateAi } from "@/lib/demo/mode";
+import { demoSignIn, demoSignOut } from "@/lib/demo/session";
+import { simulateEnrich, simulateOutreach, simulateRun } from "@/lib/demo/ai";
 
 const list = (v: FormDataEntryValue | null) =>
   String(v ?? "")
@@ -16,6 +19,13 @@ const list = (v: FormDataEntryValue | null) =>
     .filter(Boolean);
 
 export async function signIn(_: string | null, form: FormData): Promise<string | null> {
+  if (isDemo()) {
+    if (!process.env.DEMO_ADMIN_PASSWORD) return "Ukážkový režim: v .env.local chýba DEMO_ADMIN_PASSWORD.";
+    const email = String(form.get("email")).trim().toLowerCase();
+    const ok = allowedEmails().includes(email) && (await demoSignIn(email, String(form.get("password"))));
+    if (!ok) return "Nesprávny e-mail alebo heslo.";
+    redirect("/admin");
+  }
   const missing = missingSupabaseEnv();
   if (missing.length) return `Admin ešte nie je nastavený – v .env.local chýba ${missing.join(", ")}.`;
   const supabase = await createAuthClient();
@@ -28,6 +38,10 @@ export async function signIn(_: string | null, form: FormData): Promise<string |
 }
 
 export async function signOut() {
+  if (isDemo()) {
+    await demoSignOut();
+    redirect("/admin/login");
+  }
   if (missingSupabaseEnv().length) redirect("/admin/login");
   const supabase = await createAuthClient();
   await supabase.auth.signOut();
@@ -60,7 +74,9 @@ export async function deleteCampaign(form: FormData) {
 
 export async function runCampaign(form: FormData) {
   await requireAdmin();
-  await startRun(String(form.get("id")), "manual");
+  const id = String(form.get("id"));
+  if (simulateAi()) await simulateRun(id);
+  else await startRun(id, "manual");
   revalidatePath("/admin/campaigns");
 }
 
@@ -106,14 +122,18 @@ export async function addLead(form: FormData) {
 export async function enrich(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id"));
-  await enrichLead(id);
+  if (simulateAi()) await simulateEnrich(id);
+  else await enrichLead(id);
   revalidatePath(`/admin/leads/${id}`);
 }
 
 export async function rewriteOutreach(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id"));
-  await writeOutreach(id, String(form.get("language") || "en"), String(form.get("instructions") ?? ""));
+  const language = String(form.get("language") || "en");
+  const instructions = String(form.get("instructions") ?? "");
+  if (simulateAi()) await simulateOutreach(id, language, instructions);
+  else await writeOutreach(id, language, instructions);
   revalidatePath(`/admin/leads/${id}`);
 }
 

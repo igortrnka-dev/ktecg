@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { createAuthClient } from "./supabase/server";
 import { supabaseConfigured } from "./supabase/config";
+import { isDemo } from "./demo/mode";
+import { demoUser } from "./demo/session";
 
-function allowedEmails(): string[] {
+export function allowedEmails(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
@@ -10,6 +12,7 @@ function allowedEmails(): string[] {
 }
 
 export async function getAdmin() {
+  if (isDemo()) return demoUser();
   if (!supabaseConfigured()) return null;
   const supabase = await createAuthClient();
   const { data } = await supabase.auth.getUser();

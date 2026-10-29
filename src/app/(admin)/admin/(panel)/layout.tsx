@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { signOut } from "../actions";
 import NavLink from "@/components/admin/NavLink";
+import { isDemo } from "@/lib/demo/mode";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <a href="/" target="_blank" className="linkbtn">Otvoriť web ↗</a>
         </div>
       </aside>
-      <main className="content">{children}</main>
+      <main className="content">
+        {isDemo() && (
+          <p className="notice notice--demo demo-banner" role="status">
+            Ukážkový režim: vymyslené firmy a testovacie dáta, ktoré sa po reštarte servera vrátia do pôvodného stavu. AI kroky sú len simulované, kým nedoplníte kľúče Supabase a Anthropic.
+          </p>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

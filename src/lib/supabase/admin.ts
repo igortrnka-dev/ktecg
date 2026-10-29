@@ -1,4 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { isDemo } from "../demo/mode";
+import { demoClient } from "../demo/store";
 
 let client: SupabaseClient | null = null;
 
@@ -7,6 +9,7 @@ let client: SupabaseClient | null = null;
  * after the caller has been authorised (requireAdmin, CRON_SECRET, public form handler).
  */
 export function db(): SupabaseClient {
+  if (isDemo()) return demoClient();
   if (!client) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
