@@ -4,7 +4,7 @@ const sk: Dictionary = {
   meta: {
     title: "KTechnology – Leasing pracovníkov pre priemysel: zvárači, montéri, elektrikári",
     description:
-      "KTechnology s.r.o. prenajíma certifikovaných zváračov, potrubárov, elektrikárov, mechanikov a operátorov pre priemyselné projekty v Európe aj vo svete. Zručnosti overuje testom, vybaví A1, dopravu aj ubytovanie a tím dostane na miesto približne do 14 dní.",
+      "KTechnology s.r.o. prenajíma zváračov, potrubárov, elektrikárov, mechanikov a operátorov pre priemyselné projekty v Európe aj vo svete. Zručnosti pracovníkov overí testom, vybaví A1, dopravu aj ubytovanie a tím nasadí približne do 14 dní.",
   },
   nav: {
     services: "Služby",
@@ -21,7 +21,7 @@ const sk: Dictionary = {
     ctaShort: "Poslať dopyt",
   },
   hero: {
-    eyebrow: "Leasing pracovníkov pre priemysel · Európa\u00a0a\u00a0svet",
+    eyebrow: "Leasing pracovníkov pre priemysel\u00a0· Európa\u00a0a\u00a0svet",
     title: "Kvalifikovaní zvárači, montéri a\u00a0elektrikári na vašom pracovisku približne do 14\u00a0dní",
     lead:
       "Prenajímame overených priemyselných odborníkov výrobcom, zhotoviteľom a EPC spoločnostiam v celej Európe. Postaráme sa o zmluvy, A1 a povolenia, poistenie, dopravu aj ubytovanie. Jeden kontakt, jedna faktúra.",
@@ -30,7 +30,7 @@ const sk: Dictionary = {
     facts: [
       { k: "Profesie", v: "Zvárači, montéri, elektrikári, mechanici, operátori" },
       { k: "Kde", v: "Nemecko, Rakúsko, severské krajiny, Benelux, Francúzsko, PL/CZ/SK, SAE" },
-      { k: "Rýchlosť", v: "Tím na mieste približne do 14 dní" },
+      { k: "Rýchlosť", v: "Cenová ponuka do 1\u00a0pracovného dňa, tím na mieste približne do 14\u00a0dní" },
       { k: "Súčasť služby", v: "A1 a povolenia, doprava, ubytovanie, koordinátor" },
     ],
     card: {
@@ -43,7 +43,7 @@ const sk: Dictionary = {
       ],
       meta: [
         { k: "Projekt", v: "Odstávka závodu" },
-        { k: "Nástup", v: "do ~14 dní" },
+        { k: "Nástup", v: "do ~14\u00a0dní" },
       ],
       status: "Tím sa pripravuje",
     },
@@ -144,9 +144,9 @@ const sk: Dictionary = {
   },
   why: {
     label: "Prečo KTechnology",
-    title: "Personálny partner, nie iba dodávateľ životopisov",
+    title: "Personálny partner, nie\u00a0iba dodávateľ životopisov",
     items: [
-      { title: "Jeden partner na všetko", body: "Nábor, administratíva, doprava, ubytovanie aj podpora na mieste od jednej kontaktnej osoby." },
+      { title: "Jeden partner na všetko", body: "Nábor, administratíva, doprava, ubytovanie aj podpora na mieste – všetko cez jednu kontaktnú osobu." },
       { title: "Overení pred nasadením", body: "Každý špecialista prejde praktickým testom, aby váš harmonogram nenarušili nepríjemné prekvapenia." },
       { title: "Flexibilná kapacita", body: "Navýšte kapacitu na odstávku či nábeh výroby a po skončení projektu ju znížte." },
       { title: "Rýchla náhrada", body: "Ak niekto nespĺňa vaše požiadavky, rýchlo ho nahradíme." },
@@ -196,30 +196,30 @@ const sk: Dictionary = {
     body: "Pošlite nám dopyt a projektový koordinátor sa vám do jedného pracovného dňa ozve s informáciou o dostupnosti pracovníkov a s cenovou ponukou.",
     emailLabel: "Alebo nám napíšte priamo",
     tipsTitle: "Pomôže, ak uvediete",
-    tips: ["Profesie a počty ľudí", "Miesto projektu a termín nástupu", "Predpokladanú dĺžku a zmennosť"],
+    tips: ["Miesto výkonu práce (mesto) a pracovný čas", "Požadované certifikáty, napr.\u00a0metódu zvárania a normu", "Pracovný jazyk a potrebné bezpečnostné preukazy"],
     form: {
       company: "Spoločnosť",
       name: "Vaše meno",
       email: "E-mail",
       phone: "Telefón",
       country: "Krajina projektu",
-      positions: "Potrebné pozície (napr. 6× zvárač TIG)",
-      duration: "Trvanie (napr. 6 týždňov)",
+      positions: "Potrebné pozície (napr.\u00a06×\u00a0zvárač TIG)",
+      duration: "Dĺžka (napr.\u00a06\u00a0týždňov)",
       shift: "Zmennosť",
       shifts: {
         unsure: "Zatiaľ neviem",
         single: "1 zmena",
         double: "2 zmeny",
         triple: "3 zmeny",
-        rotation: "12-hodinové zmeny",
+        rotation: "Zmeny po 12\u00a0h",
       },
       required: "* Povinné polia",
       start: "Plánovaný nástup",
       message: "Detaily projektu",
       submit: "Odoslať dopyt",
       sending: "Odosiela sa…",
-      success: "Ďakujeme. Váš dopyt sme prijali a čoskoro sa vám ozveme.",
-      error: "Dopyt sa nepodarilo odoslať. Pošlite nám ho, prosím, priamo e-mailom.",
+      success: "Ďakujeme. Projektový koordinátor sa vám do jedného pracovného dňa ozve s informáciou o dostupnosti pracovníkov a s cenovou ponukou.",
+      error: "Dopyt sa nepodarilo odoslať. Vyplnené údaje zostali vo formulári – pošlite nám ich, prosím, e-\u2060mailom na adresu:",
       consent: "Vaše osobné údaje spracúvame len na vybavenie tohto dopytu a prípravu cenovej ponuky.",
     },
   },

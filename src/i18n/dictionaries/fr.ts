@@ -4,7 +4,7 @@ const fr: Dictionary = {
   meta: {
     title: "KTechnology — Mise à disposition de soudeurs, tuyauteurs et électriciens",
     description:
-      "KTechnology s.r.o. met à disposition des soudeurs, tuyauteurs, électriciens, mécaniciens et opérateurs certifiés pour des projets industriels en Europe et dans le monde. Compétences testées, formulaires A1, transport et hébergement pris en charge, équipe sur site en 14 jours environ.",
+      "KTechnology s.r.o. met à disposition des soudeurs, tuyauteurs, électriciens, mécaniciens et opérateurs aux compétences testées pour des projets industriels en Europe et dans le monde. Formulaires A1, transport et hébergement pris en charge, équipe sur site en 14 jours environ.",
   },
   nav: {
     services: "Services",
@@ -21,8 +21,8 @@ const fr: Dictionary = {
     ctaShort: "Devis",
   },
   hero: {
-    eyebrow: "Mise à disposition de personnel industriel · Europe et international",
-    title: "Soudeurs, tuyauteurs et électriciens qualifiés sur votre site en 14 jours environ",
+    eyebrow: "Mise à disposition de personnel industriel\u00a0· Europe et international",
+    title: "Soudeurs, tuyauteurs et électriciens qualifiés sur votre site en 14\u00a0jours environ",
     lead:
       "Nous mettons des ouvriers et techniciens testés à la disposition d’industriels, d’entreprises de travaux et de sociétés EPC dans toute l’Europe, et prenons en charge contrats, formulaires A1 ou permis de travail, assurance, transport et hébergement. Un seul interlocuteur, une seule facture.",
     primary: "Demander du personnel",
@@ -30,7 +30,7 @@ const fr: Dictionary = {
     facts: [
       { k: "Métiers", v: "Soudeurs, monteurs, électriciens, mécaniciens, opérateurs" },
       { k: "Où", v: "Allemagne, Autriche, pays nordiques, Benelux, France, PL/CZ/SK, EAU" },
-      { k: "Délai", v: "Équipe sur site en 14 jours environ" },
+      { k: "Délai", v: "Devis sous 1\u00a0jour ouvré, équipe sur site en 14\u00a0jours environ" },
       { k: "Inclus", v: "A1 & permis, transport, hébergement, coordinateur" },
     ],
     card: {
@@ -43,7 +43,7 @@ const fr: Dictionary = {
       ],
       meta: [
         { k: "Projet", v: "Arrêt technique" },
-        { k: "Début", v: "sous ~14 jours" },
+        { k: "Début", v: "sous ~14\u00a0jours" },
       ],
       status: "Équipe en préparation",
     },
@@ -146,7 +146,7 @@ const fr: Dictionary = {
     label: "Pourquoi KTechnology",
     title: "Un partenaire de terrain, pas un simple fournisseur de CV",
     items: [
-      { title: "Un seul partenaire", body: "Recrutement, formalités, transport, hébergement et assistance sur site par un interlocuteur unique." },
+      { title: "Un seul partenaire", body: "Recrutement, formalités, transport, hébergement et assistance sur site, le tout via un interlocuteur unique." },
       { title: "Testés avant la mission", body: "Chaque spécialiste réussit un test pratique, pour éviter les mauvaises surprises sur votre planning." },
       { title: "Capacité flexible", body: "Renforcez vos équipes pour un arrêt ou une montée en cadence, réduisez-les à la fin du projet." },
       { title: "Remplacement rapide", body: "Si quelqu’un ne répond pas à vos exigences, nous le remplaçons rapidement." },
@@ -196,30 +196,30 @@ const fr: Dictionary = {
     body: "Envoyez-nous votre demande : un coordinateur de projet vous répond sous un jour ouvré avec les disponibilités et un devis.",
     emailLabel: "Ou écrivez-nous directement",
     tipsTitle: "Utile à préciser",
-    tips: ["Métiers et effectifs", "Lieu du projet et date de début", "Durée prévue et rythme de travail"],
+    tips: ["Lieu d’intervention (ville) et horaires de travail", "Certificats requis, ex.\u00a0procédé et norme de soudage", "Langue de travail et habilitations sécurité exigées sur site"],
     form: {
       company: "Entreprise",
       name: "Votre nom",
       email: "E-mail",
       phone: "Téléphone",
       country: "Pays du projet",
-      positions: "Postes recherchés (ex. 6× soudeur TIG)",
-      duration: "Durée (ex. 6 semaines)",
+      positions: "Postes recherchés (ex.\u00a06×\u00a0soudeur TIG)",
+      duration: "Durée (ex.\u00a06\u00a0semaines)",
       shift: "Rythme de travail",
       shifts: {
         unsure: "À définir",
         single: "1 équipe",
         double: "2 équipes",
         triple: "3 équipes",
-        rotation: "Postes de 12 h en rotation",
+        rotation: "Équipes de 12\u202fh",
       },
       required: "* Champs obligatoires",
       start: "Début prévu",
       message: "Détails du projet",
       submit: "Envoyer la demande",
       sending: "Envoi…",
-      success: "Merci. Nous avons bien reçu votre demande et vous recontacterons rapidement.",
-      error: "Une erreur s’est produite. Merci de nous écrire directement par e-mail.",
+      success: "Merci. Un coordinateur de projet vous répondra sous un jour ouvré avec les disponibilités et un devis.",
+      error: "Votre demande n’a pas pu être envoyée. Les informations saisies sont toujours dans le formulaire\u202f; merci de nous les envoyer par e-\u2060mail\u00a0:",
       consent: "Nous utilisons vos données uniquement pour répondre à cette demande et établir un devis.",
     },
   },
