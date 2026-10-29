@@ -10,33 +10,37 @@ type Contact = { name?: string | null; role?: string | null; email?: string | nu
 
 export const REDACTED = "[vymazané]";
 
+/** Lowercase without accents, so "Directeur Général" and "Vedúci výroby" meet the word lists either way. */
+const fold = (w: string) => w.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+
 /** Words of a job title or department: a "name" made only of these is a role ("Plant Manager"), not a person. */
 const ROLE_WORDS = new Set(
   (
     "manager management managing director head chief lead team department dept office hr human resources " +
     "sales purchasing procurement operations plant production maintenance engineering recruiting recruitment " +
-    "contact info support general abteilung personal personalabteilung leitung leiter leiterin einkauf vertrieb " +
+    "contact info support abteilung personal personalabteilung leitung leiter leiterin einkauf vertrieb " +
     "produktion werk kontakt geschäftsführer geschäftsführerin geschäftsführung betrieb technik " +
-    "directeur directrice responsable achats service ressources humaines " +
+    "directeur directrice general generale responsable achats service ressources humaines " +
     "kierownik kierowniczka dyrektor dyrektorka dział działu zakupów produkcji kadr " +
     "chef vd inköp personalavdelning " +
-    "oddelenie oddelenia vedúci vedúca riaditeľ riaditeľka nákup nákupu výroba výroby personálne personálneho ľudských zdrojov"
-  ).split(" "),
+    "oddelenie oddelenia vedúci vedúca riaditeľ riaditeľka nákup nákupu výroba výroby personálne personálneho ľudských zdrojov " +
+    "project projekt projektu quality qualität logistics logistik site technical rh recrutement zakładu ansprechpartner ansprechpartnerin"
+  ).split(" ").map((w) => fold(w)),
 );
 /** Joining words inside a title ("Head of Production", "Leiter für Einkauf", "vedúci pre nákup"). */
-const CONNECTORS = new Set("of and & for the der die des für fur de du la le pre a i och".split(" "));
+const CONNECTORS = new Set("of and & for the der die des für de du la le pre a i och".split(" ").map((w) => fold(w)));
 /** Compound titles ("Produktionsleiter", "Einkaufsabteilung", "inköpschef"). */
 const ROLE_SUFFIX = /(leiter|leiterin|leitung|abteilung|manager|managerin|direktor|direktorin|chef|chefin)$/;
-const isRoleWord = (w: string) => ROLE_WORDS.has(w) || CONNECTORS.has(w) || ROLE_SUFFIX.test(w);
+const isRoleWord = (w: string) => ROLE_WORDS.has(fold(w)) || CONNECTORS.has(fold(w)) || ROLE_SUFFIX.test(fold(w));
 
 const digitsOf = (s: string) => s.replace(/\D/g, "");
 /**
- * A phone number as its digits, without the trunk "(0)" and with "+" for an international number:
- * "+49 (0) 375 555-0140" and "0049 375 5550140" → "+493755550140", "0375 5550140" → "03755550140".
+ * A phone number as its digits, with "+" for an international number and without its trunk "(0)":
+ * "+49 (0) 375 555-0140" and "0049 375 5550140" → "+493755550140"; "0375 5550140" and "(0)375 5550140" → "03755550140".
  */
 const phoneDigits = (phone: string) => {
-  const p = phone.replace(/\(\s*0\s*\)/g, "").trim();
-  return /^(\+|00)/.test(p) ? `+${digitsOf(p).replace(/^00/, "")}` : digitsOf(p);
+  const p = phone.trim();
+  return /^(\+|00)/.test(p) ? `+${digitsOf(p.replace(/\(\s*0\s*\)/g, "")).replace(/^00/, "")}` : digitsOf(p);
 };
 /** "https://www.linkedin.com/in/thomas-weidner-123/" → "thomas-weidner-123". */
 const linkedinSlug = (url: string) => url.match(/linkedin\.com\/in\/([^/?#\s]+)/i)?.[1]?.toLowerCase() ?? "";
@@ -134,6 +138,8 @@ function phonePattern(phone: string) {
   return new RegExp(`(?<!\\d)(?:${forms.join("|")})(?:[\\-./]\\d{1,5})?(?!\\d)`, "g");
 }
 
+const PAGE = 500;
+
 /** Replaces the contacts' e-mails, names, phone numbers and LinkedIn profiles with REDACTED in every run log; returns how many logs changed. */
 export async function redactRunLogs(contacts: Contact[] | null): Promise<number> {
   const { emails, names, phones, profiles } = erasureTerms(contacts);
@@ -155,8 +161,13 @@ export async function redactRunLogs(contacts: Contact[] | null): Promise<number>
   ];
   const logs = new Map<string, string>();
   for (const term of searches) {
-    for (const r of rows<{ id: string; log: string | null }>(await db().from("lead_runs").select("id, log").ilike("log", `%${term}%`))) {
-      logs.set(r.id, r.log ?? "");
+    // Page by page: a phone search matches many logs, and PostgREST returns at most 1000 rows per request.
+    for (let from = 0; ; from += PAGE) {
+      const page = rows<{ id: string; log: string | null }>(
+        await db().from("lead_runs").select("id, log").ilike("log", `%${term}%`).order("id").range(from, from + PAGE - 1),
+      );
+      for (const r of page) logs.set(r.id, r.log ?? "");
+      if (page.length < PAGE) break;
     }
   }
   let changed = 0;

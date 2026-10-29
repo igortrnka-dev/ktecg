@@ -195,7 +195,8 @@ ${findings}
     leadId,
     "ai",
     `Preskúmané s Claude (${usage.web_searches} ${plural(usage.web_searches, "vyhľadávanie", "vyhľadávania", "vyhľadávaní")}). Skóre ${result.score}, tier ${result.tier}. ` +
-      `Nové kontakty: ${mergedContacts.length - currentContacts.length}, nové signály: ${mergedSignals.length - currentSignals.length}.`,
+      `Nové kontakty: ${mergedContacts.length - currentContacts.length}, nové signály: ${mergedSignals.length - currentSignals.length}.` +
+      (inquiry && !keepOutreach ? ` Návrh odpovede (${outreach_language.toUpperCase()}) je v časti „E-mail na oslovenie“.` : ""),
   );
 }
 
