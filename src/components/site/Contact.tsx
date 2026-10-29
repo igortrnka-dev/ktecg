@@ -1,10 +1,11 @@
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
+import { EMAIL } from "./email";
 import Icon from "./Icon";
 import InquiryForm from "./InquiryForm";
 import Photo from "./Photo";
 
-const EMAIL = "office@ktechnology.sk";
+const [mailbox, domain] = EMAIL.split("@");
 
 export default function Contact({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
@@ -21,7 +22,8 @@ export default function Contact({ t, locale }: { t: Dictionary; locale: Locale }
           <span className="tile__icon tile__icon--accent"><Icon name="mail" /></span>
           <span>
             <span className="mono faint">{t.contact.emailLabel}</span>
-            <span className="contact__addr">{EMAIL}</span>
+            {/* On narrow screens the address may wrap after the @, never inside the domain. */}
+            <span className="contact__addr">{mailbox}@<wbr />{domain}</span>
           </span>
         </a>
 

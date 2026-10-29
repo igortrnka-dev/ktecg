@@ -9,8 +9,9 @@ type Nav = Dictionary["nav"];
 
 /**
  * Floating pill navbar. Desktop: wordmark, links with a sliding hover highlight and
- * scroll-spy active state, language dropdown, glowing CTA. Below 960px the links and
- * languages move into a modal sheet opened by the burger; a short CTA stays in the bar.
+ * scroll-spy active state, language dropdown, glowing CTA (the short label up to 1199px).
+ * Below 960px the links and languages move into a sheet opened by the burger; the short
+ * CTA stays in the bar.
  * `hrefBase` prefixes the section links on pages other than the homepage.
  */
 export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; locale: Locale; hrefBase?: string }) {
@@ -27,7 +28,7 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
   const [active, setActive] = useState<string | null>(null);
   const [langOpen, setLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [hl, setHl] = useState<{ x: number; w: number; on: boolean }>({ x: 0, w: 0, on: false });
+  const [hl, setHl] = useState<{ x: number; y: number; w: number; on: boolean }>({ x: 0, y: 0, w: 0, on: false });
 
   const headerRef = useRef<HTMLElement>(null);
   const linksRef = useRef<HTMLElement>(null);
@@ -102,7 +103,8 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  // The open sheet is modal: the rest of the page goes inert, body scroll locks, focus moves in.
+  // The open sheet is modal: the rest of the page goes inert, body scroll locks, focus moves in. No aria-modal,
+  // because the burger that closes it sits outside the sheet and VoiceOver would hide it.
   useEffect(() => {
     const sheet = sheetRef.current;
     if (!menuOpen || !sheet) return;
@@ -129,7 +131,8 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
   const moveHighlight = useCallback((el: HTMLElement | null) => {
     const box = linksRef.current;
     if (!el || !box) return setHl((h) => ({ ...h, on: false }));
-    setHl({ x: el.offsetLeft, w: el.offsetWidth, on: true });
+    // y is 0 on a single row; it moves the pill onto the right row if the links wrap (user text spacing).
+    setHl({ x: el.offsetLeft, y: el.offsetTop + (el.offsetHeight - box.clientHeight) / 2, w: el.offsetWidth, on: true });
   }, []);
 
   return (
@@ -150,7 +153,7 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
         >
           <span
             className={`nav__hl${hl.on ? " is-on" : ""}`}
-            style={{ transform: `translateX(${hl.x}px)`, width: hl.w }}
+            style={{ transform: `translate(${hl.x}px, ${hl.y}px)`, width: hl.w }}
             aria-hidden
           />
           {links.map(([id, label]) => (
@@ -236,7 +239,6 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
         className={`sheet${menuOpen ? " is-open" : ""}`}
         id="nav-sheet"
         role="dialog"
-        aria-modal="true"
         aria-label={nav.menu}
         hidden={!menuOpen}
       >

@@ -42,10 +42,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  // The localized 404 page gets no route params, so it reads the locale from this header.
-  const headers = new Headers(request.headers);
-  headers.set("x-locale", locale);
-  const response = NextResponse.next({ request: { headers } });
+  // The locale homepage is the only page under /<locale>; anything deeper renders the localized 404 page in
+  // [locale]/[...rest], which cannot set its own status.
+  const response = NextResponse.next(rest.some(Boolean) ? { status: 404 } : undefined);
   // Remember the language the visitor last used, so the bare domain brings them back to it.
   if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
     response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
@@ -54,5 +53,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|.*\\..*).*)"],
+  // Everything but API routes, Next assets and files (paths with a dot), plus every path under a locale, so that
+  // /de/kontakt.html still gets the 404 status. Keep the locale list in sync with src/i18n/config.ts.
+  matcher: ["/((?!api|_next|.*\\..*).*)", "/(en|de|fr|sv|sk|pl)/:path*"],
 };
