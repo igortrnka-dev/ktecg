@@ -16,6 +16,9 @@ const fr: Dictionary = {
     cta: "Demander du personnel",
     language: "Langue",
     menu: "Menu",
+    mainNav: "Main navigation",
+    skip: "Skip to content",
+    ctaShort: "Get a quote",
   },
   hero: {
     eyebrow: "Mise à disposition de personnel industriel · Europe & monde",
@@ -153,7 +156,7 @@ const fr: Dictionary = {
     label: "Zones d'intervention",
     title: "Basés en Slovaquie, présents sur des chantiers dans toute l'Europe et au-delà",
     countries: [
-      "Allemagne", "Autriche", "Suisse", "Suède", "Norvège", "Finlande", "Danemark",
+      "Allemagne", "Autriche", "Suède", "Norvège", "Finlande", "Danemark",
       "Pays-Bas", "Belgique", "France", "Pologne", "Tchéquie", "Slovaquie", "Émirats arabes unis",
     ],
   },
@@ -201,7 +204,16 @@ const fr: Dictionary = {
       phone: "Téléphone",
       country: "Pays du projet",
       positions: "Postes recherchés (ex. 6× soudeur TIG)",
-      headcount: "Effectif",
+      duration: "Duration (e.g. 6 weeks)",
+      shift: "Shift pattern",
+      shifts: {
+        unsure: "Not sure yet",
+        single: "1 shift",
+        double: "2 shifts",
+        triple: "3 shifts",
+        rotation: "12-hour rotation",
+      },
+      required: "* Required fields",
       start: "Début prévu",
       message: "Détails du projet",
       submit: "Envoyer la demande",
@@ -210,6 +222,11 @@ const fr: Dictionary = {
       error: "Une erreur s'est produite. Merci de nous écrire directement par e-mail.",
       consent: "En envoyant ce formulaire, vous acceptez que vos données soient traitées pour répondre à votre demande.",
     },
+  },
+  notFound: {
+    title: "Page not found",
+    body: "The page you are looking for does not exist or has moved.",
+    home: "Back to the homepage",
   },
   footer: {
     company: "KTechnology s.r.o.",

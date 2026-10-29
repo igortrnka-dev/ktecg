@@ -16,6 +16,9 @@ const sv: Dictionary = {
     cta: "Beställ personal",
     language: "Språk",
     menu: "Meny",
+    mainNav: "Main navigation",
+    skip: "Skip to content",
+    ctaShort: "Get a quote",
   },
   hero: {
     eyebrow: "Personaluthyrning för industrin · Europa & världen",
@@ -153,7 +156,7 @@ const sv: Dictionary = {
     label: "Var vi arbetar",
     title: "Baserade i Slovakien, på arbetsplatser i hela Europa och längre bort",
     countries: [
-      "Tyskland", "Österrike", "Schweiz", "Sverige", "Norge", "Finland", "Danmark",
+      "Tyskland", "Österrike", "Sverige", "Norge", "Finland", "Danmark",
       "Nederländerna", "Belgien", "Frankrike", "Polen", "Tjeckien", "Slovakien", "Förenade Arabemiraten",
     ],
   },
@@ -201,7 +204,16 @@ const sv: Dictionary = {
       phone: "Telefon",
       country: "Projektland",
       positions: "Tjänster som behövs (t.ex. 6× TIG-svetsare)",
-      headcount: "Antal",
+      duration: "Duration (e.g. 6 weeks)",
+      shift: "Shift pattern",
+      shifts: {
+        unsure: "Not sure yet",
+        single: "1 shift",
+        double: "2 shifts",
+        triple: "3 shifts",
+        rotation: "12-hour rotation",
+      },
+      required: "* Required fields",
       start: "Planerad start",
       message: "Projektdetaljer",
       submit: "Skicka förfrågan",
@@ -210,6 +222,11 @@ const sv: Dictionary = {
       error: "Något gick fel. Mejla oss gärna direkt.",
       consent: "Genom att skicka formuläret godkänner du att vi behandlar dina uppgifter för att besvara förfrågan.",
     },
+  },
+  notFound: {
+    title: "Page not found",
+    body: "The page you are looking for does not exist or has moved.",
+    home: "Back to the homepage",
   },
   footer: {
     company: "KTechnology s.r.o.",

@@ -38,7 +38,7 @@ export default function InquiryForm({ t, locale }: { t: FormText; locale: Locale
         <Field name="email" label={t.email} type="email" required />
         <Field name="phone" label={t.phone} type="tel" />
         <Field name="country" label={t.country} />
-        <Field name="headcount" label={t.headcount} type="number" min={1} />
+        <Field name="duration" label={t.duration} />
         <Field name="positions" label={t.positions} wide />
         <Field name="start_date" label={t.start} type="date" />
         <label className="field field--wide">

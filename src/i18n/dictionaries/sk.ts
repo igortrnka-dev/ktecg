@@ -16,6 +16,9 @@ const sk: Dictionary = {
     cta: "Vyžiadať pracovníkov",
     language: "Jazyk",
     menu: "Menu",
+    mainNav: "Main navigation",
+    skip: "Skip to content",
+    ctaShort: "Get a quote",
   },
   hero: {
     eyebrow: "Leasing pracovníkov pre priemysel · Európa a svet",
@@ -153,7 +156,7 @@ const sk: Dictionary = {
     label: "Kde pôsobíme",
     title: "Sídlime na Slovensku, pracujeme na projektoch v celej Európe aj mimo nej",
     countries: [
-      "Nemecko", "Rakúsko", "Švajčiarsko", "Švédsko", "Nórsko", "Fínsko", "Dánsko",
+      "Nemecko", "Rakúsko", "Švédsko", "Nórsko", "Fínsko", "Dánsko",
       "Holandsko", "Belgicko", "Francúzsko", "Poľsko", "Česko", "Slovensko", "SAE",
     ],
   },
@@ -201,7 +204,16 @@ const sk: Dictionary = {
       phone: "Telefón",
       country: "Krajina projektu",
       positions: "Potrebné pozície (napr. 6× zvárač TIG)",
-      headcount: "Počet ľudí",
+      duration: "Duration (e.g. 6 weeks)",
+      shift: "Shift pattern",
+      shifts: {
+        unsure: "Not sure yet",
+        single: "1 shift",
+        double: "2 shifts",
+        triple: "3 shifts",
+        rotation: "12-hour rotation",
+      },
+      required: "* Required fields",
       start: "Plánovaný nástup",
       message: "Detaily projektu",
       submit: "Odoslať dopyt",
@@ -210,6 +222,11 @@ const sk: Dictionary = {
       error: "Niečo sa pokazilo. Napíšte nám, prosím, priamo e-mail.",
       consent: "Odoslaním formulára súhlasíte so spracovaním údajov na účely vybavenia dopytu.",
     },
+  },
+  notFound: {
+    title: "Page not found",
+    body: "The page you are looking for does not exist or has moved.",
+    home: "Back to the homepage",
   },
   footer: {
     company: "KTechnology s.r.o.",

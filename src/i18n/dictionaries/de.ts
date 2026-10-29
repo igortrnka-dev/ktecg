@@ -16,6 +16,9 @@ const de: Dictionary = {
     cta: "Fachkräfte anfragen",
     language: "Sprache",
     menu: "Menü",
+    mainNav: "Main navigation",
+    skip: "Skip to content",
+    ctaShort: "Get a quote",
   },
   hero: {
     eyebrow: "Arbeitnehmerüberlassung für die Industrie · Europa & weltweit",
@@ -153,7 +156,7 @@ const de: Dictionary = {
     label: "Einsatzgebiete",
     title: "Sitz in der Slowakei, im Einsatz auf Baustellen in ganz Europa und darüber hinaus",
     countries: [
-      "Deutschland", "Österreich", "Schweiz", "Schweden", "Norwegen", "Finnland", "Dänemark",
+      "Deutschland", "Österreich", "Schweden", "Norwegen", "Finnland", "Dänemark",
       "Niederlande", "Belgien", "Frankreich", "Polen", "Tschechien", "Slowakei", "VAE",
     ],
   },
@@ -201,7 +204,16 @@ const de: Dictionary = {
       phone: "Telefon",
       country: "Projektland",
       positions: "Benötigte Positionen (z. B. 6× WIG-Schweißer)",
-      headcount: "Anzahl",
+      duration: "Duration (e.g. 6 weeks)",
+      shift: "Shift pattern",
+      shifts: {
+        unsure: "Not sure yet",
+        single: "1 shift",
+        double: "2 shifts",
+        triple: "3 shifts",
+        rotation: "12-hour rotation",
+      },
+      required: "* Required fields",
       start: "Geplanter Start",
       message: "Projektdetails",
       submit: "Anfrage senden",
@@ -210,6 +222,11 @@ const de: Dictionary = {
       error: "Etwas ist schiefgelaufen. Bitte schreiben Sie uns direkt eine E-Mail.",
       consent: "Mit dem Absenden stimmen Sie zu, dass wir Ihre Daten zur Bearbeitung Ihrer Anfrage verarbeiten.",
     },
+  },
+  notFound: {
+    title: "Page not found",
+    body: "The page you are looking for does not exist or has moved.",
+    home: "Back to the homepage",
   },
   footer: {
     company: "KTechnology s.r.o.",

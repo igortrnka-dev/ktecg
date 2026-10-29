@@ -16,6 +16,9 @@ const pl: Dictionary = {
     cta: "Zamów pracowników",
     language: "Język",
     menu: "Menu",
+    mainNav: "Main navigation",
+    skip: "Skip to content",
+    ctaShort: "Get a quote",
   },
   hero: {
     eyebrow: "Leasing pracowników dla przemysłu · Europa i świat",
@@ -153,7 +156,7 @@ const pl: Dictionary = {
     label: "Gdzie działamy",
     title: "Siedziba na Słowacji, praca na budowach w całej Europie i poza nią",
     countries: [
-      "Niemcy", "Austria", "Szwajcaria", "Szwecja", "Norwegia", "Finlandia", "Dania",
+      "Niemcy", "Austria", "Szwecja", "Norwegia", "Finlandia", "Dania",
       "Holandia", "Belgia", "Francja", "Polska", "Czechy", "Słowacja", "ZEA",
     ],
   },
@@ -201,7 +204,16 @@ const pl: Dictionary = {
       phone: "Telefon",
       country: "Kraj projektu",
       positions: "Potrzebne stanowiska (np. 6× spawacz TIG)",
-      headcount: "Liczba osób",
+      duration: "Duration (e.g. 6 weeks)",
+      shift: "Shift pattern",
+      shifts: {
+        unsure: "Not sure yet",
+        single: "1 shift",
+        double: "2 shifts",
+        triple: "3 shifts",
+        rotation: "12-hour rotation",
+      },
+      required: "* Required fields",
       start: "Planowany start",
       message: "Szczegóły projektu",
       submit: "Wyślij zapytanie",
@@ -210,6 +222,11 @@ const pl: Dictionary = {
       error: "Coś poszło nie tak. Napisz do nas bezpośrednio e-mail.",
       consent: "Wysyłając formularz, zgadzasz się na przetwarzanie danych w celu odpowiedzi na zapytanie.",
     },
+  },
+  notFound: {
+    title: "Page not found",
+    body: "The page you are looking for does not exist or has moved.",
+    home: "Back to the homepage",
   },
   footer: {
     company: "KTechnology s.r.o.",
