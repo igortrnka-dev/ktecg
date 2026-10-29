@@ -39,8 +39,11 @@ const digitsOf = (s: string) => s.replace(/\D/g, "");
  * "+49 (0) 375 555-0140" and "0049 375 5550140" → "+493755550140"; "0375 5550140" and "(0)375 5550140" → "03755550140".
  */
 const phoneDigits = (phone: string) => {
-  const p = phone.trim();
-  return /^(\+|00)/.test(p) ? `+${digitsOf(p.replace(/\(\s*0\s*\)/g, "")).replace(/^00/, "")}` : digitsOf(p);
+  // From the first digit or "+": a label ("Tel."), a bracket ("(+49)") or the invisible marks of a copied number come off.
+  const p = phone.normalize("NFKC").replace(/^[^\d+]+/, "");
+  // "(0)" after 1–3 digits follows a country code written without "+" ("49 (0) 375 …").
+  const international = /^(\+|00)/.test(p) || /^\d{1,3}\s*\(\s*0\s*\)/.test(p);
+  return international ? `+${digitsOf(p.replace(/\(\s*0\s*\)/g, "")).replace(/^00/, "")}` : digitsOf(p);
 };
 /** "https://www.linkedin.com/in/thomas-weidner-123/" → "thomas-weidner-123". */
 const linkedinSlug = (url: string) => url.match(/linkedin\.com\/in\/([^/?#\s]+)/i)?.[1]?.toLowerCase() ?? "";
@@ -116,7 +119,7 @@ const PREFIX = `(?:\\+|00)${SEP}`;
 /**
  * Matches a phone number with the usual separators between its digits ("+49 375 555-0140", "0049 (375) 5550140"),
  * also written the other way: an international number nationally ("0375 5550140", "375 5550140") and a national one with a
- * country code. Separators before the number only count after + or 00, so the text around it keeps its spaces;
+ * country code or without its trunk 0. Separators before the number only count after + or 00, so the text around it keeps its spaces;
  * an attached extension ("…0140-12") goes with the number.
  */
 function phonePattern(phone: string) {
@@ -132,6 +135,8 @@ function phonePattern(phone: string) {
     }
   } else if (/^0[1-9]/.test(phone)) {
     forms.push(join(phone), `${PREFIX}\\d{1,3}${SEP}${join(phone.slice(1))}`);
+    // Without the trunk 0 ("664 1234567"), as the international form reads with its country code left out.
+    if (phone.length - 1 >= 9) forms.push(join(phone.slice(1)));
   } else {
     forms.push(`(?:${PREFIX})?${join(phone)}`);
   }
