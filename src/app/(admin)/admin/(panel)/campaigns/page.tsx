@@ -1,4 +1,6 @@
+import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/supabase/admin";
+import { closeStaleRuns } from "@/lib/ai/prospect";
 import { fmtDate } from "@/components/admin/ui";
 import SubmitButton from "@/components/admin/SubmitButton";
 import AutoRefresh from "@/components/admin/AutoRefresh";
@@ -36,12 +38,17 @@ function CampaignForm({ c }: { c?: Campaign }) {
   );
 }
 
-export default async function Campaigns() {
+export default async function Campaigns({ searchParams }: { searchParams: Promise<{ busy?: string }> }) {
+  await requireAdmin();
+  const { busy } = await searchParams;
+  // Otherwise a run cut off by a restart would keep this page polling until the next run starts.
+  await closeStaleRuns();
   const [{ data: campaigns }, { data: runs }] = await Promise.all([
     db().from("campaigns").select("*").order("created_at", { ascending: false }),
     db().from("lead_runs").select("*, campaigns(name)").order("started_at", { ascending: false }).limit(15),
   ]);
   const running = (runs ?? []).some((r) => r.status === "running");
+  const isRunning = (campaignId: string) => (runs ?? []).some((r) => r.campaign_id === campaignId && r.status === "running");
 
   return (
     <>
@@ -70,6 +77,9 @@ export default async function Campaigns() {
                   </form>
                 </div>
               </div>
+              {busy === c.id && isRunning(c.id) && (
+                <p className="notice" role="status" style={{ marginBottom: 10 }}>Táto kampaň už beží. Nový beh môžete spustiť, keď sa aktuálny dokončí.</p>
+              )}
               <p className="muted small">Posledný beh: {fmtDate(c.last_run_at)}</p>
               <details>
                 <summary className="linkbtn">Upraviť</summary>

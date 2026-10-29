@@ -51,23 +51,36 @@ export async function webResearch(opts: {
   throw new Error("Web research did not finish.");
 }
 
-/** Turns free text into data matching a Zod schema using structured outputs. */
+/**
+ * Turns free text into data matching a Zod schema using structured outputs. Streamed, because a
+ * batch of up to 30 leads plus thinking needs a large max_tokens.
+ */
 export async function extract<T extends z.ZodType>(opts: {
   system: string;
   prompt: string;
   schema: T;
   usage: Usage;
 }): Promise<z.infer<T>> {
-  const response = await anthropic().beta.messages.parse({
+  // Sent without the helper's parse() so the stream does not throw on a cut-off answer
+  // before the stop reason can be checked; the answer is parsed below instead.
+  const { parse, ...format } = betaZodOutputFormat(opts.schema);
+  const stream = anthropic().beta.messages.stream({
     model: MODEL,
-    max_tokens: 32000,
+    max_tokens: 64000,
     ...FALLBACK,
-    output_config: { effort: "medium", format: betaZodOutputFormat(opts.schema) },
+    output_config: { effort: "medium", format },
     system: opts.system,
     messages: [{ role: "user", content: opts.prompt }],
   });
-  addUsage(opts.usage, response.usage);
-  if (response.stop_reason === "refusal") throw new Error("Claude declined this request.");
-  if (!response.parsed_output) throw new Error(`Could not parse Claude's answer (stop_reason: ${response.stop_reason}).`);
-  return response.parsed_output as z.infer<T>;
+  const message = await stream.finalMessage();
+  addUsage(opts.usage, message.usage);
+  if (message.stop_reason === "refusal") throw new Error("Claude declined this request.");
+  if (message.stop_reason === "max_tokens") throw new Error("Claude's answer hit the output limit before it was complete.");
+  // After a mid-stream fallback the answer continues in a second text block, so join them.
+  const text = message.content
+    .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+  if (!text) throw new Error(`Claude returned no answer (stop_reason: ${message.stop_reason}).`);
+  return parse(text) as z.infer<T>;
 }

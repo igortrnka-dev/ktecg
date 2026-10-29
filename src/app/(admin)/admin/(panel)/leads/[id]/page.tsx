@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/supabase/admin";
 import { Score, Status, STATUSES, statusLabel, sourceLabel, fmtDate } from "@/components/admin/ui";
 import SubmitButton from "@/components/admin/SubmitButton";
@@ -11,6 +12,7 @@ type Contact = { name: string; role: string; email: string; phone: string; linke
 const LANGS = ["en", "de", "fr", "sv", "sk", "cs", "pl", "nl", "da", "no", "fi", "it", "es", "hu"];
 
 export default async function LeadDetail({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin();
   const { id } = await params;
   const [{ data: lead }, { data: events }] = await Promise.all([
     db().from("leads").select("*, campaigns(name)").eq("id", id).single(),
