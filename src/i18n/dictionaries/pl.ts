@@ -4,7 +4,7 @@ const pl: Dictionary = {
   meta: {
     title: "KTechnology — Leasing pracowników dla przemysłu: spawacze, monterzy, elektrycy",
     description:
-      "KTechnology s.r.o. zapewnia leasing certyfikowanych spawaczy, monterów rurociągów, elektryków, mechaników i operatorów do projektów przemysłowych w Europie i na świecie. Sprawdzone umiejętności, A1, dojazd i zakwaterowanie po naszej stronie, zespół na miejscu w ciągu około 14 dni.",
+      "KTechnology s.r.o. zapewnia leasing spawaczy, monterów rurociągów, elektryków, mechaników i operatorów o sprawdzonych umiejętnościach do projektów przemysłowych w Europie i na świecie. A1, dojazd i zakwaterowanie po naszej stronie, zespół na miejscu w ciągu około 14 dni.",
   },
   nav: {
     services: "Usługi",
@@ -21,8 +21,8 @@ const pl: Dictionary = {
     ctaShort: "Wycena",
   },
   hero: {
-    eyebrow: "Leasing pracowników dla przemysłu · Europa i świat",
-    title: "Wykwalifikowani spawacze, monterzy i elektrycy na miejscu w ciągu około 14 dni",
+    eyebrow: "Leasing pracowników dla przemysłu\u00a0· Europa i świat",
+    title: "Wykwalifikowani spawacze, monterzy i elektrycy na miejscu w ciągu około 14\u00a0dni",
     lead:
       "W ramach leasingu pracowników zapewniamy sprawdzonych fachowców producentom, wykonawcom i firmom EPC w całej Europie. Zajmujemy się umowami, zaświadczeniami A1 lub zezwoleniami na pracę, ubezpieczeniem, dojazdem i zakwaterowaniem. Jedna osoba kontaktowa, jedna faktura.",
     primary: "Zamów pracowników",
@@ -30,7 +30,7 @@ const pl: Dictionary = {
     facts: [
       { k: "Zawody", v: "Spawacze, monterzy, elektrycy, mechanicy, operatorzy" },
       { k: "Gdzie", v: "Niemcy, Austria, kraje nordyckie, Beneluks, Francja, PL/CZ/SK, ZEA" },
-      { k: "Czas", v: "Zespół na miejscu w ciągu około 14 dni" },
+      { k: "Czas", v: "Wycena w ciągu 1\u00a0dnia roboczego, zespół na miejscu w ciągu ok.\u00a014\u00a0dni" },
       { k: "W cenie", v: "A1 i zezwolenia, dojazd, zakwaterowanie, koordynator" },
     ],
     card: {
@@ -43,9 +43,9 @@ const pl: Dictionary = {
       ],
       meta: [
         { k: "Projekt", v: "Postój remontowy" },
-        { k: "Start", v: "za ~14 dni" },
+        { k: "Start", v: "za ~14\u00a0dni" },
       ],
-      status: "Zespół w przygotowaniu",
+      status: "Kompletujemy zespół",
     },
   },
   services: {
@@ -146,7 +146,7 @@ const pl: Dictionary = {
     label: "Dlaczego KTechnology",
     title: "Partner, który zapewnia ludzi, a nie tylko CV",
     items: [
-      { title: "Wszystko u jednego partnera", body: "Rekrutacja, dokumenty, dojazd, zakwaterowanie i wsparcie na miejscu od jednej osoby kontaktowej." },
+      { title: "Wszystko u jednego partnera", body: "Rekrutacja, dokumenty, dojazd, zakwaterowanie i wsparcie na miejscu – wszystko przez jedną osobę kontaktową." },
       { title: "Sprawdzeni przed wyjazdem", body: "Każdy specjalista przechodzi test praktyczny, dzięki czemu unikają Państwo niespodzianek w harmonogramie." },
       { title: "Elastyczna obsada", body: "Zespół można powiększyć na czas postoju lub zwiększenia produkcji i zmniejszyć po zakończeniu projektu." },
       { title: "Szybka wymiana", body: "Jeśli ktoś nie spełnia Państwa wymagań, szybko go wymienimy." },
@@ -194,32 +194,32 @@ const pl: Dictionary = {
     label: "Kontakt",
     title: "Kogo Państwo potrzebują?",
     body: "Po otrzymaniu zapytania koordynator projektu odpowie w ciągu jednego dnia roboczego, podając dostępność pracowników i wycenę.",
-    emailLabel: "Lub bezpośrednio e-mailem",
+    emailLabel: "Lub bezpośrednio e-\u2060mailem",
     tipsTitle: "Warto podać",
-    tips: ["Zawody i liczbę osób", "Lokalizację projektu i datę rozpoczęcia", "Przewidywany czas trwania i system zmianowy"],
+    tips: ["Lokalizację (miasto) i godziny pracy", "Wymagane certyfikaty, np.\u00a0metodę spawania i normę", "Język roboczy i wymagane szkolenia BHP"],
     form: {
       company: "Firma",
       name: "Imię i nazwisko",
       email: "E-mail",
       phone: "Telefon",
       country: "Kraj projektu",
-      positions: "Potrzebne stanowiska (np. 6× spawacz TIG)",
-      duration: "Czas trwania (np. 6 tygodni)",
+      positions: "Potrzebne stanowiska (np.\u00a06×\u00a0spawacz TIG)",
+      duration: "Okres (np.\u00a06\u00a0tygodni)",
       shift: "System zmianowy",
       shifts: {
         unsure: "Do ustalenia",
         single: "1 zmiana",
         double: "2 zmiany",
         triple: "3 zmiany",
-        rotation: "Zmiany 12-godzinne",
+        rotation: "Zmiany po 12\u00a0h",
       },
       required: "* Pola obowiązkowe",
       start: "Planowany start",
       message: "Szczegóły projektu",
       submit: "Wyślij zapytanie",
       sending: "Wysyłanie…",
-      success: "Dziękujemy. Otrzymaliśmy zapytanie i wkrótce się odezwiemy.",
-      error: "Coś poszło nie tak. Prosimy napisać do nas bezpośrednio e-mailem.",
+      success: "Dziękujemy. Koordynator projektu odpowie w ciągu jednego dnia roboczego, podając dostępność pracowników i wycenę.",
+      error: "Nie udało się wysłać zapytania. Wprowadzone dane pozostały w formularzu – prosimy przesłać je e-\u2060mailem na adres:",
       consent: "Państwa dane wykorzystujemy wyłącznie w celu odpowiedzi na zapytanie i przygotowania wyceny.",
     },
   },
