@@ -5,6 +5,7 @@ import { RunStatus, fmtDate } from "@/components/admin/ui";
 import Icon from "@/components/admin/Icon";
 import SubmitButton from "@/components/admin/SubmitButton";
 import AutoRefresh from "@/components/admin/AutoRefresh";
+import { plural } from "@/lib/plural";
 import { deleteCampaign, runCampaign, saveCampaign } from "../../actions";
 
 type Campaign = {
@@ -14,6 +15,8 @@ type Campaign = {
 
 const LANGS = ["auto", "en", "de", "fr", "sv", "sk", "cs", "pl", "nl", "da", "no", "fi"];
 
+// The select and the checkbox are keyed by the saved value: React applies defaultValue/defaultChecked only
+// when they mount, so after a save the form reset would otherwise bring back the value from page load.
 function CampaignForm({ c }: { c?: Campaign }) {
   return (
     <form action={saveCampaign} className="stack">
@@ -27,12 +30,12 @@ function CampaignForm({ c }: { c?: Campaign }) {
       <label className="afield"><span>Ďalšie pokyny pre Claude (nepovinné)</span><textarea name="notes" rows={2} defaultValue={c?.notes} placeholder="napr. firmy so 100–2000 zamestnancami, vynechaj personálne agentúry" /></label>
       <div className="row3">
         <label className="afield"><span>Jazyk e-mailov</span>
-          <select name="outreach_language" defaultValue={c?.outreach_language ?? "auto"}>
+          <select key={c?.outreach_language ?? "auto"} name="outreach_language" defaultValue={c?.outreach_language ?? "auto"}>
             {LANGS.map((l) => <option key={l} value={l}>{l === "auto" ? "Podľa krajiny" : l.toUpperCase()}</option>)}
           </select>
         </label>
         <label className="afield"><span>Firiem na jedno hľadanie</span><input name="leads_per_run" type="number" min={1} max={30} defaultValue={c?.leads_per_run ?? 10} /></label>
-        <label className="check"><input type="checkbox" name="active" defaultChecked={c?.active ?? true} /> Hľadať automaticky každý deň</label>
+        <label className="check"><input key={String(c?.active ?? true)} type="checkbox" name="active" defaultChecked={c?.active ?? true} /> Hľadať automaticky každý deň</label>
       </div>
       <div className="actions">
         <SubmitButton className="abtn abtn--primary" pending="Ukladám…">{c ? "Uložiť zmeny" : "Vytvoriť kampaň"}</SubmitButton>
@@ -40,6 +43,8 @@ function CampaignForm({ c }: { c?: Campaign }) {
     </form>
   );
 }
+
+const searches = (n: number) => `${n} ${plural(n, "vyhľadávanie", "vyhľadávania", "vyhľadávaní")} na webe`;
 
 const list = (items: string[]) => (items.length ? items.join(", ") : <span className="muted">neuvedené</span>);
 
@@ -106,7 +111,13 @@ export default async function Campaigns({ searchParams }: { searchParams: Promis
               <div className="card__foot">
                 <form action={deleteCampaign}>
                   <input type="hidden" name="id" value={c.id} />
-                  <SubmitButton className="abtn abtn--ghost abtn--small abtn--danger" pending="Mažem…"><Icon name="trash" size={14} />Zmazať kampaň</SubmitButton>
+                  <SubmitButton
+                    className="abtn abtn--ghost abtn--small abtn--danger"
+                    pending="Mažem…"
+                    confirm={`Naozaj zmazať kampaň „${c.name}“? Nájdené leady a história hľadaní ostanú. Zmazanie sa nedá vrátiť.`}
+                  >
+                    <Icon name="trash" size={14} />Zmazať kampaň
+                  </SubmitButton>
                 </form>
               </div>
             </section>
@@ -137,7 +148,7 @@ export default async function Campaigns({ searchParams }: { searchParams: Promis
                     <strong>{r.campaigns?.name ?? "Kampaň bola zmazaná"}</strong>
                     <RunStatus status={r.status} created={r.created} />
                   </div>
-                  <span className="muted small">{fmtDate(r.started_at)} · {r.trigger === "cron" ? "automaticky" : "ručne"} · {r.usage?.web_searches ?? 0} vyhľadávaní na webe</span>
+                  <span className="muted small">{fmtDate(r.started_at)} · {r.trigger === "cron" ? "automaticky" : "ručne"} · {searches(r.usage?.web_searches ?? 0)}</span>
                   {r.error && <p className="error small">{r.error}</p>}
                   {r.log && (
                     <details className="more">

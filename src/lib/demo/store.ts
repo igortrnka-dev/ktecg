@@ -84,6 +84,18 @@ function project(row: Row, cols: string): Row {
   return structuredClone(out);
 }
 
+/** jsonb containment: every element or key of `needle` is found in `value` (arrays match in any order). */
+function jsonContains(value: unknown, needle: unknown): boolean {
+  if (Array.isArray(needle)) {
+    return Array.isArray(value) && needle.every((n) => value.some((v) => jsonContains(v, n)));
+  }
+  if (needle !== null && typeof needle === "object") {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+    return Object.entries(needle).every(([k, n]) => jsonContains((value as Row)[k], n));
+  }
+  return value === needle;
+}
+
 type Order = { col: string; asc: boolean; nullsFirst: boolean };
 function sorted(rows: Row[], orders: Order[]): Row[] {
   return [...rows].sort((a, b) => {
@@ -182,8 +194,10 @@ class Query implements PromiseLike<Result> {
   lt(col: string, value: unknown) {
     return this.where((r) => r[col] != null && r[col] < (value as string));
   }
-  contains(col: string, values: unknown[]) {
-    return this.where((r) => Array.isArray(r[col]) && values.every((v) => r[col].includes(v)));
+  /** Postgres `@>`; a jsonb value comes as JSON text, e.g. contains("contacts", '[{"email":"a@b.example"}]'). */
+  contains(col: string, value: unknown) {
+    const needle = typeof value === "string" ? JSON.parse(value) : value;
+    return this.where((r) => jsonContains(r[col], needle));
   }
   order(col: string, opts?: { ascending?: boolean; nullsFirst?: boolean }) {
     const asc = opts?.ascending ?? true;

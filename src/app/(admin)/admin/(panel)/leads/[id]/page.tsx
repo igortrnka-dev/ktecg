@@ -5,7 +5,8 @@ import { db } from "@/lib/supabase/admin";
 import { Due, Score, Status, STATUSES, statusLabel, sourceLabel, fmtDate, fmtDay } from "@/components/admin/ui";
 import SubmitButton from "@/components/admin/SubmitButton";
 import Icon from "@/components/admin/Icon";
-import { enrich, logContacted, rewriteOutreach, updateLead } from "../../../actions";
+import { plural } from "@/lib/plural";
+import { deleteLead, enrich, logContacted, rewriteOutreach, updateLead } from "../../../actions";
 
 type Signal = { type: string; detail: string; url: string };
 type Contact = { name: string; role: string; email: string; phone: string; linkedin: string };
@@ -36,12 +37,20 @@ function eventBody(type: string, body: string) {
   return body.split(" → ").map((s) => statusLabel[s] ?? s).join(" → ");
 }
 
-export default async function LeadDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function LeadDetail({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ existing?: string }>;
+}) {
   await requireAdmin();
   const { id } = await params;
-  const [{ data: lead }, { data: events }] = await Promise.all([
+  const { existing } = await searchParams;
+  const [{ data: lead }, { data: events }, { count: inquiryCount }] = await Promise.all([
     db().from("leads").select("*, campaigns(name)").eq("id", id).single(),
     db().from("lead_events").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
+    db().from("inquiries").select("id", { count: "exact", head: true }).eq("lead_id", id),
   ]);
   if (!lead) notFound();
 
@@ -49,8 +58,18 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
   const contacts = (lead.contacts ?? []) as Contact[];
   const mailTo = contacts.find((c) => c.email)?.email ?? "";
   const mailHref = `mailto:${mailTo}?subject=${encodeURIComponent(lead.outreach_subject ?? "")}&body=${encodeURIComponent(lead.outreach_body ?? "")}`;
-  const site = lead.website ? (lead.website.startsWith("http") ? lead.website : `https://${lead.website}`) : null;
+  // Inbound leads only have the domain of the sender's e-mail.
+  const website = lead.website || (lead.domain ? `https://${lead.domain}` : null);
+  const site = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
   const place = [lead.city, lead.country].filter(Boolean).join(", ");
+  const eventCount = (events ?? []).length;
+  const inquiries = inquiryCount ?? 0;
+  const deleteConfirm = [
+    `Naozaj zmazať lead „${lead.company_name}“?`,
+    `Zmaže sa lead s kontaktmi a signálmi, jeho história (${eventCount} ${plural(eventCount, "záznam", "záznamy", "záznamov")})` +
+      (inquiries ? ` a ${inquiries} ${plural(inquiries, "priradený dopyt", "priradené dopyty", "priradených dopytov")} z webu.` : "."),
+    "Zmazanie sa nedá vrátiť.",
+  ].join(" ");
 
   return (
     <>
@@ -78,6 +97,12 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
           </form>
         </div>
       </header>
+
+      {existing && (
+        <p className="notice notice--info page-notice" role="status">
+          Firma s doménou {lead.domain ?? lead.website} už v zozname je – otvorili sme existujúci lead.
+        </p>
+      )}
 
       <div className="grid-detail">
         <div className="stack">
@@ -165,7 +190,9 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
             <div className="card__body">
               <label className="afield">
                 <span>Stav</span>
-                <select name="status" defaultValue={lead.status}>
+                {/* Keyed by the saved status: React applies defaultValue only on mount, so after a save or
+                    "Označiť ako oslovený" the form reset would bring back the old status and the next save would write it. */}
+                <select key={lead.status} name="status" defaultValue={lead.status}>
                   {STATUSES.map((s) => <option key={s} value={s}>{statusLabel[s]}</option>)}
                 </select>
               </label>
@@ -209,7 +236,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
               <div className="row2">
                 <label className="afield">
                   <span>Jazyk</span>
-                  <select name="language" defaultValue={lead.outreach_language ?? "en"}>
+                  <select key={lead.outreach_language ?? "en"} name="language" defaultValue={lead.outreach_language ?? "en"}>
                     {LANGS.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
                   </select>
                 </label>
@@ -218,6 +245,21 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
             </div>
             <div className="card__foot">
               <SubmitButton pending="Claude píše…"><Icon name="pen" />Napísať znova</SubmitButton>
+            </div>
+          </form>
+
+          <form action={deleteLead} className="card card--danger">
+            <input type="hidden" name="id" value={lead.id} />
+            <div className="card__head">
+              <div>
+                <h2>Zmazať lead</h2>
+                <p>Pri spame, testovacom zázname alebo žiadosti o vymazanie údajov. Zmaže lead, jeho históriu a priradené dopyty z webu.</p>
+              </div>
+            </div>
+            <div className="card__foot">
+              <SubmitButton className="abtn abtn--danger" pending="Mažem…" confirm={deleteConfirm}>
+                <Icon name="trash" />Zmazať lead
+              </SubmitButton>
             </div>
           </form>
         </div>

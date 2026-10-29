@@ -13,13 +13,18 @@ admin that uses Claude to find, qualify and draft outreach to sales leads.
   - *AI prospecting*: campaigns (countries, industries, roles). Claude searches the web for buying signals
     (job ads, expansions, project wins, outages), returns structured, scored leads with a personalised first e-mail.
     Active campaigns also run daily via the Render cron job.
-  - *Nastavenia*: the company profile / ideal-customer text Claude works from.
+  - *Nastavenia*: the company profile / ideal-customer text Claude works from. Claude is told to use only
+    the facts in it. 0001_init.sql seeds it once, so a project that ran an older 0001 still has the old
+    default text (it mentioned Switzerland, the UK, "certified" welders and engagement sizes): edit it in
+    *Nastavenia* to match what the website says.
 
 Stack: Next.js 15 (App Router), Supabase (Postgres + Auth), Anthropic API (`claude-opus-5-5` with web search), Render.
 
 ## Setup
 
-1. **Supabase** – create a project, then run `supabase/migrations/0001_init.sql` in the SQL editor.
+1. **Supabase** – create a project, then run `supabase/migrations/0001_init.sql` and then
+   `supabase/migrations/0002_inquiry_duration_shift.sql` in the SQL editor. 0002 is safe to run again; a
+   project set up with an older 0001 needs it, or every website inquiry fails.
    In *Authentication → Users* add the admin user(s) with a password and tick *Auto Confirm User*
    (the admin only accepts confirmed e-mails listed in `ADMIN_EMAILS`).
    Then in *Authentication → Sign In / Providers* turn off *Allow new users to sign up* (it is on by default)
@@ -40,4 +45,7 @@ prospecting cron job. Fill in the env vars marked `sync: false` in the Render da
   (`src/components/site/Art.tsx`, `.portrait` in `site.css`) when available.
 - AI runs cost API credits: each prospecting run uses up to ~25 web searches plus two Claude calls.
   A campaign runs at most once at a time. Runs live in the web server process, so a run cut off by a
-  restart or deploy is marked failed ("interrupted") after an hour; its research notes stay in the run log.
+  restart or deploy is marked failed ("Beh sa prerušil") after an hour; its research notes stay in the run log.
+- The inquiry endpoint takes at most 5 requests per 10 minutes per visitor address (CF-Connecting-IP, which
+  Render's Cloudflare edge sets), 5 inquiries per 10 minutes per sender company domain (the whole address
+  for free-mail) and 30 inquiries per 10 minutes in total; over a limit it answers 429.

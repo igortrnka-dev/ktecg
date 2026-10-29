@@ -6,7 +6,7 @@ import { qualifyInquiry } from "@/lib/ai/leads";
 import { linkInquiry, SHIFT_PATTERNS, type InquiryRow } from "@/lib/inquiries";
 import { isDemo, simulateAi } from "@/lib/demo/mode";
 import { simulateInquiry } from "@/lib/demo/ai";
-import { clientIp, rateLimited, readBody } from "./guard";
+import { inquiryLimited, ipLimited, readBody } from "./guard";
 
 const MAX_BODY = 20 * 1024;
 
@@ -48,10 +48,9 @@ async function inquiriesToday(): Promise<number> {
 
 export async function POST(request: Request) {
   const tooLarge = () => NextResponse.json({ error: "too_large" }, { status: 413 });
+  const tooMany = () => NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { "retry-after": "600" } });
   if (Number(request.headers.get("content-length")) > MAX_BODY) return tooLarge();
-  if (rateLimited(clientIp(request))) {
-    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { "retry-after": "600" } });
-  }
+  if (ipLimited(request)) return tooMany();
   const body = await readBody(request, MAX_BODY);
   if (body === null) return tooLarge();
 
@@ -59,6 +58,8 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const { website, ...data } = parsed.data;
   if (website) return NextResponse.json({ ok: true }); // bot
+  // Counted only for inquiries that would be saved, so typos and bots do not use up a sender's quota.
+  if (inquiryLimited(data.email)) return tooMany();
 
   if (!supabaseConfigured() && !isDemo()) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 

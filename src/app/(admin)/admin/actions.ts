@@ -63,7 +63,7 @@ export async function saveCampaign(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id") ?? "");
   const row = {
-    name: String(form.get("name") || "Untitled campaign"),
+    name: String(form.get("name") || "Kampaň bez názvu"),
     countries: list(form.get("countries")),
     industries: list(form.get("industries")),
     roles: list(form.get("roles")),
@@ -135,13 +135,26 @@ export async function addLead(form: FormData) {
     })
     .select("id")
     .single();
-  // The domain is unique: open the lead we already have instead of failing.
+  // The domain is unique: open the lead we already have (the page says so) instead of failing.
   if (error?.code === "23505" && domain) {
     const { data: existing } = await db().from("leads").select("id").eq("domain", domain).maybeSingle();
-    if (existing) redirect(`/admin/leads/${existing.id}`);
+    if (existing) redirect(`/admin/leads/${existing.id}?existing=1`);
   }
   if (error || !data) throw new Error(error?.message ?? "Lead sa nepodarilo uložiť.");
   redirect(`/admin/leads/${data.id}`);
+}
+
+/** Deletes a lead with its history and the website inquiries linked to it (spam, test records, erasure requests). */
+export async function deleteLead(form: FormData) {
+  await requireAdmin();
+  const id = String(form.get("id"));
+  const { data: lead } = await db().from("leads").select("company_name").eq("id", id).maybeSingle();
+  if (!lead) redirect("/admin/leads");
+  check(await db().from("inquiries").delete().eq("lead_id", id));
+  check(await db().from("lead_events").delete().eq("lead_id", id));
+  check(await db().from("leads").delete().eq("id", id));
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/leads?deleted=${encodeURIComponent(lead.company_name)}`);
 }
 
 export async function enrich(form: FormData) {

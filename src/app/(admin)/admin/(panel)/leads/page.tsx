@@ -6,7 +6,7 @@ import Icon from "@/components/admin/Icon";
 import { addLead } from "../../actions";
 import SubmitButton from "@/components/admin/SubmitButton";
 
-type Search = { status?: string; tier?: string; source?: string; q?: string; page?: string };
+type Search = { status?: string; tier?: string; source?: string; q?: string; page?: string; deleted?: string };
 
 const PAGE_SIZE = 50;
 
@@ -58,8 +58,16 @@ export default async function Leads({ searchParams }: { searchParams: Promise<Se
         </details>
       </header>
 
+      {sp.deleted !== undefined && (
+        <p className="notice notice--info page-notice" role="status">
+          Lead {sp.deleted ? `„${sp.deleted}“ ` : ""}bol zmazaný spolu s históriou a dopytmi z webu.
+        </p>
+      )}
+
       <div className="card">
-        <form className="toolbar" role="search">
+        {/* Keyed by the filters: React applies defaultValue only on mount, so "Zrušiť filter" or the menu link
+            would otherwise leave the old filter in the selects. */}
+        <form key={pageHref(1)} className="toolbar" role="search">
           <label className="search">
             <span className="sr-only">Hľadať firmu</span>
             <Icon name="search" />

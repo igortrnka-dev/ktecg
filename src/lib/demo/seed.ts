@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { AI_ERROR } from "../ai/errors";
+import { runLog } from "../ai/runlog";
 
 /*
  * Sample data for the local admin preview. Every company is fictional and uses the
@@ -15,9 +17,13 @@ const day = (offset: number) => new Date(Date.now() + offset * 24 * HOUR).toISOS
 const signal = (type: string, detail: string, url = "") => ({ type, detail, url });
 const contact = (name: string, role: string, email = "", phone = "", linkedin = "") => ({ name, role, email, phone, linkedin });
 
-const COMPANY_PROFILE = `KTechnology s.r.o. (Slovakia) provides industrial staff leasing worldwide: certified welders (MIG/MAG, TIG), pipe fitters, steel fitters, mechanics, electricians, PLC/automation technicians, CNC operators and production/logistics operators. We handle recruiting, practical skills tests, certifications, contracts, A1 / work permits, travel and accommodation, plus an on-site coordinator. Typical engagements: 3–40 people for 1–12 months, plant ramp-ups, outages/shutdowns, shipyard and steel-structure projects.
+const COMPANY_PROFILE = `KTechnology s.r.o. (based in Slovakia) provides industrial staff leasing for projects across Europe and worldwide. We deploy to Germany, Austria, the Nordics (Sweden, Norway, Finland, Denmark), Benelux, France, Poland, Czechia, Slovakia and the UAE.
 
-Ideal customers: manufacturers, EPC and installation contractors, shipyards, energy/power plants and their subcontractors, automotive suppliers, mid-size to large (50+ employees), in the EU/EEA, Switzerland, UK, Nordics and the Middle East, who are struggling to hire skilled blue-collar staff.
+Trades: welders (MIG/MAG, TIG, MMA; steel and stainless), pipe fitters, steel fitters, industrial electricians, automation technicians (PLC), mechanics and millwrights, CNC and machine operators, assembly operators and logistics operators. Every worker passes a practical skills test before deployment.
+
+We handle recruiting, employment contracts, A1 forms and work permits, insurance, travel and accommodation, plus a project coordinator and fast replacement. The customer gets one contact and one invoice.
+
+Ideal customers: manufacturers, automotive suppliers, metalworking companies, energy and power plants (outages and shutdowns), shipyards and offshore, electrical and automation contractors, EPC and installation contractors, mid-size and larger, in the countries above, who struggle to hire skilled blue-collar staff.
 
 Strong buying signals: many open job ads for skilled trades, new plant/line/expansion announcements, large project wins or contracts, planned outages/shutdowns, labour-shortage statements, subcontracting tenders.`;
 
@@ -158,7 +164,7 @@ export function seed(): Record<string, Row[]> {
     status: "done",
     found,
     created,
-    log: `Researching: ${campaigns.find((c) => c.id === campaign)!.name}\nResearch done (${found * 3 + 4} searches). Qualifying…\nSaved ${created} new leads of ${found} found.`,
+    log: [runLog.researching(campaigns.find((c) => c.id === campaign)!.name), runLog.researched(found * 3 + 4), runLog.saved(created, found)].join("\n"),
     error: null,
     usage: { web_searches: found * 3 + 4 },
     started_at: ago(0, startedAgo),
@@ -172,8 +178,8 @@ export function seed(): Record<string, Row[]> {
     run(de, "manual", 26, 0, 0, {
       status: "failed",
       found: 0,
-      log: "Researching: Zvárači – Nemecko a Rakúsko, automotive\nFailed: Anthropic API overloaded (529). Try again later.",
-      error: "Anthropic API overloaded (529). Try again later.",
+      log: [runLog.researching("Zvárači – Nemecko a Rakúsko, automotive"), runLog.failed(AI_ERROR.overloaded)].join("\n"),
+      error: AI_ERROR.overloaded,
       usage: { web_searches: 6 },
     }),
     run(de, "cron", 9, 5, 4),
@@ -210,7 +216,7 @@ export function seed(): Record<string, Row[]> {
       next_action: "Zavolať T. Weidnerovi",
       next_action_at: day(0),
       created_at: ago(0, 9),
-      events: [["created", "Nájdené AI prospectingom. Skóre 91, tier A.", 9]],
+      events: [["created", "Nájdené AI vyhľadávaním. Skóre 91, tier A.", 9]],
     },
     {
       company_name: "Nordkap Kraft AB",
@@ -238,7 +244,7 @@ export function seed(): Record<string, Row[]> {
       next_action: "Poslať referencie z odstávok",
       next_action_at: day(1),
       created_at: ago(2),
-      events: [["created", "Nájdené AI prospectingom. Skóre 88, tier A.", 48]],
+      events: [["created", "Nájdené AI vyhľadávaním. Skóre 88, tier A.", 48]],
     },
     {
       company_name: "Weserwerft Schiffbau GmbH",
@@ -260,11 +266,11 @@ export function seed(): Record<string, Row[]> {
       status: "contacted",
       source: "ai_prospecting",
       campaign_id: de,
-      next_action: "Follow-up e-mail",
+      next_action: "Pripomenúť sa e-mailom",
       next_action_at: day(-1),
       created_at: ago(3),
       events: [
-        ["created", "Nájdené AI prospectingom. Skóre 74, tier B.", 72],
+        ["created", "Nájdené AI vyhľadávaním. Skóre 74, tier B.", 72],
         ["status", "qualified → contacted", 50],
         ["outreach", "Odoslaný prvý e-mail.", 50],
       ],
@@ -293,7 +299,7 @@ export function seed(): Record<string, Row[]> {
       next_action_at: day(0),
       created_at: ago(6),
       events: [
-        ["created", "Nájdené AI prospectingom. Skóre 69, tier B.", 144],
+        ["created", "Nájdené AI vyhľadávaním. Skóre 69, tier B.", 144],
         ["status", "qualified → contacted", 120],
         ["status", "contacted → replied", 20],
       ],
@@ -322,7 +328,7 @@ export function seed(): Record<string, Row[]> {
       next_action_at: day(3),
       created_at: ago(8),
       events: [
-        ["created", "Nájdené AI prospectingom. Skóre 84, tier A.", 192],
+        ["created", "Nájdené AI vyhľadávaním. Skóre 84, tier A.", 192],
         ["status", "qualified → contacted", 170],
         ["status", "contacted → meeting", 30],
       ],
@@ -350,7 +356,7 @@ export function seed(): Record<string, Row[]> {
       notes: "Rámcová zmluva, prvých 6 potrubárov nastupuje začiatkom mesiaca.",
       created_at: ago(13),
       events: [
-        ["created", "Nájdené AI prospectingom. Skóre 86, tier A.", 312],
+        ["created", "Nájdené AI vyhľadávaním. Skóre 86, tier A.", 312],
         ["status", "qualified → contacted", 300],
         ["status", "contacted → meeting", 220],
         ["status", "meeting → won", 40],
@@ -377,7 +383,7 @@ export function seed(): Record<string, Row[]> {
       source: "ai_prospecting",
       campaign_id: cnc,
       created_at: ago(9),
-      events: [["created", "Nájdené AI prospectingom. Skóre 63, tier B.", 216]],
+      events: [["created", "Nájdené AI vyhľadávaním. Skóre 63, tier B.", 216]],
     },
     {
       company_name: "Wisła Konstrukcje Sp. z o.o.",
@@ -400,7 +406,7 @@ export function seed(): Record<string, Row[]> {
       source: "ai_prospecting",
       campaign_id: cnc,
       created_at: ago(9),
-      events: [["created", "Nájdené AI prospectingom. Skóre 58, tier B.", 216]],
+      events: [["created", "Nájdené AI vyhľadávaním. Skóre 58, tier B.", 216]],
     },
     {
       company_name: "Hamar Treforedling AS",
@@ -421,7 +427,7 @@ export function seed(): Record<string, Row[]> {
       campaign_id: nordic,
       created_at: ago(2, 1),
       events: [
-        ["created", "Nájdené AI prospectingom. Skóre 41, tier C.", 49],
+        ["created", "Nájdené AI vyhľadávaním. Skóre 41, tier C.", 49],
         ["status", "new → disqualified", 30],
       ],
     },

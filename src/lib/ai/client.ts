@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/lib/supabase/admin";
+import { AiStepError } from "./errors";
 
 export const MODEL = "claude-opus-5-5";
 /** Server-side refusal fallback: a declined request is re-run on Anthropic's recommended model. */
@@ -8,7 +9,7 @@ export const FALLBACK = { betas: ["server-side-fallback-2026-07-01"], fallbacks:
 let client: Anthropic | null = null;
 export function anthropic(): Anthropic {
   if (!client) {
-    if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not set.");
+    if (!process.env.ANTHROPIC_API_KEY) throw new AiStepError("Chýba ANTHROPIC_API_KEY, Claude nie je pripojený.");
     client = new Anthropic({ timeout: 15 * 60 * 1000 });
   }
   return client;
@@ -16,14 +17,17 @@ export function anthropic(): Anthropic {
 
 export async function getCompanyProfile(): Promise<string> {
   const { data } = await db().from("settings").select("value").eq("key", "company_profile").maybeSingle();
-  return typeof data?.value === "string" ? data.value : "KTechnology s.r.o. — industrial staff leasing worldwide.";
+  return typeof data?.value === "string"
+    ? data.value
+    : "KTechnology s.r.o. (Slovakia): industrial staff leasing for projects across Europe and worldwide.";
 }
 
+/** "HTTPS://www.Firma.de:8080/kontakt" and "firma.de." both become "firma.de". */
 export function normalizeDomain(input?: string | null): string | null {
-  if (!input) return null;
+  if (!input?.trim()) return null;
   try {
-    const url = new URL(input.includes("://") ? input : `https://${input}`);
-    return url.hostname.replace(/^www\./, "").toLowerCase();
+    const url = new URL(input.includes("://") ? input.trim() : `https://${input.trim()}`);
+    return url.hostname.toLowerCase().replace(/\.+$/, "").replace(/^www\./, "") || null;
   } catch {
     return null;
   }

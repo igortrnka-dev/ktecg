@@ -130,10 +130,15 @@ a.strong:hover {
   background: #fffaeb;
   color: #5c4405;
 }
-.notice--busy {
+.notice--busy,
+.notice--info {
   border-color: #b9cdf9;
   background: #f1f5ff;
   color: #1c3d99;
+}
+/* A one-off message at the top of a page, e.g. after a redirect. */
+.page-notice {
+  margin: -8px 0 16px;
 }
 
 /* brand */
@@ -969,6 +974,13 @@ textarea {
 }
 .abtn--danger:hover {
   color: #b42318;
+}
+.card--danger .abtn--danger {
+  color: #b42318;
+}
+.card--danger .abtn--danger:hover {
+  background: #fdecec;
+  border-color: #f1b8b2;
 }
 .abtn--small {
   height: 32px;
