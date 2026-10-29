@@ -7,7 +7,7 @@ import SubmitButton from "@/components/admin/SubmitButton";
 import PageNotice from "@/components/admin/PageNotice";
 import Icon from "@/components/admin/Icon";
 import { plural } from "@/lib/plural";
-import { erasureTerms, leadInquiryIds, REDACTED } from "@/lib/erase";
+import { erasureTerms, leadInquiryIds, otherLeadsWithContacts, REDACTED } from "@/lib/erase";
 import { deleteLead, enrich, logContacted, rewriteOutreach, updateLead } from "../../../actions";
 
 type Signal = { type: string; detail: string; url: string };
@@ -49,9 +49,10 @@ export default async function LeadDetail({
   await requireAdmin();
   const { id } = await params;
   const { existing } = await searchParams;
-  const [{ data: lead }, { data: events }] = await Promise.all([
+  const [{ data: lead }, { data: events }, { data: inquiry }] = await Promise.all([
     db().from("leads").select("*, campaigns(name)").eq("id", id).single(),
     db().from("lead_events").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
+    db().from("inquiries").select("locale").eq("lead_id", id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
   if (!lead) notFound();
 
@@ -66,6 +67,13 @@ export default async function LeadDetail({
   const eventCount = (events ?? []).length;
   const inquiries = (await leadInquiryIds(lead.id, contacts)).length;
   const terms = erasureTerms(contacts);
+  const others = await otherLeadsWithContacts(lead.id, contacts);
+  const othersText = others.length
+    ? `Rovnaký e-mail kontaktu má aj ${others.length === 1 ? "lead" : "leady"} ${others.map((o) => `„${o.company_name}“`).join(", ")} – ` +
+      `pri žiadosti o vymazanie údajov ${others.length === 1 ? "zmažte aj ten" : "zmažte aj tie"}.`
+    : "";
+  // Without a draft, Claude writes in the language the customer used on the website.
+  const draftLanguage = lead.outreach_language ?? (LANGS.includes(inquiry?.locale ?? "") ? inquiry!.locale : "en");
   const deleteConfirm = [
     `Naozaj zmazať lead „${lead.company_name}“?`,
     `Zmaže sa lead s kontaktmi a signálmi, jeho história (${eventCount} ${plural(eventCount, "záznam", "záznamy", "záznamov")})` +
@@ -73,9 +81,10 @@ export default async function LeadDetail({
         ? ` a ${inquiries} ${plural(inquiries, "dopyt", "dopyty", "dopytov")} z webu ` +
           `(${plural(inquiries, "priradený k leadu alebo odoslaný", "priradené k leadu alebo odoslané", "priradených k leadu alebo odoslaných")} z e-mailov jeho kontaktov).`
         : "."),
-    terms.emails.length || terms.names.length
-      ? `Mená a e-maily kontaktov sa v logoch AI vyhľadávania nahradia textom „${REDACTED}“.`
+    terms.emails.length || terms.names.length || terms.phones.length || terms.profiles.length
+      ? `Mená, e-maily, telefónne čísla a LinkedIn profily kontaktov sa v logoch AI vyhľadávania nahradia textom „${REDACTED}“.`
       : "",
+    othersText,
     "Ďalšie AI vyhľadávanie môže firmu z verejných zdrojov nájsť znova.",
     "Zmazanie sa nedá vrátiť.",
   ]
@@ -106,7 +115,7 @@ export default async function LeadDetail({
               pending="Ukladám…"
               title={promotes ? "Stav sa zmení na Oslovený a odoslaný e-mail sa zapíše do histórie." : "Zapíše odoslaný e-mail do histórie, stav sa nezmení."}
             >
-              <Icon name="check" />{promotes ? "Označiť ako oslovený" : "E-mail odoslaný"}
+              {promotes ? <><Icon name="check" />Označiť ako oslovený</> : <><Icon name="mail" />Zapísať odoslaný e-mail</>}
             </SubmitButton>
           </form>
           <form action={enrich}>
@@ -254,7 +263,7 @@ export default async function LeadDetail({
               <div className="row2">
                 <label className="afield">
                   <span>Jazyk</span>
-                  <select key={lead.outreach_language ?? "en"} name="language" defaultValue={lead.outreach_language ?? "en"}>
+                  <select key={draftLanguage} name="language" defaultValue={draftLanguage}>
                     {LANGS.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
                   </select>
                 </label>
@@ -273,9 +282,11 @@ export default async function LeadDetail({
                 <h2>Zmazať lead</h2>
                 <p>
                   Pri spame, testovacom zázname alebo žiadosti o vymazanie údajov. Zmaže lead s kontaktmi a históriou a dopyty
-                  z webu priradené k nemu alebo odoslané z e-mailov jeho kontaktov. V logoch AI vyhľadávania nahradí mená
-                  a e-maily kontaktov textom „{REDACTED}“. Ďalšie AI vyhľadávanie môže firmu z verejných zdrojov nájsť znova.
+                  z webu priradené k nemu alebo odoslané z e-mailov jeho kontaktov (okrem dopytov iných leadov). V logoch AI
+                  vyhľadávania nahradí mená, e-maily, telefónne čísla a LinkedIn profily kontaktov textom „{REDACTED}“.
+                  Ďalšie AI vyhľadávanie môže firmu z verejných zdrojov nájsť znova.
                 </p>
+                {othersText && <p className="notice notice--demo" style={{ marginTop: 10 }}>{othersText}</p>}
               </div>
             </div>
             <div className="card__foot">

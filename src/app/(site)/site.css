@@ -1675,8 +1675,10 @@ p {
   border-color: #ff8a7a;
   box-shadow: inset 0 0 0 1px #ff8a7a;
 }
+/* The border already shows the error, so focus needs its own clear mark. */
 .field [aria-invalid="true"]:focus {
-  box-shadow: inset 0 0 0 1px #ff8a7a, 0 0 0 3px rgba(255, 138, 122, 0.2);
+  outline: 2px solid #ff8a7a;
+  outline-offset: 2px;
 }
 @media (forced-colors: active) {
   .field [aria-invalid="true"] {

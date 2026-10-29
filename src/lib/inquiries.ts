@@ -105,6 +105,9 @@ function details(q: InquiryRow): string {
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
+/** "2026-11-02" → "2. 11. 2026", as the admin shows dates. */
+const skDay = (date: string) =>
+  new Date(`${date.slice(0, 10)}T12:00:00Z`).toLocaleDateString("sk-SK", { day: "numeric", month: "numeric", year: "numeric" });
 const sameEmail = (a?: string | null, b?: string | null) => Boolean(a && b && a.trim().toLowerCase() === b.trim().toLowerCase());
 
 async function logEvent(leadId: string, type: string, body: string) {
@@ -209,7 +212,7 @@ async function attach(leadId: string, q: InquiryRow, contact: Contact, signal: S
   await db().from("inquiries").update({ lead_id: lead.id }).eq("id", q.id);
   const previous =
     lead.next_action && lead.next_action !== NEXT_ACTION
-      ? ` Predchádzajúci ďalší krok: ${lead.next_action}${lead.next_action_at ? ` (${lead.next_action_at})` : ""}.`
+      ? ` Predchádzajúci ďalší krok: ${lead.next_action}${lead.next_action_at ? ` (${skDay(lead.next_action_at)})` : ""}.`
       : "";
   await logEvent(lead.id, "inquiry", `Nový dopyt z webu (${q.name}, ${q.email})${details(q)}${previous}`);
   if (reopen) await logEvent(lead.id, "status", `${lead.status} → new`);

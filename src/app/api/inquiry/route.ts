@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     await db().from("lead_events").insert({
       lead_id: leadId,
       type: "ai",
-      body: "Veľa dopytov naraz – Claude tento dopyt nevyhodnotil. Odpovedzte ručne alebo použite „Preskúmať znova s Claude“.",
+      body: "Veľa dopytov naraz – Claude tento dopyt nevyhodnotil. Odpovedzte ručne alebo použite „Napísať e-mail znova s Claude“, ktorý pripraví odpoveď na dopyt.",
     });
   } else if (simulateAi()) {
     void simulateInquiry(row.id, leadId).catch((err) => console.error("simulateInquiry failed", err));
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       await db().from("lead_events").insert({
         lead_id: leadId,
         type: "ai",
-        body: `Denný limit AI pre dopyty (${cap}) je vyčerpaný, Claude tento dopyt nevyhodnotil. Odpovedzte ručne alebo použite „Preskúmať znova s Claude“.`,
+        body: `Denný limit AI pre dopyty (${cap}) je vyčerpaný, Claude tento dopyt nevyhodnotil. Odpovedzte ručne alebo použite „Napísať e-mail znova s Claude“, ktorý pripraví odpoveď na dopyt.`,
       });
     }
   }

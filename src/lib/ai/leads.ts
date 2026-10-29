@@ -1,6 +1,6 @@
 import type * as z from "zod/v4";
 import { db } from "@/lib/supabase/admin";
-import { replacedDraftNote, type InquiryRow, type ShiftPattern } from "@/lib/inquiries";
+import { NEXT_ACTION, replacedDraftNote, type InquiryRow, type ShiftPattern } from "@/lib/inquiries";
 import { plural } from "@/lib/plural";
 import { getCompanyProfile } from "./client";
 import { AiStepError, aiErrorText } from "./errors";
@@ -68,6 +68,22 @@ Message: ${q.message ?? "-"}
 </inquiry>`;
 }
 
+/** What our reply to a website inquiry does; the same for the first draft and for a rewrite. */
+const REPLY_TASK = `thank them, confirm what we understood, ask the 2-3 most important missing questions,
+and propose a short call`;
+
+/** The lead's latest website inquiry, if it came from (or got) one. */
+async function latestInquiry(leadId: string) {
+  const { data } = await db()
+    .from("inquiries")
+    .select("*")
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<InquiryRow>();
+  return data;
+}
+
 /**
  * Scores an inbound lead (already created or attached by linkInquiry) and drafts the reply.
  * A failure is recorded on the lead, which stays in the pipeline either way.
@@ -87,8 +103,7 @@ export async function qualifyInquiry(inquiryId: string, leadId: string) {
       usage: newUsage(),
       prompt: `A company sent this request through our website. Qualify it and draft our reply.
 Write the reply in the language of the request (website locale: ${q.locale ?? "en"}).
-The reply should thank them, confirm what we understood, ask the 2-3 most important missing questions,
-and propose a short call.
+The reply should ${REPLY_TASK}.
 
 ${inquiryBlock(q)}
 <what_we_know_already>${JSON.stringify({ status: lead.status, qualification: lead.qualification, signals: lead.signals })}</what_we_know_already>`,
@@ -110,7 +125,7 @@ ${inquiryBlock(q)}
         `Návrh odpovede (${outreach_language.toUpperCase()}) je v časti „E-mail na oslovenie“.`,
     );
   } catch (err) {
-    await logEvent(leadId, "ai", `Claude dopyt nevyhodnotil: ${aiErrorText(err)} Odpovedzte ručne alebo skúste „Preskúmať znova s Claude“.`);
+    await logEvent(leadId, "ai", `Claude dopyt nevyhodnotil: ${aiErrorText(err)} Odpovedzte ručne alebo použite „Napísať e-mail znova s Claude“, ktorý pripraví odpoveď na dopyt.`);
     throw err;
   }
 }
@@ -121,6 +136,12 @@ export async function enrichLead(leadId: string) {
   if (!lead) throw new AiStepError("Lead sa nenašiel.");
   const profile = await getCompanyProfile();
   const usage = newUsage();
+  // A customer who asked through the website and has no draft yet (e.g. the AI step was skipped) gets our reply.
+  const inquiry = lead.next_action === NEXT_ACTION ? await latestInquiry(leadId) : null;
+  const draftTask = inquiry
+    ? `draft our reply to the customer's inquiry below in the language of the request (website locale: ${inquiry.locale ?? "en"}): ${REPLY_TASK}`
+    : `write a first outreach e-mail
+in ${lead.outreach_language || "the main business language of the company's country"} that references a concrete signal`;
 
   const findings = await webResearch({
     system: SYSTEM(profile),
@@ -136,10 +157,9 @@ with role and public contact details. Cite source URLs.`,
     system: SYSTEM(profile),
     schema: Enrichment,
     usage,
-    prompt: `Update this lead from the research notes. Score fit and timing, and write a first outreach e-mail
-in ${lead.outreach_language || "the main business language of the company's country"} that references a concrete signal.
+    prompt: `Update this lead from the research notes. Score fit and timing, and ${draftTask}.
 In signals and contacts, list only items that are not already in current_lead.
-
+${inquiry ? `\n${inquiryBlock(inquiry)}\n` : ""}
 <current_lead>${JSON.stringify({ company: lead.company_name, signals: lead.signals, contacts: lead.contacts, notes: lead.notes })}</current_lead>
 <research_notes>
 ${findings}
@@ -189,24 +209,24 @@ export async function writeOutreach(leadId: string, language: string, instructio
   if (!lead) throw new AiStepError("Lead sa nenašiel.");
   const profile = await getCompanyProfile();
   const hasDraft = Boolean(lead.outreach_subject || lead.outreach_body);
-  // The latest website inquiry, when the lead came from (or got) one: the draft may be the reply to it.
-  const { data: inquiry } = await db()
-    .from("inquiries")
-    .select("*")
-    .eq("lead_id", leadId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle<InquiryRow>();
+  const inquiry = await latestInquiry(leadId);
+  // Until "Označiť ako oslovený" records the sent reply, the e-mail to write is the reply to the inquiry,
+  // whatever the current draft is (it may be an older cold e-mail, or missing because the AI step was skipped).
+  const replying = Boolean(inquiry) && (lead.next_action === NEXT_ACTION || !hasDraft);
 
-  const task = hasDraft
-    ? `Rewrite the current e-mail below in language "${language}". Keep its purpose: if it answers the customer's
+  const task = replying
+    ? `Draft our reply to the customer's inquiry below in language "${language}": ${REPLY_TASK}.
+If the current e-mail is already such a reply, keep what it confirms and asks; if it is a cold outreach e-mail,
+do not reuse it. It must not read as a sales pitch.`
+    : hasDraft
+      ? `Rewrite the current e-mail below in language "${language}". Keep its purpose: if it answers the customer's
 inquiry, it must still answer it (thank them, keep what it confirms and the questions it asks) and must not turn
 into a sales pitch; if it is a first outreach e-mail, it stays one. Keep the facts it states.`
-    : `Write a short, personal first outreach e-mail to this prospect in language "${language}".
+      : `Write a short, personal first outreach e-mail to this prospect in language "${language}".
 Reference their concrete signal, offer the roles we recommend, and end with a simple call to action.`;
   const context = [
     hasDraft ? `<current_email>\nSubject: ${lead.outreach_subject ?? ""}\n\n${lead.outreach_body ?? ""}\n</current_email>` : "",
-    inquiry ? `The customer's latest inquiry:\n${inquiryBlock(inquiry)}` : "",
+    inquiry ? `The customer's ${replying ? "inquiry" : "latest inquiry"}:\n${inquiryBlock(inquiry)}` : "",
   ]
     .filter(Boolean)
     .map((block) => `${block}\n\n`)
