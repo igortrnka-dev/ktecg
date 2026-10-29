@@ -18,7 +18,7 @@ export default function Trades({ t }: { t: Dictionary }) {
       <div className="gallery">
         {gallery.map((g, i) => (
           <figure key={g.slug} className="gallery__item" data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
-            <Photo slug={g.slug} variant={i} alt={t.trades.items[g.item].name} />
+            <Photo slug={g.slug} variant={i} />
             <figcaption className="mono">{t.trades.items[g.item].name}</figcaption>
           </figure>
         ))}

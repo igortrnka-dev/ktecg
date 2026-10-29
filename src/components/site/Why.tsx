@@ -24,13 +24,11 @@ export default function Why({ t }: { t: Dictionary }) {
             <p className="reach__title">{t.reach.title}</p>
           </div>
         </div>
-        <div className="strip">
-          <div className="strip__track">
-            {[...t.reach.countries, ...t.reach.countries].map((c, i) => (
-              <span key={i} aria-hidden={i >= t.reach.countries.length}>{c}</span>
-            ))}
-          </div>
-        </div>
+        <ul className="reach__list" aria-label={t.reach.label}>
+          {t.reach.countries.map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
       </div>
     </section>
   );

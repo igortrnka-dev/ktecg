@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type { Dictionary } from "@/i18n";
 import Icon from "./Icon";
 import Photo from "./Photo";
@@ -21,11 +22,14 @@ export default function Hero({ t }: { t: Dictionary }) {
     <section className="hero" id="top">
       <div className="hero__copy">
         <span className="pill mono enter enter--up">{t.hero.eyebrow}</span>
-        <h1 className="hero__title" aria-label={t.hero.title}>
+        <h1 className="hero__title">
           {words.map((word, i) => (
-            <span className="hero__word" key={i} aria-hidden style={{ animationDelay: `${0.3 + i * 0.06}s` }}>
-              {word}
-            </span>
+            <Fragment key={i}>
+              {i > 0 && " "}
+              <span className="hero__word" style={{ animationDelay: `${0.3 + i * 0.06}s` }}>
+                {word}
+              </span>
+            </Fragment>
           ))}
         </h1>
         <p className="hero__lead enter enter--up">{t.hero.lead}</p>

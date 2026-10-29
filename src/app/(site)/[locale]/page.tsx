@@ -13,9 +13,6 @@ import Contact from "@/components/site/Contact";
 import Footer from "@/components/site/Footer";
 import RevealObserver from "@/components/site/RevealObserver";
 
-// Bumped on each content release; shown in the footer.
-const LAST_UPDATED = "28/10/26";
-
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
@@ -23,9 +20,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   return (
     <div className="page">
+      <a href="#main" className="skip">{t.nav.skip}</a>
       <RevealObserver />
       <Header nav={t.nav} locale={locale} />
-      <main className="main">
+      <main id="main" className="main" tabIndex={-1}>
         <Hero t={t} />
         <Services t={t} />
         <Trades t={t} />
@@ -35,7 +33,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <Faq t={t} />
         <Contact t={t} locale={locale} />
       </main>
-      <Footer t={t} locale={locale} updated={LAST_UPDATED} />
+      <Footer t={t} locale={locale} />
     </div>
   );
 }

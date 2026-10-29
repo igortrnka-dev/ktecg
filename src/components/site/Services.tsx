@@ -1,10 +1,15 @@
 import type { Dictionary } from "@/i18n";
+import Art from "./Art";
 import Icon, { type IconName } from "./Icon";
 import Photo from "./Photo";
 import SectionHead from "./SectionHead";
 
 const icons: IconName[] = ["people", "chart", "route"];
-const photos = ["service-leasing", "service-outages", "service-mobilisation"];
+/**
+ * null shows the art: service-mobilisation.jpg (welder without PPE or fall protection)
+ * stays off until a photo of our own crew replaces it.
+ */
+const photos = ["service-leasing", "service-outages", null];
 
 export default function Services({ t }: { t: Dictionary }) {
   return (
@@ -14,7 +19,7 @@ export default function Services({ t }: { t: Dictionary }) {
         {t.services.items.map((s, i) => (
           <article key={s.title} className="tile tile--service" data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
             <div className="tile__media">
-              <Photo slug={photos[i]} variant={i + 2} />
+              {photos[i] ? <Photo slug={photos[i]} variant={i + 2} /> : <Art variant={i + 2} />}
               <span className="tile__icon tile__icon--accent"><Icon name={icons[i]} /></span>
             </div>
             <h3 className="tile__title">{s.title}</h3>
