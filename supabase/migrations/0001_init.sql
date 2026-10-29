@@ -73,7 +73,7 @@ create index leads_created_idx on leads (created_at desc);
 create table lead_events (
   id uuid primary key default gen_random_uuid(),
   lead_id uuid not null references leads(id) on delete cascade,
-  type text not null, -- created | status | note | ai | outreach
+  type text not null, -- created | status | note | ai | outreach | inquiry
   body text not null default '',
   created_at timestamptz not null default now()
 );
@@ -87,7 +87,9 @@ create table inquiries (
   phone text,
   country text,
   positions text,
-  headcount int,
+  headcount int, -- older form; positions now carries the counts
+  duration text,
+  shift_pattern text check (shift_pattern in ('unsure', 'single', 'double', 'triple', 'rotation')),
   start_date date,
   message text,
   locale text,
