@@ -4,7 +4,7 @@ const sv: Dictionary = {
   meta: {
     title: "KTechnology — Personaluthyrning för industrin: svetsare, montörer, elektriker",
     description:
-      "KTechnology s.r.o. hyr ut certifierade svetsare, rörmontörer, elektriker, mekaniker och operatörer till industriprojekt i hela Europa och världen. Testad kompetens, A1, resor och boende ordnat, team på plats inom cirka 14 dagar.",
+      "KTechnology s.r.o. hyr ut certifierade svetsare, rörmontörer, elektriker, mekaniker och operatörer till industriprojekt i hela Europa och världen. Kompetenstestad personal. Vi ordnar A1-intyg, resor och boende – team på plats inom cirka 14 dagar.",
   },
   nav: {
     services: "Tjänster",
@@ -16,21 +16,21 @@ const sv: Dictionary = {
     cta: "Beställ personal",
     language: "Språk",
     menu: "Meny",
-    mainNav: "Main navigation",
-    skip: "Skip to content",
-    ctaShort: "Get a quote",
+    mainNav: "Huvudmeny",
+    skip: "Hoppa till innehållet",
+    ctaShort: "Begär offert",
   },
   hero: {
     eyebrow: "Personaluthyrning för industrin · Europa & världen",
-    title: "Yrkeskunnig industripersonal till ert projekt, redo från första dagen",
+    title: "Yrkeskunniga svetsare, montörer och elektriker på plats hos er inom cirka 14 dagar",
     lead:
-      "KTechnology hyr ut certifierade svetsare, rörmontörer, elektriker, mekaniker och operatörer till tillverkare, entreprenörer och EPC-företag. Vi rekryterar, testar, anställer, försäkrar och tar dem till er arbetsplats.",
+      "Vi hyr ut kompetenstestade yrkesarbetare inom industrin till tillverkare, entreprenörer och EPC-företag i hela Europa och sköter avtal, A1-intyg eller arbetstillstånd, försäkring, resor och boende. En kontakt, en faktura.",
     primary: "Beställ personal",
     secondary: "Se våra yrken",
     facts: [
       { k: "Yrken", v: "Svetsare, montörer, elektriker, mekaniker, operatörer" },
-      { k: "Var", v: "I hela Europa och världen" },
-      { k: "Tempo", v: "Team på plats inom cirka 14 dagar" },
+      { k: "Var", v: "Tyskland, Österrike, Norden, Benelux, Frankrike, PL/CZ/SK, Arabemiraten" },
+      { k: "Uppstart", v: "Team på plats inom cirka 14 dagar" },
       { k: "Ingår", v: "A1 & tillstånd, resor, boende, koordinator" },
     ],
     card: {
@@ -55,7 +55,7 @@ const sv: Dictionary = {
     items: [
       {
         title: "Personaluthyrning",
-        body: "Kvalificerade yrkesarbetare uthyrda till ert företag under uppdragets längd. De arbetar under er platsledning; vi är fortsatt arbetsgivare.",
+        body: "Vi hyr ut kvalificerade yrkesarbetare till er så länge uppdraget pågår. De arbetar under er arbetsledning – vi förblir deras arbetsgivare.",
         points: ["Enskilda specialister eller hela team", "Korta och långa uppdrag", "Ingen rekrytering eller HR-administration för er"],
       },
       {
@@ -65,7 +65,7 @@ const sv: Dictionary = {
       },
       {
         title: "Komplett mobilisering",
-        body: "Allt mellan ”vi behöver folk” och ”de jobbar produktivt på plats” sköter vi: rekrytering, papper, resor, boende och stöd.",
+        body: "Allt mellan ”vi behöver folk” och ”de jobbar produktivt på plats” sköter vi: rekrytering, pappersarbete, resor, boende och stöd.",
         points: ["Avtal, A1-intyg och tillstånd", "Resor, boende och skyddsutrustning", "En koordinator för hela projektet"],
       },
     ],
@@ -77,20 +77,20 @@ const sv: Dictionary = {
     items: [
       { name: "Svetsare", skills: ["MIG/MAG", "TIG", "MMA", "Stål & rostfritt"] },
       { name: "Rörmontörer", skills: ["Industrirör", "Isometriritningar", "Prefabricering", "Montage"] },
-      { name: "Stålmontörer & plåtslagare", skills: ["Stålkonstruktioner", "Tekniska ritningar", "Montage", "Skruvförband"] },
-      { name: "Industrielektriker", skills: ["Installation", "Kablage & kabelstegar", "Ställverk"] },
+      { name: "Stålmontörer", skills: ["Stålkonstruktioner", "Tekniska ritningar", "Montage", "Skruvförband"] },
+      { name: "Industrielektriker", skills: ["Installation", "Kablage & kabelstegar", "Elcentraler"] },
       { name: "Automationstekniker", skills: ["PLC", "Driftsättning", "Felsökning"] },
       { name: "Mekaniker & industrimontörer", skills: ["Maskininstallation", "Uppriktning", "Underhåll vid stopp"] },
       { name: "CNC- & maskinoperatörer", skills: ["Svarvning & fräsning", "Maskinställning", "Mätning"] },
       { name: "Monteringsoperatörer", skills: ["Linjemontering", "Kvalitetskontroll", "Skiftarbete"] },
       { name: "Logistikpersonal", skills: ["Truck", "Lager & plock", "Linjeförsörjning"] },
     ],
-    note: "Söker ni ett annat yrke? Fråga oss, vårt nätverk täcker de flesta industriyrken.",
+    note: "Behöver ni en annan yrkesgrupp? Fråga oss – vårt nätverk täcker de flesta industriyrken.",
   },
   included: {
     label: "Allt ingår",
     title: "Vi sköter allt runt ert team",
-    lead: "Ni får produktiv personal på plats. Rekrytering, papper, resor och stöd ligger kvar hos oss.",
+    lead: "Ni får produktiv personal på plats – vi sköter rekrytering, administration, resor och stöd.",
     items: [
       "Sökning & urval",
       "Praktiska kompetenstester",
@@ -101,7 +101,7 @@ const sv: Dictionary = {
       "Personlig skyddsutrustning",
       "Resor & boende",
       "Egen projektkoordinator",
-      "Snabb ersättning",
+      "Snabbt byte av personal",
     ],
   },
   sectors: {
@@ -118,7 +118,7 @@ const sv: Dictionary = {
   },
   process: {
     label: "Så går det till",
-    title: "Från er förfrågan till ett team på plats på cirka två veckor",
+    title: "Från er förfrågan till ett team på plats inom cirka två veckor",
     steps: [
       {
         period: "Dag 1",
@@ -133,12 +133,12 @@ const sv: Dictionary = {
       {
         period: "Dag 7–14",
         title: "Juridik & mobilisering",
-        body: "Avtal, A1 / arbetstillstånd, försäkring, skyddsutrustning, resor och boende ordnar vi.",
+        body: "Vi ordnar avtal, A1-intyg eller arbetstillstånd, försäkring, skyddsutrustning, resor och boende.",
       },
       {
         period: "Under projektet",
         title: "Uppföljning & stöd",
-        body: "En koordinator håller kontakten med er arbetsplats, följer upp prestationen och ersätter personal snabbt vid behov.",
+        body: "En koordinator håller kontakten med er arbetsplats, följer upp arbetet och ersätter personal snabbt vid behov.",
       },
     ],
   },
@@ -146,27 +146,27 @@ const sv: Dictionary = {
     label: "Varför KTechnology",
     title: "En bemanningspartner, inte bara en CV-leverantör",
     items: [
-      { title: "En partner för allt", body: "Rekrytering, papper, resor, boende och stöd på plats från en och samma kontakt." },
-      { title: "Testade före uppdraget", body: "Varje specialist klarar ett praktiskt test, så att er tidplan inte betalar för överraskningar." },
+      { title: "En partner för allt", body: "Rekrytering, pappersarbete, resor, boende och stöd på plats – via en och samma kontakt." },
+      { title: "Testade före uppdraget", body: "Varje specialist har klarat ett praktiskt test, så att er tidplan inte drabbas av överraskningar." },
       { title: "Flexibel kapacitet", body: "Skala upp inför ett stopp eller en upprampning och ner när projektet är klart." },
-      { title: "Snabb ersättning", body: "Om någon inte håller er standard ersätter vi personen snabbt." },
+      { title: "Snabbt byte av personal", body: "Om någon inte lever upp till era krav byter vi snabbt ut personen." },
     ],
   },
   reach: {
     label: "Var vi arbetar",
-    title: "Baserade i Slovakien, på arbetsplatser i hela Europa och längre bort",
+    title: "Med bas i Slovakien – på arbetsplatser i hela Europa och utanför",
     countries: [
       "Tyskland", "Österrike", "Sverige", "Norge", "Finland", "Danmark",
       "Nederländerna", "Belgien", "Frankrike", "Polen", "Tjeckien", "Slovakien", "Förenade Arabemiraten",
     ],
   },
   faq: {
-    label: "Vanliga frågor",
+    label: "FAQ",
     title: "Vanliga frågor",
     items: [
       {
         q: "Hur fungerar personaluthyrning?",
-        a: "Personalen är anställd av KTechnology och hyrs ut till er under projektets längd. De arbetar under er platsledning; vi sköter avtal, löner, försäkring och all administration, och ni får en faktura.",
+        a: "Personalen är anställd av KTechnology och hyrs ut till er så länge projektet pågår. De arbetar under er arbetsledning; vi sköter avtal, löner, försäkring och all administration – och ni får allt samlat på en faktura.",
       },
       {
         q: "Hur snabbt kan personalen börja?",
@@ -174,11 +174,11 @@ const sv: Dictionary = {
       },
       {
         q: "I vilka länder arbetar ni?",
-        a: "Vi arbetar i hela Europa och världen, bland annat i Tyskland, Österrike, Norden, Benelux, Frankrike, Polen och Mellanöstern.",
+        a: "Vi tar uppdrag i Tyskland, Österrike, Sverige, Norge, Finland, Danmark, Beneluxländerna, Frankrike, Polen, Tjeckien, Slovakien och Förenade Arabemiraten. Andra länder på förfrågan.",
       },
       {
         q: "Vilken administration sköter ni?",
-        a: "Anställningsavtal, A1-intyg eller arbetstillstånd, försäkring, certifikatkontroll, skyddsutrustning, resor och boende. Ni behöver inte ordna något för personalen.",
+        a: "Anställningsavtal, A1-intyg eller arbetstillstånd, försäkring, certifikatkontroll, skyddsutrustning, resor och boende. Ni behöver inte själva ordna något av detta för personalen.",
       },
       {
         q: "Vad händer om någon inte motsvarar våra förväntningar?",
@@ -186,7 +186,7 @@ const sv: Dictionary = {
       },
       {
         q: "Hur prissätts tjänsten?",
-        a: "Vi offererar per person utifrån yrke, ort, längd och skiftschema. Skicka er förfrågan så får ni en offert inom en arbetsdag.",
+        a: "Vi offererar per person utifrån yrke, ort, uppdragets längd och skiftschema. Skicka er förfrågan så får ni en offert inom en arbetsdag.",
       },
     ],
   },
@@ -196,37 +196,37 @@ const sv: Dictionary = {
     body: "Skicka er förfrågan så återkommer en projektkoordinator inom en arbetsdag med tillgänglighet och offert.",
     emailLabel: "Eller mejla oss direkt",
     tipsTitle: "Bra att ange",
-    tips: ["Yrken och antal", "Projektort och startdatum", "Beräknad längd och skiftschema"],
+    tips: ["Yrken och antal", "Projektort och startdatum", "Beräknad uppdragslängd och skiftschema"],
     form: {
       company: "Företag",
       name: "Ditt namn",
       email: "E-post",
       phone: "Telefon",
       country: "Projektland",
-      positions: "Tjänster som behövs (t.ex. 6× TIG-svetsare)",
-      duration: "Duration (e.g. 6 weeks)",
-      shift: "Shift pattern",
+      positions: "Yrken (t.ex. 6× TIG-svetsare)",
+      duration: "Uppdragslängd (t.ex. 6 veckor)",
+      shift: "Skiftschema",
       shifts: {
-        unsure: "Not sure yet",
-        single: "1 shift",
-        double: "2 shifts",
-        triple: "3 shifts",
-        rotation: "12-hour rotation",
+        unsure: "Inte bestämt ännu",
+        single: "Enskift",
+        double: "Tvåskift",
+        triple: "Treskift",
+        rotation: "Rullande 12-timmarsskift",
       },
-      required: "* Required fields",
+      required: "* Obligatoriska fält",
       start: "Planerad start",
       message: "Projektdetaljer",
       submit: "Skicka förfrågan",
       sending: "Skickar…",
       success: "Tack. Vi har tagit emot er förfrågan och hör av oss inom kort.",
       error: "Något gick fel. Mejla oss gärna direkt.",
-      consent: "Genom att skicka formuläret godkänner du att vi behandlar dina uppgifter för att besvara förfrågan.",
+      consent: "Vi använder dina personuppgifter enbart för att besvara förfrågan och ta fram en offert.",
     },
   },
   notFound: {
-    title: "Page not found",
-    body: "The page you are looking for does not exist or has moved.",
-    home: "Back to the homepage",
+    title: "Sidan hittades inte",
+    body: "Sidan du letar efter finns inte eller har flyttats.",
+    home: "Tillbaka till startsidan",
   },
   footer: {
     company: "KTechnology s.r.o.",
