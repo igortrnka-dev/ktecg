@@ -627,6 +627,7 @@ p {
     padding: 10px 16px;
     white-space: normal;
     overflow-wrap: anywhere;
+    hyphens: auto;
     text-align: center;
   }
   .nav.is-open .nav__cta {
@@ -712,9 +713,11 @@ p {
   margin-left: -0.03em;
   text-wrap: balance;
   overflow-wrap: break-word;
+  hyphens: auto;
   max-width: 100%;
 }
-/* max-width lets a word that is wider than the column (narrow phone plus text spacing) break instead of overflowing */
+/* max-width lets a word that is wider than the column (narrow phone plus text spacing) break instead of overflowing,
+   hyphenated where the browser has a dictionary for the language (pl.ts carries soft hyphens instead) */
 .hero__word {
   display: inline-block;
   max-width: 100%;
@@ -1585,7 +1588,8 @@ p {
   color: var(--muted);
 }
 
-/* form: one column; six tracks (halves and thirds) once a third is wide enough for the longest shift option */
+/* form: one column; six tracks from 560px. The fields use halves or the full width: a third is too narrow for the
+   longest shift option under user text spacing. */
 .contact__form {
   container-type: inline-size;
 }
@@ -1648,7 +1652,7 @@ p {
 .field select {
   height: 48px;
 }
-/* Narrow caret gutter so the longest option fits a third of the form; ellipsis only as a last resort. */
+/* Narrow caret gutter so the longest option fits; ellipsis only as a last resort. */
 .field select {
   appearance: none;
   -webkit-appearance: none;
@@ -1664,6 +1668,27 @@ p {
 .field textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(255, 77, 46, 0.15);
+}
+/* Fields the API rejected: the error text's colour (8.6:1 on the field) and a 2px edge, also while focused. */
+.field [aria-invalid="true"],
+.field [aria-invalid="true"]:focus {
+  border-color: #ff8a7a;
+  box-shadow: inset 0 0 0 1px #ff8a7a;
+}
+.field [aria-invalid="true"]:focus {
+  box-shadow: inset 0 0 0 1px #ff8a7a, 0 0 0 3px rgba(255, 138, 122, 0.2);
+}
+@media (forced-colors: active) {
+  .field [aria-invalid="true"] {
+    border-style: dashed;
+    border-width: 2px;
+  }
+}
+.field__hint {
+  align-self: flex-end;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
 .hp {
   position: absolute;
