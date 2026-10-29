@@ -101,21 +101,20 @@ export async function updateLead(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id"));
   const { data: before } = await db().from("leads").select("status").eq("id", id).single();
-  const status = String(form.get("status"));
-  check(
-    await db()
-      .from("leads")
-      .update({
-        status,
-        next_action: String(form.get("next_action") ?? "") || null,
-        next_action_at: String(form.get("next_action_at") ?? "") || null,
-        notes: String(form.get("notes") ?? ""),
-        outreach_subject: String(form.get("outreach_subject") ?? ""),
-        outreach_body: String(form.get("outreach_body") ?? ""),
-      })
-      .eq("id", id),
-  );
-  if (before && before.status !== status) {
+  // The lead page saves the pipeline and the e-mail draft from separate forms, so only fields that were sent change.
+  const sent = (key: string) => (form.has(key) ? String(form.get(key) ?? "") : undefined);
+  const status = sent("status");
+  const patch = {
+    status,
+    next_action: sent("next_action") === undefined ? undefined : sent("next_action") || null,
+    next_action_at: sent("next_action_at") === undefined ? undefined : sent("next_action_at") || null,
+    notes: sent("notes"),
+    outreach_subject: sent("outreach_subject"),
+    outreach_body: sent("outreach_body"),
+  };
+  const changes = Object.fromEntries(Object.entries(patch).filter(([, value]) => value !== undefined));
+  if (Object.keys(changes).length) check(await db().from("leads").update(changes).eq("id", id));
+  if (before && status && before.status !== status) {
     check(await db().from("lead_events").insert({ lead_id: id, type: "status", body: `${before.status} → ${status}` }));
   }
   revalidatePath(`/admin/leads/${id}`);
@@ -167,7 +166,7 @@ export async function logContacted(form: FormData) {
   await requireAdmin();
   const id = String(form.get("id"));
   check(await db().from("leads").update({ status: "contacted" }).eq("id", id));
-  check(await db().from("lead_events").insert({ lead_id: id, type: "outreach", body: "Outreach e-mail sent." }));
+  check(await db().from("lead_events").insert({ lead_id: id, type: "outreach", body: "Oslovovací e-mail odoslaný." }));
   revalidatePath(`/admin/leads/${id}`);
 }
 

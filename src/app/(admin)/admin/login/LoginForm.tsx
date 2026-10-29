@@ -9,7 +9,11 @@ export default function LoginForm({ missing, demo }: { missing: string[]; demo: 
   return (
     <main className="login">
       <form action={action} className="login__card">
-        <div className="brand">KTechnology<sup>®</sup> <span>Sales</span></div>
+        <div className="brand">
+          <span className="brand__mark" aria-hidden>K</span>
+          <span>KTechnology<small>Obchod a leady</small></span>
+        </div>
+        <h1>Prihlásenie</h1>
         {demo && !off && (
           <p className="notice notice--demo" role="status">
             Ukážkový režim: vymyslené firmy a testovacie dáta, beží len na tomto počítači.

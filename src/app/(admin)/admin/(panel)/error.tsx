@@ -12,14 +12,16 @@ export default function PanelError({ error, reset }: { error: Error & { digest?:
       reset();
     });
   return (
-    <section className="card stack" role="alert">
-      <h2>Niečo sa pokazilo</h2>
-      <p className="muted">
-        Akciu sa nepodarilo dokončiť. Neuložené zmeny vo formulári sa mohli stratiť. Skúste to znova; ak chyba
-        pretrváva, skontrolujte pripojenia v Nastaveniach.
-      </p>
-      {error.digest && <p className="mono muted">Kód chyby: {error.digest}</p>}
-      <div className="actions">
+    <section className="card" role="alert">
+      <div className="card__head"><h2>Niečo sa pokazilo</h2></div>
+      <div className="card__body">
+        <p>
+          Akciu sa nepodarilo dokončiť. Neuložené zmeny vo formulári sa mohli stratiť. Skúste to znova; ak chyba
+          pretrváva, skontrolujte pripojenia v Nastaveniach.
+        </p>
+        {error.digest && <p className="mono muted">Kód chyby: {error.digest}</p>}
+      </div>
+      <div className="card__foot">
         <button type="button" className="abtn abtn--primary" onClick={retry}>Skúsiť znova</button>
       </div>
     </section>
