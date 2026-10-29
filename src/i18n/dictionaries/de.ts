@@ -4,7 +4,7 @@ const de: Dictionary = {
   meta: {
     title: "KTechnology – Arbeitnehmerüberlassung für die Industrie: Schweißer, Monteure, Elektriker",
     description:
-      "KTechnology s.r.o. überlässt zertifizierte Schweißer, Rohrschlosser, Elektriker, Mechaniker und Maschinenbediener für Industrieprojekte in ganz Europa und weltweit. Geprüfte Fachkräfte, A1, Anreise und Unterkunft inklusive, Team in rund 14 Tagen vor Ort.",
+      "KTechnology s.r.o. überlässt praxisgeprüfte Schweißer, Rohrschlosser, Elektriker, Mechaniker und Maschinenbediener für Industrieprojekte in ganz Europa und weltweit. A1, Anreise und Unterkunft übernehmen wir; das Team ist in rund 14 Tagen vor Ort.",
   },
   nav: {
     services: "Leistungen",
@@ -22,15 +22,15 @@ const de: Dictionary = {
   },
   hero: {
     eyebrow: "Arbeitnehmerüberlassung für die Industrie · Europa & weltweit",
-    title: "Schweißer, Monteure und Elektriker in rund 14 Tagen bei Ihnen vor Ort",
+    title: "Schweißer, Monteure und Elektriker in rund 14\u00a0Tagen bei Ihnen vor Ort",
     lead:
-      "Wir überlassen geprüfte Industriefachkräfte an Hersteller, Anlagenbauer und EPC-Unternehmen in ganz Europa – und übernehmen Verträge, A1/Genehmigungen, Versicherung, Anreise und Unterkunft. Ein Ansprechpartner, eine Rechnung.",
+      "Wir überlassen geprüfte Industriefachkräfte an Hersteller, Anlagenbauer und EPC-Unternehmen in ganz Europa\u00a0– und übernehmen Verträge, A1/Genehmigungen, Versicherung, Anreise und Unterkunft. Ein Ansprechpartner, eine Rechnung.",
     primary: "Fachkräfte anfragen",
     secondary: "Unsere Berufe",
     facts: [
       { k: "Berufe", v: "Schweißer, Monteure, Elektriker, Mechaniker, Maschinenbediener" },
-      { k: "Wo", v: "Deutschland, Österreich, Nordeuropa, Benelux, Frankreich, PL/CZ/SK, VAE" },
-      { k: "Tempo", v: "Team in rund 14 Tagen vor Ort" },
+      { k: "Einsatzgebiete", v: "Deutschland, Österreich, Nordeuropa, Benelux, Frankreich, PL/CZ/SK, VAE" },
+      { k: "Tempo", v: "Angebot in 1\u00a0Werktag, Team in rund 14\u00a0Tagen" },
       { k: "Inklusive", v: "A1 & Genehmigungen, Anreise, Unterkunft, Koordinator" },
     ],
     card: {
@@ -43,7 +43,7 @@ const de: Dictionary = {
       ],
       meta: [
         { k: "Projekt", v: "Anlagenrevision" },
-        { k: "Start", v: "in ~14 Tagen" },
+        { k: "Start", v: "in ~14\u00a0Tagen" },
       ],
       status: "In Vorbereitung",
     },
@@ -55,7 +55,7 @@ const de: Dictionary = {
     items: [
       {
         title: "Arbeitnehmerüberlassung",
-        body: "Wir überlassen Ihnen qualifizierte Fachkräfte für die Dauer des Auftrags. Vor Ort arbeiten sie nach Ihren Weisungen – Arbeitgeber bleiben wir.",
+        body: "Wir überlassen Ihnen qualifizierte Fachkräfte für die Dauer des Auftrags. Vor Ort arbeiten sie nach Ihren Weisungen\u00a0– Arbeitgeber bleiben wir.",
         points: ["Einzelne Spezialisten oder ganze Teams", "Kurz- und langfristige Einsätze", "Kein Recruiting- oder HR-Aufwand für Sie"],
       },
       {
@@ -85,7 +85,7 @@ const de: Dictionary = {
       { name: "Montagemitarbeiter", skills: ["Linienmontage", "Qualitätsprüfung", "Schichtarbeit"] },
       { name: "Logistikmitarbeiter", skills: ["Stapler", "Lager & Kommissionierung", "Linienversorgung"] },
     ],
-    note: "Der gesuchte Beruf ist nicht dabei? Fragen Sie uns – unser Netzwerk deckt die meisten Industrieberufe ab.",
+    note: "Der gesuchte Beruf ist nicht dabei? Fragen Sie uns\u00a0– unser Netzwerk deckt die meisten Industrieberufe ab.",
   },
   included: {
     label: "Alles inklusive",
@@ -109,7 +109,7 @@ const de: Dictionary = {
     title: "Wo unsere Leute arbeiten",
     items: [
       { name: "Automobil & Zulieferer", tags: "Montage · Karosseriebau · Qualität" },
-      { name: "Metallbau & Schweißen", tags: "MIG/MAG · WIG · Stahlbau" },
+      { name: "Metallverarbeitung & Schweißen", tags: "MIG/MAG · WIG · Stahlbau" },
       { name: "Energie & Kraftwerke", tags: "Revisionen · Rohrleitungen · Mechanik" },
       { name: "Schiffbau & Offshore", tags: "Rumpf · Ausrüstung · Rohrleitungsmontage" },
       { name: "Elektro & Automatisierung", tags: "Installation · SPS · Inbetriebnahme" },
@@ -147,14 +147,14 @@ const de: Dictionary = {
     title: "Wir liefern Fachkräfte, nicht nur Lebensläufe",
     items: [
       { title: "Ein Partner für alles", body: "Recruiting, Formalitäten, Anreise, Unterkunft und Betreuung vor Ort aus einer Hand." },
-      { title: "Vor dem Einsatz geprüft", body: "Jede Fachkraft besteht vorab einen Praxistest – damit Ihr Zeitplan nicht unter bösen Überraschungen leidet." },
+      { title: "Vor dem Einsatz geprüft", body: "Jede Fachkraft besteht vorab einen Praxistest\u00a0– damit Ihr Zeitplan nicht unter bösen Überraschungen leidet." },
       { title: "Flexible Kapazität", body: "Für Revision oder Hochlauf aufstocken und nach Projektende wieder reduzieren." },
       { title: "Schneller Ersatz", body: "Wenn jemand Ihren Anforderungen nicht entspricht, ersetzen wir ihn zügig." },
     ],
   },
   reach: {
     label: "Einsatzgebiete",
-    title: "Mit Sitz in der Slowakei – im Einsatz in Werken und Anlagen in ganz Europa und darüber hinaus",
+    title: "Mit Sitz in der Slowakei\u00a0– im Einsatz in ganz Europa und darüber hinaus",
     countries: [
       "Deutschland", "Österreich", "Schweden", "Norwegen", "Finnland", "Dänemark",
       "Niederlande", "Belgien", "Frankreich", "Polen", "Tschechien", "Slowakei", "VAE",
@@ -166,7 +166,7 @@ const de: Dictionary = {
     items: [
       {
         q: "Wie funktioniert die Arbeitnehmerüberlassung?",
-        a: "Die Fachkräfte sind bei KTechnology angestellt und werden Ihnen für die Projektdauer überlassen. Vor Ort arbeiten sie nach Ihren Weisungen; wir kümmern uns um Verträge, Löhne, Versicherung und alle Formalitäten – und Sie erhalten eine einzige Rechnung.",
+        a: "Die Fachkräfte sind bei KTechnology angestellt und werden Ihnen für die Projektdauer überlassen. Vor Ort arbeiten sie nach Ihren Weisungen; wir kümmern uns um Verträge, Löhne, Versicherung und alle Formalitäten\u00a0– und Sie erhalten eine einzige Rechnung.",
       },
       {
         q: "Wie schnell können die Fachkräfte anfangen?",
@@ -182,7 +182,7 @@ const de: Dictionary = {
       },
       {
         q: "Was, wenn eine Fachkraft nicht unseren Erwartungen entspricht?",
-        a: "Sagen Sie es Ihrem Koordinator. Wir besprechen das Problem und ersetzen die Person bei Bedarf so schnell wie möglich.",
+        a: "Wenden Sie sich an Ihren Koordinator. Wir besprechen das Problem und ersetzen die Person bei Bedarf so schnell wie möglich.",
       },
       {
         q: "Wie werden die Kosten berechnet?",
@@ -196,15 +196,15 @@ const de: Dictionary = {
     body: "Senden Sie uns Ihre Anfrage, und ein Projektkoordinator meldet sich innerhalb eines Werktags mit Verfügbarkeit und Angebot.",
     emailLabel: "Oder direkt per E-Mail",
     tipsTitle: "Hilfreiche Angaben",
-    tips: ["Berufe und Anzahl", "Projektort und Starttermin", "Voraussichtliche Dauer und Schichtmodell"],
+    tips: ["Einsatzort (Stadt) und Arbeitszeiten", "Erforderliche Zertifikate, z.\u00a0B. Schweißverfahren und Norm", "Arbeitssprache und notwendige Sicherheitsnachweise"],
     form: {
       company: "Unternehmen",
       name: "Ihr Name",
       email: "E-Mail",
       phone: "Telefon",
       country: "Einsatzland",
-      positions: "Positionen (z. B. 6× WIG-Schweißer)",
-      duration: "Dauer (z. B. 6 Wochen)",
+      positions: "Positionen (z.\u00a0B. 6×\u00a0WIG-Schweißer)",
+      duration: "Dauer (z.\u00a0B. 6\u00a0Wochen)",
       shift: "Schichtmodell",
       shifts: {
         unsure: "Noch offen",
@@ -218,8 +218,8 @@ const de: Dictionary = {
       message: "Projektdetails",
       submit: "Anfrage senden",
       sending: "Wird gesendet…",
-      success: "Vielen Dank. Wir haben Ihre Anfrage erhalten und melden uns in Kürze.",
-      error: "Etwas ist schiefgelaufen. Bitte schreiben Sie uns direkt eine E-Mail.",
+      success: "Vielen Dank. Ein Projektkoordinator meldet sich innerhalb eines Werktags mit Verfügbarkeit und Angebot.",
+      error: "Ihre Anfrage konnte nicht gesendet werden. Ihre Angaben stehen noch im Formular\u00a0– bitte senden Sie sie uns per E-Mail an:",
       consent: "Ihre Angaben verwenden wir ausschließlich, um Ihre Anfrage zu beantworten und ein Angebot zu erstellen.",
     },
   },
@@ -230,7 +230,7 @@ const de: Dictionary = {
   },
   footer: {
     company: "KTechnology s.r.o.",
-    tagline: "Arbeitnehmerüberlassung für die Industrie aus der Slowakei, für Projekte in ganz Europa und weltweit.",
+    tagline: "Arbeitnehmerüberlassung aus der Slowakei für Industrieprojekte in ganz Europa und weltweit.",
     rights: "Alle Rechte vorbehalten.",
     top: "Nach oben",
   },

@@ -2,7 +2,7 @@ const en = {
   meta: {
     title: "KTechnology — Industrial Staff Leasing: Welders, Fitters, Electricians",
     description:
-      "KTechnology s.r.o. leases certified welders, pipe fitters, electricians, mechanics and operators to industrial projects across Europe and worldwide. Skills tested, A1, travel and housing handled, crew on site in about 14 days.",
+      "KTechnology s.r.o. leases skills-tested welders, pipe fitters, electricians, mechanics and operators to industrial projects across Europe and worldwide. A1, travel and housing handled, crew on site in about 14 days.",
   },
   nav: {
     services: "Services",
@@ -20,7 +20,7 @@ const en = {
   },
   hero: {
     eyebrow: "Industrial staff leasing · Europe & worldwide",
-    title: "Skilled welders, fitters and electricians on your site in about 14 days",
+    title: "Skilled welders, fitters and electricians on your site in about 14\u00a0days",
     lead:
       "We lease tested industrial tradespeople to manufacturers, contractors and EPC companies across Europe, and handle contracts, A1/permits, insurance, travel and housing. One contact, one invoice.",
     primary: "Request workers",
@@ -28,7 +28,7 @@ const en = {
     facts: [
       { k: "Trades", v: "Welders, fitters, electricians, mechanics, operators" },
       { k: "Where", v: "Germany, Austria, Nordics, Benelux, France, PL/CZ/SK, UAE" },
-      { k: "Speed", v: "Crew on site in about 14 days" },
+      { k: "Speed", v: "Quote in 1\u00a0business day, crew in about 14\u00a0days" },
       { k: "Included", v: "A1 & permits, travel, housing, coordinator" },
     ],
     card: {
@@ -41,7 +41,7 @@ const en = {
       ],
       meta: [
         { k: "Project", v: "Plant outage" },
-        { k: "Start", v: "in ~14 days" },
+        { k: "Start", v: "in ~14\u00a0days" },
       ],
       status: "Crew being prepared",
     },
@@ -194,30 +194,30 @@ const en = {
     body: "Send us your request and a project coordinator will get back to you within one business day with availability and a quote.",
     emailLabel: "Or e-mail us directly",
     tipsTitle: "Helpful to include",
-    tips: ["Trades and headcount", "Project location and start date", "Expected duration and shift pattern"],
+    tips: ["Site location (city) and working hours", "Required certificates, e.g. welding process and standard", "Working language and site safety passes"],
     form: {
       company: "Company",
       name: "Your name",
       email: "E-mail",
       phone: "Phone",
       country: "Project country",
-      positions: "Positions needed (e.g. 6× TIG welder)",
-      duration: "Duration (e.g. 6 weeks)",
+      positions: "Positions needed (e.g. 6×\u00a0TIG welder)",
+      duration: "Duration (e.g. 6\u00a0weeks)",
       shift: "Shift pattern",
       shifts: {
         unsure: "Not sure yet",
         single: "1 shift",
         double: "2 shifts",
         triple: "3 shifts",
-        rotation: "12-hour rotation",
+        rotation: "12-hour shifts",
       },
       required: "* Required fields",
       start: "Expected start",
       message: "Project details",
       submit: "Send request",
       sending: "Sending…",
-      success: "Thank you. We've received your request and will be in touch shortly.",
-      error: "Something went wrong. Please e-mail us directly.",
+      success: "Thank you. A project coordinator will reply within one business day with availability and a quote.",
+      error: "Your request could not be sent. Your entries are still in the form\u00a0– please e-mail them to us:",
       consent: "We use your details only to answer this request and prepare a quote.",
     },
   },
