@@ -54,5 +54,5 @@ prospecting cron job. Fill in the env vars marked `sync: false` in the Render da
   history says so and the server log warns once per 10 minutes), so a flood cannot lock real buyers out.
   On a validation error it answers 400 `{"error":"invalid","fields":[…]}` with the failing field names.
 - *Zmazať lead* deletes the lead with its history, every website inquiry linked to it or sent from one of its
-  contacts' e-mail addresses, and replaces the contacts' e-mails and full names in all AI prospecting run logs
-  with "[vymazané]". A later prospecting run can find the company again from public sources.
+  contacts' e-mail addresses (unless another lead owns it), and replaces the contacts' e-mails, full names, phone
+  numbers and LinkedIn profiles in all AI prospecting run logs with "[vymazané]". A later prospecting run can find the company again from public sources.
