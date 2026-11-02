@@ -20,12 +20,13 @@ Downloaded on 2026-10-29, resized to max 1600px wide.
 | contact.jpg | Christopher Burns | https://unsplash.com/photos/8KfCR12oeUM |
 | sector-energy.jpg | iSawRed | https://unsplash.com/photos/pCZsRKT-_Ns (downloaded 2026-11-02) |
 | included.jpg | Ümit Yıldırım | https://unsplash.com/photos/Ass0DusYDk4 (downloaded 2026-11-02) |
+| service-mobilisation.jpg | Armin Iranzad | https://unsplash.com/photos/1YkvAHgw6fo (downloaded 2026-11-02) |
 
 ## Removed
 
 These stock photos were deleted. A slot whose file is missing shows the abstract art (see
-`src/components/site/Photo.tsx`). `service-mobilisation.jpg` is still missing; `sector-energy.jpg` and `included.jpg`
-were replaced on 2026-11-02 by the photos listed above (plant pipework without people; a hard hat in a factory hall):
+`src/components/site/Photo.tsx`). All three were replaced on 2026-11-02 by the photos listed above
+(plant pipework without people; a hard hat in a factory hall; a crew in hard hats on a guarded plant walkway):
 
 - `service-mobilisation.jpg` (Ben Koorengevel): the welder works barefoot on an open roof frame
   without gloves, helmet or fall protection, which contradicts "PPE included".
