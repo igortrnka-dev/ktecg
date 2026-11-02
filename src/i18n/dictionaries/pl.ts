@@ -83,7 +83,7 @@ const pl: Dictionary = {
       { name: "Mechanicy i monterzy maszyn", skills: ["Instalacja maszyn", "Osiowanie", "Remonty podczas postojów"] },
       { name: "Operatorzy CNC i maszyn", skills: ["Toczenie i frezowanie", "Ustawianie maszyn", "Pomiary"] },
       { name: "Operatorzy montażu", skills: ["Montaż liniowy", "Kontrola jakości", "Praca zmianowa"] },
-      { name: "Pracownicy logistyki", skills: ["Wózek widłowy", "Magazyn i kompletacja", "Zasilanie linii"] },
+      { name: "Technicy AKPiA", skills: ["Pomiary i automatyka", "Kalibracja przyrządów", "Czujniki i pętle regulacji"] },
     ],
     note: "Potrzebują Państwo innej specjalności? Prosimy o kontakt – nasza sieć obejmuje większość zawodów przemysłowych.",
   },
@@ -108,7 +108,7 @@ const pl: Dictionary = {
     label: "Branże",
     title: "Gdzie pracują nasi ludzie",
     items: [
-      { name: "Motoryzacja i dostawcy", tags: "Montaż · Karoseria · Jakość" },
+      { name: "Motoryzacja i dostawcy", tags: "Automatyka · Programowanie · Robotyka" },
       { name: "Obróbka metali i spawanie", tags: "MIG/MAG · TIG · Konstrukcje stalowe" },
       { name: "Energetyka i elektrownie", tags: "Postoje · Rurociągi · Mechanika" },
       { name: "Przemysł stoczniowy i offshore", tags: "Kadłub · Wyposażenie · Rurociągi" },

@@ -83,7 +83,7 @@ const sv: Dictionary = {
       { name: "Mekaniker & industrimontörer", skills: ["Maskininstallation", "Uppriktning", "Underhåll vid stopp"] },
       { name: "CNC- & maskinoperatörer", skills: ["Svarvning & fräsning", "Maskinställning", "Mätning"] },
       { name: "Monteringsoperatörer", skills: ["Linjemontering", "Kvalitetskontroll", "Skiftarbete"] },
-      { name: "Logistikpersonal", skills: ["Truck", "Lager & plock", "Linjeförsörjning"] },
+      { name: "Instrumenttekniker", skills: ["Mät- och reglerteknik", "Kalibrering av instrument", "Givare & reglerkretsar"] },
     ],
     note: "Behöver ni en annan yrkesgrupp? Fråga oss\u00a0– vårt nätverk täcker de flesta industriyrken.",
   },
@@ -108,7 +108,7 @@ const sv: Dictionary = {
     label: "Branscher",
     title: "Där vår personal arbetar",
     items: [
-      { name: "Fordon & underleverantörer", tags: "Montering · Kaross · Kvalitet" },
+      { name: "Fordon & underleverantörer", tags: "Automation · Programmering · Robotik" },
       { name: "Metallindustri & svetsning", tags: "MIG/MAG · TIG · Stålkonstruktioner" },
       { name: "Energi & kraftverk", tags: "Revisioner · Rör · Mekanik" },
       { name: "Varv & offshore", tags: "Skrov · Utrustning · Rörmontage" },

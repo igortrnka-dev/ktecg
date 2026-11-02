@@ -83,7 +83,7 @@ const fr: Dictionary = {
       { name: "Mécaniciens & monteurs industriels", skills: ["Installation de machines", "Alignement", "Maintenance d’arrêt"] },
       { name: "Opérateurs CNC & machines", skills: ["Tournage & fraisage", "Réglage machine", "Métrologie"] },
       { name: "Opérateurs de montage", skills: ["Montage sur ligne", "Contrôle qualité", "Travail posté"] },
-      { name: "Opérateurs logistiques", skills: ["Chariot élévateur", "Entrepôt & préparation", "Approvisionnement des lignes"] },
+      { name: "Techniciens instrumentation & régulation", skills: ["Mesure & régulation", "Étalonnage des instruments", "Capteurs & boucles de régulation"] },
     ],
     note: "Besoin d’un autre profil ? Contactez-nous : notre réseau couvre la plupart des métiers industriels.",
   },
@@ -108,7 +108,7 @@ const fr: Dictionary = {
     label: "Secteurs",
     title: "Où travaillent nos équipes",
     items: [
-      { name: "Automobile & équipementiers", tags: "Montage · Ferrage · Qualité" },
+      { name: "Automobile & équipementiers", tags: "Automatisation · Programmation · Robotique" },
       { name: "Métallurgie & soudage", tags: "MIG/MAG · TIG · Charpente métallique" },
       { name: "Énergie & centrales", tags: "Arrêts · Tuyauterie · Mécanique" },
       { name: "Construction navale & offshore", tags: "Coque · Armement · Tuyauterie" },
