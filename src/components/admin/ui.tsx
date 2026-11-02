@@ -80,3 +80,31 @@ export function fmtDay(value: string | null) {
   if (!value) return "–";
   return new Date(`${value.slice(0, 10)}T12:00:00Z`).toLocaleDateString("sk-SK", { day: "numeric", month: "numeric", year: "numeric" });
 }
+
+const MAIL_BADGE: Record<string, [label: string, tone: string]> = {
+  in: ["Prijatý", "chip--info"],
+  out: ["Odoslaný", ""],
+  auto_reply: ["Automatická odpoveď", "chip--warn"],
+  bounce: ["Nedoručený", "chip--bad"],
+};
+
+/** What a recorded e-mail is: received, sent, an automatic reply or a bounce. */
+export function MailBadge({ direction, kind }: { direction: string; kind: string }) {
+  const [label, tone] = MAIL_BADGE[kind === "normal" ? direction : kind] ?? [kind, ""];
+  return <span className={`chip ${tone}`}>{label}</span>;
+}
+
+/** "45 %", or "–" when there is nothing to divide. */
+export function percent(part: number, whole: number) {
+  return whole ? `${Math.round((part / whole) * 100)} %` : "–";
+}
+
+/** Hours as "5 h", "1 deň", "2,5 dňa", "4 dni". */
+export function fmtDuration(hours: number | null) {
+  if (hours == null) return "–";
+  if (hours < 1) return "do 1 h";
+  if (hours < 48) return `${Math.round(hours)} h`;
+  const days = Math.round((hours / 24) * 10) / 10;
+  if (Number.isInteger(days)) return `${days} ${plural(days, "deň", "dni", "dní")}`;
+  return `${days.toLocaleString("sk-SK")} dňa`;
+}

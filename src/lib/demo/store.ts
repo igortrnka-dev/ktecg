@@ -43,12 +43,20 @@ const DEFAULTS: Record<string, () => Row> = {
     roles: [], industries: [], question: "", status: "running", report: null, log: null, error: null, usage: null,
     created_at: now(), finished_at: null,
   }),
+  lead_emails: () => ({
+    folder: null, kind: "normal", from_email: null, from_name: null, to_emails: [], cc_emails: [], subject: null,
+    snippet: null, body: null, sent_at: null, in_reply_to: null, created_at: now(),
+  }),
 };
 
 const PRIMARY_KEY: Record<string, string> = { settings: "key" };
-const UNIQUE: Record<string, string[]> = { leads: ["domain"] };
+/** Unique column sets: a row clashes when another row has the same non-null values in all of them. */
+const UNIQUE: Record<string, string[][]> = { leads: [["domain"]], lead_emails: [["lead_id", "message_id"]] };
 /** Embeddable relations, e.g. `select("*, campaigns(name)")`. */
-const EMBEDS: Record<string, { fk: string; table: string }> = { campaigns: { fk: "campaign_id", table: "campaigns" } };
+const EMBEDS: Record<string, { fk: string; table: string }> = {
+  campaigns: { fk: "campaign_id", table: "campaigns" },
+  leads: { fk: "lead_id", table: "leads" },
+};
 const ON_DELETE: Record<string, { table: string; fk: string; cascade: boolean }[]> = {
   campaigns: [
     { table: "lead_runs", fk: "campaign_id", cascade: false },
@@ -57,6 +65,7 @@ const ON_DELETE: Record<string, { table: string; fk: string; cascade: boolean }[
   lead_runs: [{ table: "leads", fk: "run_id", cascade: false }],
   leads: [
     { table: "lead_events", fk: "lead_id", cascade: true },
+    { table: "lead_emails", fk: "lead_id", cascade: true },
     { table: "inquiries", fk: "lead_id", cascade: false },
   ],
 };
@@ -213,6 +222,9 @@ class Query implements PromiseLike<Result> {
   lt(col: string, value: unknown) {
     return this.where((r) => r[col] != null && r[col] < (value as string));
   }
+  gt(col: string, value: unknown) {
+    return this.where((r) => r[col] != null && r[col] > (value as string));
+  }
   /** Postgres `@>`; a jsonb value comes as JSON text, e.g. contains("contacts", '[{"email":"a@b.example"}]'). */
   contains(col: string, value: unknown) {
     const needle = typeof value === "string" ? JSON.parse(value) : value;
@@ -256,9 +268,11 @@ class Query implements PromiseLike<Result> {
   }
 
   private clash(row: Row, rows: Row[]): DbError | null {
-    const col = (UNIQUE[this.table] ?? []).find((c) => row[c] != null && rows.some((r) => r !== row && r[c] === row[c]));
-    return col
-      ? { code: "23505", message: `duplicate key value violates unique constraint "${this.table}_${col}_key"` }
+    const cols = (UNIQUE[this.table] ?? []).find(
+      (set) => set.every((c) => row[c] != null) && rows.some((r) => r !== row && set.every((c) => r[c] === row[c])),
+    );
+    return cols
+      ? { code: "23505", message: `duplicate key value violates unique constraint "${this.table}_${cols.join("_")}_key"` }
       : null;
   }
 

@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Keeps the Next.js dev badge out of the way when the local admin preview is shown to people.
   devIndicators: false,
+  // Node-only mail libraries (sockets, charset tables loaded at runtime): required from node_modules, not bundled.
+  serverExternalPackages: ["imapflow", "mailparser"],
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

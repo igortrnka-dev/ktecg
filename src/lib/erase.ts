@@ -1,9 +1,9 @@
 import { db } from "@/lib/supabase/admin";
 
 /*
- * Personal data deleteLead removes besides the lead row and its history: website inquiries sent from the
- * contacts' addresses, and the contacts' e-mails, names, phone numbers and LinkedIn profiles in the prospecting
- * run logs.
+ * Personal data deleteLead removes besides the lead row, its history and its recorded e-mails: website inquiries
+ * sent from the contacts' addresses, and the contacts' e-mails, names, phone numbers and LinkedIn profiles in the
+ * prospecting run logs and in other leads' recorded e-mails.
  */
 
 type Contact = { name?: string | null; role?: string | null; email?: string | null; phone?: string | null; linkedin?: string | null };
@@ -145,8 +145,20 @@ function phonePattern(phone: string) {
 
 const PAGE = 500;
 
-/** Replaces the contacts' e-mails, names, phone numbers and LinkedIn profiles with REDACTED in every run log; returns how many logs changed. */
-export async function redactRunLogs(contacts: Contact[] | null): Promise<number> {
+type Page<T> = (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>;
+
+/** Every row a query finds, page by page: a phone search matches many rows, and PostgREST returns at most 1000 per request. */
+async function allPages<T>(query: Page<T>): Promise<T[]> {
+  const found: T[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const page = rows(await query(from, from + PAGE - 1));
+    found.push(...page);
+    if (page.length < PAGE) return found;
+  }
+}
+
+/** Regexes that find the contacts' e-mails, names, phone numbers and LinkedIn profiles in text, and LIKE terms that find the rows to run them on. */
+function redaction(contacts: Contact[] | null) {
   const { emails, names, phones, profiles } = erasureTerms(contacts);
   const words = names.map((n) => n.split(/\s+/));
   const patterns = [
@@ -164,22 +176,103 @@ export async function redactRunLogs(contacts: Contact[] | null): Promise<number>
     ...phones.map((p) => digitsOf(p).slice(-7).split("").join("%")),
     ...profiles.map((s) => `/in/${likeLiteral(s)}`),
   ];
+  const redact = (text: string) => patterns.reduce((t, re) => t.replace(re, REDACTED), text);
+  return { emails, searches, redact };
+}
+
+/** Replaces the contacts' e-mails, names, phone numbers and LinkedIn profiles with REDACTED in every run log; returns how many logs changed. */
+export async function redactRunLogs(contacts: Contact[] | null): Promise<number> {
+  const { searches, redact } = redaction(contacts);
   const logs = new Map<string, string>();
   for (const term of searches) {
-    // Page by page: a phone search matches many logs, and PostgREST returns at most 1000 rows per request.
-    for (let from = 0; ; from += PAGE) {
-      const page = rows<{ id: string; log: string | null }>(
-        await db().from("lead_runs").select("id, log").ilike("log", `%${term}%`).order("id").range(from, from + PAGE - 1),
-      );
-      for (const r of page) logs.set(r.id, r.log ?? "");
-      if (page.length < PAGE) break;
-    }
+    const found = await allPages<{ id: string; log: string | null }>((from, to) =>
+      db().from("lead_runs").select("id, log").ilike("log", `%${term}%`).order("id").range(from, to),
+    );
+    for (const r of found) logs.set(r.id, r.log ?? "");
   }
   let changed = 0;
   for (const [id, log] of logs) {
-    const redacted = patterns.reduce((text, re) => text.replace(re, REDACTED), log);
+    const redacted = redact(log);
     if (redacted === log) continue;
     const { error } = await db().from("lead_runs").update({ log: redacted }).eq("id", id);
+    if (error) throw new Error(error.message);
+    changed++;
+  }
+  return changed;
+}
+
+type MailRow = {
+  id: string; from_email: string | null; from_name: string | null; to_emails: string[]; cc_emails: string[];
+  subject: string | null; snippet: string | null; body: string | null;
+};
+const MAIL_COLUMNS = "id, from_email, from_name, to_emails, cc_emails, subject, snippet, body";
+
+/** PostgREST's answer while a table does not exist yet (a migration not run): nothing is stored there. */
+const missingTable = (error: { code?: string } | null) => error?.code === "PGRST205" || error?.code === "42P01";
+
+type Redaction = ReturnType<typeof redaction>;
+
+/**
+ * The contacts' data in other leads' recorded e-mails (one sent to both companies, a bounce for both) and in those
+ * leads' e-mail history lines, replaced with REDACTED; returns how many rows changed. The lead's own e-mails and
+ * history are deleted with it.
+ */
+export async function redactOtherMail(leadId: string, contacts: Contact[] | null): Promise<number> {
+  const terms = redaction(contacts);
+  if (!terms.searches.length) return 0;
+  return (await redactMailRows(leadId, terms)) + (await redactMailEvents(leadId, terms));
+}
+
+async function redactMailRows(leadId: string, { emails, searches, redact }: Redaction): Promise<number> {
+  const probe = await db().from("lead_emails").select("id").limit(1);
+  if (missingTable(probe.error)) return 0;
+  rows(probe);
+  const mail = () => db().from("lead_emails").select(MAIL_COLUMNS).neq("lead_id", leadId).order("id");
+  const lists = await Promise.all([
+    ...emails.flatMap((e) => [
+      allPages<MailRow>((from, to) => mail().eq("from_email", e).range(from, to)),
+      allPages<MailRow>((from, to) => mail().contains("to_emails", [e]).range(from, to)),
+      allPages<MailRow>((from, to) => mail().contains("cc_emails", [e]).range(from, to)),
+    ]),
+    ...searches.flatMap((term) =>
+      ["from_name", "subject", "snippet", "body"].map((col) => allPages<MailRow>((from, to) => mail().ilike(col, `%${term}%`).range(from, to))),
+    ),
+  ]);
+  const found = new Map(lists.flat().map((r) => [r.id, r]));
+  const address = (a: string) => (emails.includes(a.toLowerCase()) ? REDACTED : a);
+  const text = (t: string | null) => (t == null ? t : redact(t));
+  let changed = 0;
+  for (const r of found.values()) {
+    const patch = {
+      from_email: r.from_email == null ? null : address(r.from_email),
+      from_name: text(r.from_name),
+      to_emails: r.to_emails.map(address),
+      cc_emails: r.cc_emails.map(address),
+      subject: text(r.subject),
+      snippet: text(r.snippet),
+      body: text(r.body),
+    };
+    if (Object.entries(patch).every(([k, v]) => JSON.stringify(v) === JSON.stringify(r[k as keyof MailRow]))) continue;
+    const { error } = await db().from("lead_emails").update(patch).eq("id", r.id);
+    if (error) throw new Error(error.message);
+    changed++;
+  }
+  return changed;
+}
+
+async function redactMailEvents(leadId: string, { searches, redact }: Redaction): Promise<number> {
+  const events = new Map<string, string>();
+  for (const term of searches) {
+    const found = await allPages<{ id: string; body: string | null }>((from, to) =>
+      db().from("lead_events").select("id, body").eq("type", "email").neq("lead_id", leadId).ilike("body", `%${term}%`).order("id").range(from, to),
+    );
+    for (const e of found) events.set(e.id, e.body ?? "");
+  }
+  let changed = 0;
+  for (const [id, body] of events) {
+    const redacted = redact(body);
+    if (redacted === body) continue;
+    const { error } = await db().from("lead_events").update({ body: redacted }).eq("id", id);
     if (error) throw new Error(error.message);
     changed++;
   }
