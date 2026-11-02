@@ -3,7 +3,7 @@ import Icon, { type IconName } from "./Icon";
 import Photo from "./Photo";
 import SectionHead from "./SectionHead";
 
-const icons: IconName[] = ["weld", "pipe", "beam", "bolt", "chip", "gear", "cnc", "assembly", "forklift"];
+const icons: IconName[] = ["weld", "pipe", "beam", "bolt", "chip", "gear", "cnc", "assembly", "gauge"];
 /** Photo strip above the grid: slug and the trade (index into items) it illustrates. */
 const gallery = [
   { slug: "trade-welding", item: 0 },

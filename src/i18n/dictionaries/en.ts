@@ -81,7 +81,7 @@ const en = {
       { name: "Mechanics & millwrights", skills: ["Machine installation", "Alignment", "Outage maintenance"] },
       { name: "CNC & machine operators", skills: ["Turning & milling", "Machine set-up", "Measuring"] },
       { name: "Assembly operators", skills: ["Line assembly", "Quality inspection", "Shift work"] },
-      { name: "Logistics operators", skills: ["Forklift", "Warehouse & picking", "Line supply"] },
+      { name: "Instrumentation & control technicians", skills: ["Measurement & control", "Instrument calibration", "Sensors & control loops"] },
     ],
     note: "Looking for another profession? Ask us. Our network covers most industrial trades.",
   },
@@ -106,7 +106,7 @@ const en = {
     label: "Industries",
     title: "Where our people work",
     items: [
-      { name: "Automotive & suppliers", tags: "Assembly · Body-in-white · Quality" },
+      { name: "Automotive & suppliers", tags: "Automation · Programming · Robotics" },
       { name: "Metalworking & welding", tags: "MIG/MAG · TIG · Steel structures" },
       { name: "Energy & power plants", tags: "Outages · Piping · Mechanical" },
       { name: "Shipbuilding & offshore", tags: "Hull · Outfitting · Pipe fitting" },

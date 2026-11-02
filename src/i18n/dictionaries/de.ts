@@ -83,7 +83,7 @@ const de: Dictionary = {
       { name: "Mechaniker & Industriemonteure", skills: ["Maschinenaufstellung", "Ausrichtung", "Revisionsarbeiten"] },
       { name: "CNC- & Maschinenbediener", skills: ["Drehen & Fräsen", "Maschineneinrichtung", "Messen"] },
       { name: "Montagemitarbeiter", skills: ["Linienmontage", "Qualitätsprüfung", "Schichtarbeit"] },
-      { name: "Logistikmitarbeiter", skills: ["Stapler", "Lager & Kommissionierung", "Linienversorgung"] },
+      { name: "MSR-Techniker", skills: ["Mess-, Steuer- und Regelungstechnik", "Kalibrierung von Messgeräten", "Sensorik & Regelkreise"] },
     ],
     note: "Der gesuchte Beruf ist nicht dabei? Fragen Sie uns\u00a0– unser Netzwerk deckt die meisten Industrieberufe ab.",
   },
@@ -108,7 +108,7 @@ const de: Dictionary = {
     label: "Branchen",
     title: "Wo unsere Leute arbeiten",
     items: [
-      { name: "Automobil & Zulieferer", tags: "Montage · Karosseriebau · Qualität" },
+      { name: "Automobil & Zulieferer", tags: "Automatisierung · Programmierung · Robotik" },
       { name: "Metallverarbeitung & Schweißen", tags: "MIG/MAG · WIG · Stahlbau" },
       { name: "Energie & Kraftwerke", tags: "Revisionen · Rohrleitungen · Mechanik" },
       { name: "Schiffbau & Offshore", tags: "Rumpf · Ausrüstung · Rohrleitungsmontage" },

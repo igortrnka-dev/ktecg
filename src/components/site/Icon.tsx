@@ -50,13 +50,12 @@ const paths: Record<string, React.ReactNode> = {
       <circle cx="17" cy="19" r="0.5" />
     </>
   ),
-  forklift: (
+  gauge: (
     <>
-      <path d="M4 17V9h6l3 5v3" />
-      <path d="M17 4v13h4" />
-      <path d="M13 14h4" />
-      <circle cx="7" cy="18" r="2" />
-      <circle cx="13" cy="18" r="1.5" />
+      <path d="M3.5 17a8.5 8.5 0 0117 0" />
+      <path d="M12 17l4.2-5.2" />
+      <circle cx="12" cy="17" r="1.3" />
+      <path d="M6.2 11.2l1.2 1.1M12 8.5V10M17.8 11.2l-1.2 1.1M3.5 20h17" />
     </>
   ),
   // services

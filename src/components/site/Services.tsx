@@ -1,15 +1,14 @@
 import type { Dictionary } from "@/i18n";
-import Art from "./Art";
 import Icon, { type IconName } from "./Icon";
 import Photo from "./Photo";
 import SectionHead from "./SectionHead";
 
 const icons: IconName[] = ["people", "chart", "route"];
 /**
- * null shows the art until a photo of our own crew in full PPE replaces it. The same goes for the "All included"
- * panel: the stock shots showed work without gloves, face shield or fall protection, next to "PPE included".
+ * A missing file shows the art instead (see Photo). Photos here, and in the "All included" panel, must show every
+ * worker in full PPE for the task: they sit next to "PPE included".
  */
-const photos = ["service-leasing", "service-outages", null];
+const photos = ["service-leasing", "service-outages", "service-mobilisation"];
 
 export default function Services({ t }: { t: Dictionary }) {
   return (
@@ -19,7 +18,7 @@ export default function Services({ t }: { t: Dictionary }) {
         {t.services.items.map((s, i) => (
           <article key={s.title} className="tile tile--service" data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
             <div className="tile__media">
-              {photos[i] ? <Photo slug={photos[i]} variant={i + 2} /> : <Art variant={i + 2} />}
+              <Photo slug={photos[i]} variant={i + 2} />
               <span className="tile__icon tile__icon--accent"><Icon name={icons[i]} /></span>
             </div>
             <h3 className="tile__title">{s.title}</h3>
@@ -39,7 +38,7 @@ export default function Services({ t }: { t: Dictionary }) {
           <h3 className="included__title">{t.included.title}</h3>
           <p className="muted">{t.included.lead}</p>
           <div className="included__media">
-            <Art variant={5} />
+            <Photo slug="included" variant={5} />
           </div>
         </div>
         <ul className="included__list">

@@ -83,7 +83,7 @@ const sk: Dictionary = {
       { name: "Mechanici a montéri strojov", skills: ["Inštalácia strojov", "Ustavovanie", "Údržba počas odstávok"] },
       { name: "Operátori CNC a strojov", skills: ["Sústruženie a frézovanie", "Nastavovanie strojov", "Meranie"] },
       { name: "Montážni operátori", skills: ["Montáž na linke", "Kontrola kvality", "Zmenová práca"] },
-      { name: "Operátori logistiky", skills: ["VZV", "Sklad a vychystávanie", "Zásobovanie liniek"] },
+      { name: "Technici pre meranie a reguláciu", skills: ["MaR", "Kalibrácia prístrojov", "Snímače a regulačné slučky"] },
     ],
     note: "Hľadáte inú profesiu? Opýtajte sa nás – naša sieť pokrýva väčšinu priemyselných odborností.",
   },
@@ -108,7 +108,7 @@ const sk: Dictionary = {
     label: "Odvetvia",
     title: "Kde pracujú naši ľudia",
     items: [
-      { name: "Automobilový priemysel a dodávatelia", tags: "Montáž · Karosárne · Kvalita" },
+      { name: "Automobilový priemysel a dodávatelia", tags: "Automatizácia · Programovanie · Robotika" },
       { name: "Kovovýroba a zváranie", tags: "MIG/MAG · TIG · Oceľové konštrukcie" },
       { name: "Energetika a elektrárne", tags: "Odstávky · Potrubia · Strojné montáže" },
       { name: "Lodiarstvo a offshore", tags: "Trup · Vystrojovanie · Potrubárstvo" },
