@@ -20,7 +20,7 @@ Downloaded on 2026-10-29, resized to max 1600px wide.
 | contact.jpg | Christopher Burns | https://unsplash.com/photos/8KfCR12oeUM |
 | sector-energy.jpg | iSawRed | https://unsplash.com/photos/pCZsRKT-_Ns (downloaded 2026-11-02) |
 | included.jpg | Ümit Yıldırım | https://unsplash.com/photos/Ass0DusYDk4 (downloaded 2026-11-02) |
-| service-mobilisation.jpg | Armin Iranzad | https://unsplash.com/photos/1YkvAHgw6fo (downloaded 2026-11-02) |
+| service-mobilisation.jpg | Armin Iranzad | https://unsplash.com/photos/1YkvAHgw6fo (downloaded 2026-11-02, cropped to the crew) |
 
 ## Removed
 
