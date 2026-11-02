@@ -5,6 +5,7 @@ import { RunStatus, fmtDate } from "@/components/admin/ui";
 import Icon from "@/components/admin/Icon";
 import SubmitButton from "@/components/admin/SubmitButton";
 import AutoRefresh from "@/components/admin/AutoRefresh";
+import PageNotice from "@/components/admin/PageNotice";
 import { plural } from "@/lib/plural";
 import { deleteCampaign, runCampaign, saveCampaign } from "../../actions";
 
@@ -48,9 +49,9 @@ const searches = (n: number) => `${n} ${plural(n, "vyhľadávanie", "vyhľadáva
 
 const list = (items: string[]) => (items.length ? items.join(", ") : <span className="muted">neuvedené</span>);
 
-export default async function Campaigns({ searchParams }: { searchParams: Promise<{ busy?: string }> }) {
+export default async function Campaigns({ searchParams }: { searchParams: Promise<{ busy?: string; created?: string }> }) {
   await requireAdmin();
-  const { busy } = await searchParams;
+  const { busy, created } = await searchParams;
   // Otherwise a run cut off by a restart would keep this page polling until the next run starts.
   await closeStaleRuns();
   const [{ data: campaigns }, { data: runs }] = await Promise.all([
@@ -70,6 +71,13 @@ export default async function Campaigns({ searchParams }: { searchParams: Promis
         </div>
         <a className="abtn" href="#nova-kampan"><Icon name="plus" />Nová kampaň</a>
       </header>
+
+      {created !== undefined && (
+        <PageNotice param="created">
+          Kampaň {created ? `„${created}“ ` : ""}je vytvorená z analýzy trhu. Hľadá len ručne: skontrolujte ju a spustite
+          tlačidlom „Hľadať teraz“.
+        </PageNotice>
+      )}
 
       <div className="grid-detail">
         <div className="stack">

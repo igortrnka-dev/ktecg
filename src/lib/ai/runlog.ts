@@ -13,3 +13,15 @@ export const runLog = {
   /** Stored as the run error by closeStaleRuns. */
   interrupted: "Beh sa prerušil (napr. reštart servera). Spustite hľadanie znova.",
 };
+
+/** Slovak texts of the market analysis log, shared by the real analysis, the demo and the seed. */
+export const marketLog = {
+  researching: (title: string) => `Skúmam trh: ${title}`,
+  researched: (searches: number) =>
+    `Prieskum na webe hotový (${searches} ${plural(searches, "vyhľadávanie", "vyhľadávania", "vyhľadávaní")}). Píšem analýzu…`,
+  saved: (companies: number, sources: number) =>
+    `Analýza hotová: ${companies} ${plural(companies, "firma", "firmy", "firiem")}, ${sources} ${plural(sources, "zdroj", "zdroje", "zdrojov")}.`,
+  /** Stored as the analysis error by closeStaleReports. */
+  interrupted: "Analýza sa prerušila (napr. reštart servera). Spustite ju znova.",
+  addedEvent: (title: string, day: string) => `Pridané z analýzy trhu ${title} (${day}).`,
+};

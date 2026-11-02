@@ -13,6 +13,10 @@ admin that uses Claude to find, qualify and draft outreach to sales leads.
   - *AI prospecting*: campaigns (countries, industries, roles). Claude searches the web for buying signals
     (job ads, expansions, project wins, outages), returns structured, scored leads with a personalised first e-mail.
     Active campaigns also run daily via the Render cron job.
+  - *Analýzy trhu*: Claude researches a country for chosen trades on the web (demand and job-ad indicators, companies
+    hiring, competitors, wages and rates for leased staff, rules for leasing and posting workers, seasonality) and saves a
+    sourced report in Slovak. From it, companies go into the pipeline with "Pridať ako lead" (an existing lead with the
+    same domain is linked instead), and "Vytvoriť kampaň z analýzy" creates an inactive prospecting campaign.
   - *Nastavenia*: the company profile / ideal-customer text Claude works from. Claude is told to use only
     the facts in it. 0001_init.sql seeds it once, so a project that ran an older 0001 still has the old
     default text (it mentioned Switzerland, the UK, "certified" welders and engagement sizes, and lacked the
@@ -23,9 +27,10 @@ Stack: Next.js 15 (App Router), Supabase (Postgres + Auth), Anthropic API (`clau
 
 ## Setup
 
-1. **Supabase** – create a project, then run `supabase/migrations/0001_init.sql` and then
-   `supabase/migrations/0002_inquiry_duration_shift.sql` in the SQL editor. 0002 is safe to run again; a
-   project set up with an older 0001 needs it, or every website inquiry fails.
+1. **Supabase** – create a project, then run `supabase/migrations/0001_init.sql`, then
+   `supabase/migrations/0002_inquiry_duration_shift.sql` and then `supabase/migrations/0003_market_reports.sql` in
+   the SQL editor. 0002 and 0003 are safe to run again; a project set up with an older 0001 needs 0002, or every
+   website inquiry fails, and an existing project needs 0003 for *Analýzy trhu*.
    In *Authentication → Users* add the admin user(s) with a password and tick *Auto Confirm User*
    (the admin only accepts confirmed e-mails listed in `ADMIN_EMAILS`).
    Then in *Authentication → Sign In / Providers* turn off *Allow new users to sign up* (it is on by default)
@@ -47,6 +52,9 @@ prospecting cron job. Fill in the env vars marked `sync: false` in the Render da
 - AI runs cost API credits: each prospecting run uses up to ~25 web searches plus two Claude calls.
   A campaign runs at most once at a time. Runs live in the web server process, so a run cut off by a
   restart or deploy is marked failed ("Beh sa prerušil") after an hour; its research notes stay in the run log.
+- A market analysis uses up to ~20 web searches plus two Claude calls and takes a few minutes; only one runs at a
+  time, and like a prospecting run it is marked failed after an hour if a restart cut it off. Its figures, wages and
+  rules are only as good as the sources it lists: the page marks wages as indicative and rules as informative.
 - The inquiry endpoint takes at most 5 requests per 10 minutes per visitor address (CF-Connecting-IP, which
   Render's Cloudflare edge sets; IPv6 counted per /64) and 5 inquiries per 10 minutes per sender company
   domain (the whole address for free-mail); over either limit it answers 429. Above 30 inquiries in 10 minutes

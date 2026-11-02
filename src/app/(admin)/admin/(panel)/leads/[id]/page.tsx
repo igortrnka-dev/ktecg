@@ -24,6 +24,7 @@ const signalLabel: Record<string, string> = {
   labour_shortage: "Nedostatok ľudí",
   tender: "Tender",
   inbound_request: "Dopyt z webu",
+  market_report: "Analýza trhu",
 };
 
 const eventLabel: Record<string, string> = {

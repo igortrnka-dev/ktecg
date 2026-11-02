@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/supabase/admin";
-import { Due, RunStatus, Score, Status, STATUSES, fmtDate, sourceLabel } from "@/components/admin/ui";
+import { Due, MarketStatus, Opportunity, RunStatus, Score, Status, STATUSES, fmtDate, sourceLabel } from "@/components/admin/ui";
 import Icon from "@/components/admin/Icon";
+import { marketTitle } from "@/lib/market";
 
 const HOT_STATUSES = ["new", "qualified"];
 
@@ -12,7 +13,7 @@ export default async function Dashboard() {
   const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
   const countLeads = () => db().from("leads").select("id", { count: "exact", head: true });
 
-  const [byStatusCount, { count: week }, { count: hotCount }, { data: hotRows }, { data: dueRows }, { data: runs }, { count: inquiries }, { count: inquiriesWeek }] =
+  const [byStatusCount, { count: week }, { count: hotCount }, { data: hotRows }, { data: dueRows }, { data: runs }, { count: inquiries }, { count: inquiriesWeek }, { data: market }] =
     await Promise.all([
       Promise.all(STATUSES.map((s) => countLeads().eq("status", s))),
       countLeads().gte("created_at", weekAgo),
@@ -23,6 +24,7 @@ export default async function Dashboard() {
       db().from("lead_runs").select("id, status, created, started_at, campaigns(name)").order("started_at", { ascending: false }).limit(5),
       db().from("inquiries").select("id", { count: "exact", head: true }),
       db().from("inquiries").select("id", { count: "exact", head: true }).gte("created_at", weekAgo),
+      db().from("market_reports").select("id, country, roles, status, opportunity:report->>opportunity, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
 
   const byStatus = Object.fromEntries(STATUSES.map((s, i) => [s, byStatusCount[i].count ?? 0]));
@@ -143,6 +145,25 @@ export default async function Dashboard() {
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      <section className="card" style={{ marginTop: 16 }}>
+        <div className="card__head">
+          <h2>Posledná analýza trhu</h2>
+          <Link href="/admin/market" className="link small">Všetky analýzy</Link>
+        </div>
+        {market ? (
+          <ul className="list">
+            <li>
+              <Link className="list__row" href={`/admin/market/${market.id}`}>
+                <span className="list__main"><strong>{marketTitle(market)}</strong><span>{fmtDate(market.created_at)}</span></span>
+                {market.status === "done" && market.opportunity ? <Opportunity level={market.opportunity} /> : <MarketStatus status={market.status} />}
+              </Link>
+            </li>
+          </ul>
+        ) : (
+          <p className="empty">Zatiaľ žiadna analýza. <Link href="/admin/market" className="link">Spustiť analýzu trhu</Link></p>
         )}
       </section>
     </>

@@ -15,7 +15,10 @@ import { leadInquiryIds, redactRunLogs } from "@/lib/erase";
 import { fmtDay, PRE_CONTACT } from "@/components/admin/ui";
 import { isDemo, simulateAi } from "@/lib/demo/mode";
 import { demoSignIn, demoSignOut } from "@/lib/demo/session";
-import { simulateEnrich, simulateOutreach, simulateRun } from "@/lib/demo/ai";
+import { simulateEnrich, simulateMarketReport, simulateOutreach, simulateRun } from "@/lib/demo/ai";
+import { createMarketReport, startMarketReport } from "@/lib/ai/market";
+import { marketLog } from "@/lib/ai/runlog";
+import { httpUrl, marketTitle, type MarketReportRow } from "@/lib/market";
 
 const list = (v: FormDataEntryValue | null) =>
   String(v ?? "")
@@ -238,4 +241,137 @@ export async function saveSettings(form: FormData) {
       .upsert({ key: "company_profile", value: String(form.get("company_profile") ?? ""), updated_at: new Date().toISOString() }),
   );
   revalidatePath("/admin/settings");
+}
+
+/** A form list of at most 10 items of at most 80 characters each, or null when it is longer. */
+function shortList(v: FormDataEntryValue | null): string[] | null {
+  const items = list(v);
+  return items.length <= 10 && items.every((item) => item.length <= 80) ? items : null;
+}
+
+const MARKET_FIELDS = ["country", "roles", "industries", "question"] as const;
+
+/** Back to the form with a notice; what was typed comes along, so the form shows it again. */
+function backToMarketForm(form: FormData, notice: Record<string, string>): never {
+  const params = new URLSearchParams(notice);
+  for (const key of MARKET_FIELDS) {
+    const value = String(form.get(key) ?? "").trim();
+    if (value) params.set(key, value.slice(0, 1200));
+  }
+  redirect(`/admin/market?${params}`);
+}
+
+export async function startMarketAnalysis(form: FormData) {
+  await requireAdmin();
+  const country = String(form.get("country") ?? "").trim();
+  const roles = shortList(form.get("roles"));
+  const industries = shortList(form.get("industries"));
+  // Browsers send textarea line breaks as CRLF but count them as one character against maxLength.
+  const question = String(form.get("question") ?? "").replace(/\r\n?/g, "\n").trim();
+  if (!country || country.length > 100) backToMarketForm(form, { error: "country" });
+  if (!roles) backToMarketForm(form, { error: "roles" });
+  if (!industries) backToMarketForm(form, { error: "industries" });
+  if (question.length > 1000) backToMarketForm(form, { error: "question" });
+
+  const id = await createMarketReport({ country, roles, industries, question });
+  if (!id) backToMarketForm(form, { busy: "1" });
+  if (simulateAi()) await simulateMarketReport(id);
+  else startMarketReport(id);
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/market/${id}`);
+}
+
+export async function deleteMarketReport(form: FormData) {
+  await requireAdmin();
+  const id = String(form.get("id"));
+  const { data: row } = await db().from("market_reports").select("country, roles").eq("id", id).maybeSingle();
+  if (row) check(await db().from("market_reports").delete().eq("id", id));
+  revalidatePath("/admin", "layout");
+  redirect(row ? `/admin/market?deleted=${encodeURIComponent(marketTitle(row))}` : "/admin/market");
+}
+
+async function leadIdByDomain(domain: string): Promise<string | null> {
+  const { data } = await db().from("leads").select("id").eq("domain", domain).maybeSingle();
+  return data?.id ?? null;
+}
+
+/**
+ * "Pridať ako lead" on a company of a market analysis: a new lead, or the lead that already has the company's
+ * domain. The report remembers the lead, so the page links to it, also for a company without a website.
+ */
+export async function addCompanyAsLead(form: FormData) {
+  await requireAdmin();
+  const id = String(form.get("id"));
+  const index = Number(form.get("index"));
+  const { data: row } = await db().from("market_reports").select("*").eq("id", id).maybeSingle<MarketReportRow>();
+  const company = row?.report && Number.isInteger(index) ? row.report.companies[index] : undefined;
+  if (!row?.report || !company) redirect(`/admin/market/${id}`);
+
+  const domain = normalizeDomain(company.website);
+  let leadId: string | null = null;
+  if (company.lead_id) {
+    const { data } = await db().from("leads").select("id").eq("id", company.lead_id).maybeSingle();
+    leadId = data?.id ?? null;
+  }
+  if (!leadId && domain) leadId = await leadIdByDomain(domain);
+  if (!leadId) {
+    const { data: lead, error } = await db()
+      .from("leads")
+      .insert({
+        company_name: company.name.trim() || domain || "Firma z analýzy trhu",
+        website: httpUrl(company.website),
+        domain,
+        country: row.country,
+        city: company.city.trim() || null,
+        industry: company.industry.trim() || null,
+        signals: company.signal.trim() ? [{ type: "market_report", detail: company.signal.trim(), url: httpUrl(company.url) ?? "" }] : [],
+        status: "new",
+        source: "ai_prospecting",
+      })
+      .select("id")
+      .single();
+    // The domain is unique: a lead with it was added after our lookup.
+    if (error?.code === "23505" && domain) leadId = await leadIdByDomain(domain);
+    else if (error || !lead) throw new Error(error?.message ?? "Lead sa nepodarilo uložiť.");
+    else {
+      leadId = lead.id;
+      check(await db().from("lead_events").insert({ lead_id: lead.id, type: "created", body: marketLog.addedEvent(marketTitle(row), fmtDay(row.created_at)) }));
+    }
+  }
+  if (!leadId) throw new Error("Lead sa nepodarilo uložiť.");
+
+  const companies = row.report.companies.map((c, i) => (i === index ? { ...c, lead_id: leadId } : c));
+  check(await db().from("market_reports").update({ report: { ...row.report, companies } }).eq("id", id));
+  revalidatePath("/admin", "layout");
+}
+
+/** An inactive campaign from the analysis' suggested campaign, to check and start by hand. */
+export async function createCampaignFromReport(form: FormData) {
+  await requireAdmin();
+  const id = String(form.get("id"));
+  const { data: row } = await db().from("market_reports").select("*").eq("id", id).maybeSingle<MarketReportRow>();
+  if (!row?.report) redirect(`/admin/market/${id}`);
+
+  const suggested = row.report.suggested_campaign;
+  const clean = (items: string[] | undefined, fallback: string[]) => {
+    const kept = (items ?? []).map((item) => item.trim()).filter(Boolean).slice(0, 10);
+    return kept.length ? kept : fallback;
+  };
+  const title = marketTitle(row);
+  const name = suggested?.name?.trim() || `Kampaň z analýzy ${title}`;
+  const regions = row.report.regions.map((r) => r.name.trim()).filter(Boolean).slice(0, 5).join(", ");
+  check(
+    await db().from("campaigns").insert({
+      name,
+      countries: clean(suggested?.countries, [row.country]),
+      industries: clean(suggested?.industries, row.industries),
+      roles: clean(suggested?.roles, row.roles),
+      notes: `Z analýzy trhu ${title} (${fmtDay(row.created_at)}).${regions ? ` Zameraj sa najmä na regióny: ${regions}.` : ""}`,
+      outreach_language: "auto",
+      leads_per_run: 10,
+      active: false,
+    }),
+  );
+  revalidatePath("/admin/campaigns");
+  redirect(`/admin/campaigns?created=${encodeURIComponent(name)}`);
 }

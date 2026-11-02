@@ -39,6 +39,10 @@ const DEFAULTS: Record<string, () => Row> = {
     message: null, locale: null, lead_id: null, created_at: now(),
   }),
   settings: () => ({ updated_at: now() }),
+  market_reports: () => ({
+    roles: [], industries: [], question: "", status: "running", report: null, log: null, error: null, usage: null,
+    created_at: now(), finished_at: null,
+  }),
 };
 
 const PRIMARY_KEY: Record<string, string> = { settings: "key" };
@@ -70,6 +74,13 @@ function project(row: Row, cols: string): Row {
     if (!part) continue;
     if (part === "*") {
       out = { ...out, ...row };
+      continue;
+    }
+    // A jsonb field as text, named like PostgREST does: "report->>opportunity" or "alias:report->>opportunity".
+    const field = part.match(/^(?:(\w+):)?(\w+)->>(\w+)$/);
+    if (field) {
+      const value = row[field[2]]?.[field[3]];
+      out[field[1] ?? field[3]] = value == null ? null : typeof value === "string" ? value : JSON.stringify(value);
       continue;
     }
     const embed = part.match(/^(\w+)\((.*)\)$/);

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { AI_ERROR } from "../ai/errors";
-import { runLog } from "../ai/runlog";
+import { marketLog, runLog } from "../ai/runlog";
+import type { MarketReportData } from "../ai/schemas";
 import { NEXT_ACTION } from "../inquiries";
 
 /*
@@ -34,6 +35,160 @@ const RESEARCH_NOTES = `1. Brenner Achsentechnik GmbH (brenner-achsen.example), 
    Decision makers: Thomas Weidner, Leiter Produktion, t.weidner@brenner-achsen.example, +49 375 555 0140; Sabine Kroll, Personalleiterin, s.kroll@brenner-achsen.example.
 2. Alpenstahl Montage GmbH (alpenstahl.example), Linz, Austria – steel structures and installation.
    Decision makers: Stefan Gruber, Geschäftsführer, s.gruber@alpenstahl.example.`;
+
+/** A finished sample market analysis; fictional companies, sources and figures (.example domains). */
+const MARKET_REPORT: MarketReportData = {
+  summary:
+    "Ukážková analýza s vymyslenými firmami, zdrojmi a číslami. Dopyt po zváračoch a montéroch v Nemecku je vysoký najmä v strojárstve, u dodávateľov pre automotive a vo výrobe komponentov pre veterné elektrárne; inzeráty na tieto profesie ostávajú otvorené aj niekoľko mesiacov. Najviac ponúk je v Severnom Porýní-Vestfálsku, Bádensku-Württembersku a Bavorsku. Viaceré firmy rozširujú výrobu alebo chystajú jarné odstávky, čo otvára priestor pre tímy na 3–12 mesiacov. Konkurencia veľkých personálnych agentúr je silná, preto sa oplatí stavať na prakticky preverených ľuďoch a rýchlom nástupe.",
+  opportunity: "vysoká",
+  opportunity_reason:
+    "Dlhodobo neobsadené pozície, nové linky a jarné odstávky u viacerých firiem zo zoznamu. Riziko: cenový tlak veľkých agentúr a povinnosti pri prenájme pracovníkov do Nemecka.",
+  demand_signals: [
+    {
+      title: "Dlhodobo otvorené inzeráty na zváračov",
+      detail: "Ukážkový prehľad pracovných portálov uvádza 2 000 – 3 000 aktívnych inzerátov na zváračov MIG/MAG a TIG (09/2026), časť z nich je otvorená dlhšie ako 60 dní.",
+      url: "https://jobportal-prehlad.example/schweisser-2026",
+    },
+    {
+      title: "Zvárači medzi nedostatkovými profesiami",
+      detail: "Ukážková štatistika úradu práce radí zváračov a montérov kovových konštrukcií medzi profesie s nedostatkom uchádzačov (správa 06/2026).",
+      url: "https://statistika-prace.example/engpass-2026",
+    },
+    {
+      title: "Nové linky a haly s nábehom v 1. polroku",
+      detail: "Tri firmy zo zoznamu ohlásili nové výrobné linky alebo haly; nábor zváračov a montérov prebieha už teraz.",
+      url: "https://priemysel-spravy.example/investitionen-q3",
+    },
+    {
+      title: "Jarné odstávky v chemickom priemysle",
+      detail: "Údržbové firmy v Sasku-Anhaltsku hľadajú subdodávateľov na potrubné a montážne práce počas odstávok v marci a apríli.",
+      url: "https://saale-anlagenservice.example/revision-2027",
+    },
+  ],
+  regions: [
+    { name: "Severné Porýnie-Vestfálsko", detail: "Najviac inzerátov na zváračov; strojárstvo, oceľové konštrukcie, chemický priemysel." },
+    { name: "Bádensko-Württembersko", detail: "Strojárstvo a dodávatelia pre automotive; vysoké mzdy, dôraz na kvalitu a nemčinu majstra." },
+    { name: "Bavorsko", detail: "Výroba kotlov, tlakových nádob a automotive; dopyt po zváračoch TIG." },
+    { name: "Dolné Sasko", detail: "Komponenty pre veterné elektrárne a lodiarstvo; projekty na 6–12 mesiacov." },
+  ],
+  industries: [
+    { name: "Strojárstvo", detail: "Najväčší objem inzerátov na zváračov a montérov, často na zmeny." },
+    { name: "Automotive dodávatelia", detail: "Nábehy nových liniek, potreba tímov na obmedzený čas." },
+    { name: "Komponenty pre veterné elektrárne", detail: "Rozširovanie výroby veží a rámov, zváranie hrubých plechov." },
+    { name: "Údržba chemických závodov", detail: "Krátke, intenzívne odstávky s pevným termínom." },
+  ],
+  companies: [
+    {
+      name: "Brenner Achsentechnik GmbH",
+      website: "https://brenner-achsen.example",
+      city: "Zwickau",
+      industry: "Automotive – nápravy",
+      signal: "14 otvorených pozícií pre MAG zváračov a údržbárov, nová zváracia linka so sériovou výrobou od 1. štvrťroka.",
+      url: "https://brenner-achsen.example/karriere",
+    },
+    {
+      name: "Ruhrtal Metalltechnik GmbH",
+      website: "https://ruhrtal-metall.example",
+      city: "Dortmund",
+      industry: "Oceľové konštrukcie a zariadenia",
+      signal: "Hľadajú 8 zváračov MAG a 4 montérov pre novú výrobnú halu; inzeráty sú otvorené od júla.",
+      url: "https://ruhrtal-metall.example/jobs",
+    },
+    {
+      name: "Neckar Fördertechnik GmbH",
+      website: "https://neckar-foerdertechnik.example",
+      city: "Heilbronn",
+      industry: "Strojárstvo – dopravníkové systémy",
+      signal: "Nová montážna linka s nábehom v 2. štvrťroku, 6 pozícií pre montérov a 2 pre zváračov TIG.",
+      url: "https://neckar-foerdertechnik.example/news/neue-montagelinie",
+    },
+    {
+      name: "Isar Kesseltechnik GmbH",
+      website: "https://isar-kessel.example",
+      city: "Landshut",
+      industry: "Kotly a tlakové nádoby",
+      signal: "Opakované inzeráty na zváračov TIG pre nerezové tlakové nádoby, posledný z 09/2026.",
+      url: "https://isar-kessel.example/karriere",
+    },
+    {
+      name: "Emsland Windtechnik GmbH",
+      website: "https://emsland-wind.example",
+      city: "Lingen",
+      industry: "Komponenty pre veterné elektrárne",
+      signal: "Rozšírenie výroby veží, 20 nových pozícií vo zváraní a montáži do konca roka.",
+      url: "https://emsland-wind.example/presse/erweiterung",
+    },
+    {
+      name: "Saale Anlagenservice GmbH",
+      website: "https://saale-anlagenservice.example",
+      city: "Halle (Saale)",
+      industry: "Údržba chemických závodov",
+      signal: "Jarná odstávka v marci, hľadajú subdodávateľov na potrubné a montážne práce na 5 týždňov.",
+      url: "https://saale-anlagenservice.example/revision-2027",
+    },
+  ],
+  competitors: [
+    { name: "Nordstern Personal GmbH", website: "https://nordstern-personal.example", detail: "Veľká sieť pobočiek, zváračov ponúka najmä na dlhodobý prenájom." },
+    { name: "Praxis Industrieservice GmbH", website: "https://praxis-industrie.example", detail: "Špecializácia na odstávky v chemickom priemysle, vlastní koordinátori." },
+    { name: "Montana Workforce Sp. z o.o.", website: "https://montana-workforce.example", detail: "Poľská agentúra, vysiela zváračov a montérov do Nemecka, nízke ceny." },
+  ],
+  wages: [
+    { role: "Zvárač MIG/MAG", range: "17 – 22 € / h hrubá mzda (ukážkový údaj, 09/2026)", detail: "Vyššie pri zmenách a v automotive.", url: "https://mzdy-prehlad.example/schweisser" },
+    { role: "Zvárač TIG", range: "19 – 25 € / h hrubá mzda (ukážkový údaj, 09/2026)", detail: "Nerez a tlakové nádoby na hornej hranici.", url: "https://mzdy-prehlad.example/wig-schweisser" },
+    { role: "Montér", range: "16 – 20 € / h hrubá mzda (ukážkový údaj, 09/2026)", detail: "", url: "https://mzdy-prehlad.example/monteur" },
+    { role: "Sadzba za prenajatého zvárača", range: "32 – 42 € / h (odhad)", detail: "Odhad z ukážkových cenníkov; závisí od zmien, ubytovania a dĺžky projektu.", url: "" },
+  ],
+  regulations: [
+    {
+      title: "Povolenie na prenájom pracovníkov (AÜG)",
+      detail: "Prenájom pracovníkov do Nemecka vyžaduje povolenie Bundesagentur für Arbeit, aj pre agentúru so sídlom v zahraničí.",
+      url: "https://pravidla-prenajmu.example/aueg",
+    },
+    {
+      title: "Formulár A1",
+      detail: "Potvrdenie, že vyslaný pracovník ostáva poistený na Slovensku; vydáva Sociálna poisťovňa pred začiatkom práce.",
+      url: "https://pravidla-prenajmu.example/a1",
+    },
+    {
+      title: "Nahlásenie vyslania",
+      detail: "Prenajatých pracovníkov treba pred nástupom nahlásiť colnej správe (Meldeportal-Mindestlohn).",
+      url: "https://pravidla-prenajmu.example/meldung",
+    },
+    {
+      title: "Minimálna mzda a Equal Pay",
+      detail: "Platí aspoň nemecká minimálna mzda; po 9 mesiacoch u jedného zákazníka rovnaká odmena ako kmeňoví zamestnanci.",
+      url: "https://pravidla-prenajmu.example/equal-pay",
+    },
+  ],
+  seasonality:
+    "Najviac dopytu je od februára do mája (nábehy výroby, jarné odstávky v chemickom priemysle) a v septembri a októbri. V auguste a koncom decembra sa projekty spomaľujú pre celozávodné dovolenky.",
+  recommendations: [
+    "Do konca mesiaca osloviť firmy s najčerstvejšími signálmi: Emsland Windtechnik a Saale Anlagenservice (odstávka v marci).",
+    "Pripraviť nemecký profil tímu zváračov MIG/MAG a TIG a montérov s praktickým testom a nástupom približne do 14 dní.",
+    "Pred prvou zákazkou overiť povolenie na prenájom pracovníkov (AÜG) a postup nahlásenia vyslania.",
+    "Spustiť AI vyhľadávanie pre strojárstvo a komponenty pre veterné elektrárne v Severnom Porýní-Vestfálsku a Dolnom Sasku.",
+  ],
+  suggested_campaign: {
+    name: "Zvárači a montéri – Nemecko, strojárstvo",
+    countries: ["Germany"],
+    industries: ["mechanical engineering", "steel structures", "wind energy components"],
+    roles: ["MIG/MAG welder", "TIG welder", "fitter"],
+  },
+  sources: [
+    { title: "Schweißer-Stellenmarkt 2026 (ukážkový prehľad)", url: "https://jobportal-prehlad.example/schweisser-2026" },
+    { title: "Engpassanalyse 2026 (ukážka)", url: "https://statistika-prace.example/engpass-2026" },
+    { title: "Investitionen im 3. Quartal (ukážka)", url: "https://priemysel-spravy.example/investitionen-q3" },
+    { title: "Löhne für Schweißer (ukážka)", url: "https://mzdy-prehlad.example/schweisser" },
+    { title: "Arbeitnehmerüberlassung aus dem Ausland (ukážka)", url: "https://pravidla-prenajmu.example/aueg" },
+    { title: "Emsland Windtechnik – Erweiterung der Turmfertigung", url: "https://emsland-wind.example/presse/erweiterung" },
+    { title: "Saale Anlagenservice – Revision 2027", url: "https://saale-anlagenservice.example/revision-2027" },
+  ],
+};
+
+/** An excerpt of the web research notes a real analysis keeps in its log (sample companies and figures). */
+const MARKET_NOTES = `Demand: job portals list 2,000–3,000 active ads for MIG/MAG and TIG welders in Germany (09/2026), part open over 60 days (https://jobportal-prehlad.example/schweisser-2026).
+Companies: Ruhrtal Metalltechnik GmbH (ruhrtal-metall.example), Dortmund – 8 MAG welders and 4 fitters for a new hall (https://ruhrtal-metall.example/jobs).
+Emsland Windtechnik GmbH (emsland-wind.example), Lingen – tower production expansion, 20 positions in welding and assembly (https://emsland-wind.example/presse/erweiterung).`;
 
 /** Prospects the simulated AI run "finds" (see ai.ts), taken in order. */
 export const PROSPECT_POOL: Row[] = [
@@ -614,6 +769,27 @@ export function seed(): Record<string, Row[]> {
     },
   ];
 
+  const market_reports: Row[] = [
+    {
+      id: randomUUID(),
+      country: "Nemecko",
+      roles: ["zvárači", "montéri"],
+      industries: ["strojárstvo", "automotive"],
+      question: "Kde je najväčší dopyt po zváračoch na projekty na 3–12 mesiacov?",
+      status: "done",
+      report: MARKET_REPORT,
+      log: [
+        marketLog.researching("Nemecko · zvárači, montéri"),
+        `${marketLog.researched(18)}\n\n${MARKET_NOTES}\n`,
+        marketLog.saved(MARKET_REPORT.companies.length, MARKET_REPORT.sources.length),
+      ].join("\n"),
+      error: null,
+      usage: { web_searches: 18 },
+      created_at: ago(3, 2),
+      finished_at: ago(3, 1.9),
+    },
+  ];
+
   return {
     campaigns,
     lead_runs,
@@ -621,5 +797,6 @@ export function seed(): Record<string, Row[]> {
     lead_events,
     inquiries,
     settings: [{ key: "company_profile", value: COMPANY_PROFILE, updated_at: ago(14) }],
+    market_reports,
   };
 }

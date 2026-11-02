@@ -41,6 +41,18 @@ export function RunStatus({ status, created }: { status: string; created?: numbe
   return <span className={`chip chip--run-${status}`}>{label}</span>;
 }
 
+export function MarketStatus({ status }: { status: string }) {
+  const label = status === "running" ? "Beží" : status === "done" ? "Hotová" : "Chyba";
+  return <span className={`chip chip--run-${status}`}>{label}</span>;
+}
+
+const OPPORTUNITY_TONE: Record<string, string> = { vysoká: "ok", stredná: "warn", nízka: "bad" };
+
+/** The market analysis rating of the opportunity for KTechnology. */
+export function Opportunity({ level }: { level: string }) {
+  return <span className={`chip chip--${OPPORTUNITY_TONE[level] ?? "plain"}`}>Príležitosť: {level}</span>;
+}
+
 /** A YYYY-MM-DD due date as "Dnes", "Zajtra", "Včera" or a short date; overdue dates are marked. */
 export function Due({ date }: { date: string | null }) {
   if (!date) return <span className="muted">–</span>;
