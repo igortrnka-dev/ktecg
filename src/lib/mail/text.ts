@@ -11,6 +11,7 @@ type LoggedEmail = {
   from_email: string | null;
   from_name: string | null;
   to_emails: string[];
+  cc_emails: string[];
   subject: string | null;
 };
 
@@ -24,7 +25,7 @@ export function sender(name: string | null, email: string | null): string {
 }
 
 /** "From → To, Cc" of a recorded e-mail; a bounce names the addresses that failed. */
-export function mailRoute(e: Pick<LoggedEmail, "kind" | "from_name" | "from_email" | "to_emails"> & { cc_emails: string[] }): string {
+export function mailRoute(e: Pick<LoggedEmail, "kind" | "from_name" | "from_email" | "to_emails" | "cc_emails">): string {
   if (e.kind === "bounce") return `Nedoručené na ${e.to_emails.join(", ") || "–"}`;
   return `${sender(e.from_name, e.from_email)} → ${[...e.to_emails, ...e.cc_emails].join(", ") || "–"}`;
 }
@@ -32,7 +33,8 @@ export function mailRoute(e: Pick<LoggedEmail, "kind" | "from_name" | "from_emai
 export const mailLog = {
   event(e: LoggedEmail): string {
     const subject = e.subject?.trim() || "(bez predmetu)";
-    const to = e.to_emails.join(", ") || "neznámu adresu";
+    // A lead reached through Cc is named too; a bounce lists the addresses that failed.
+    const to = (e.kind === "bounce" ? e.to_emails : [...e.to_emails, ...e.cc_emails]).join(", ") || "neznámu adresu";
     if (e.kind === "bounce") return `E-mail na ${to} sa nepodarilo doručiť: ${subject}`;
     if (e.kind === "auto_reply") {
       return e.direction === "in" ? `Automatická odpoveď od ${sender(e.from_name, e.from_email)}: ${subject}` : `Odoslaná automatická odpoveď na ${to}: ${subject}`;

@@ -8,7 +8,9 @@ export const MAIL_ERROR = {
   host: "Server pošty sa nenašiel. Skontrolujte IMAP_HOST (pre Websupport imap.websupport.sk).",
   network: "Nepodarilo sa spojiť so serverom pošty (sieť alebo časový limit). Skontrolujte IMAP_HOST, IMAP_PORT a pripojenie k sieti.",
   tls: "Šifrované spojenie so serverom pošty zlyhalo (certifikát). Skontrolujte IMAP_HOST a IMAP_PORT (993).",
-  db: "E-maily sa nepodarilo uložiť do databázy. Podrobnosti sú v logu servera.",
+  db: "E-maily sa nepodarilo uložiť do databázy. Skontrolujte, či bola spustená migrácia supabase/migrations/0004_mail.sql; podrobnosti sú v logu servera.",
+  /** Pošta and the overview, when lead_emails cannot be read. */
+  read: "E-maily sa nepodarilo načítať z databázy. Ak ešte nebola spustená migrácia supabase/migrations/0004_mail.sql, spustite ju v Supabase (SQL Editor).",
   other: "Synchronizácia pošty zlyhala. Podrobnosti sú v logu servera.",
 };
 

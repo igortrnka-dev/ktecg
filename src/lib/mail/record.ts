@@ -24,91 +24,110 @@ export type NewEmail = {
 };
 
 type Lead = { id: string; status: string; next_action: string | null; next_action_at: string | null };
+type Task = { next_action: string; next_action_at: string };
 
 /** Statuses a reply moves to "replied"; later ones (meeting, won) and closed leads keep theirs. */
 const REPLY_MOVES: string[] = ["new", "qualified", "contacted"];
 const CLOSED: string[] = ["won", "lost", "disqualified"];
+/**
+ * Older e-mails, as the first sync and "Prehľadať znova 90 dní" find them, only go into the history: what happened
+ * since (a call, a meeting, a step set by hand) is not in the mailbox.
+ */
+const FRESH_MS = 14 * 864e5;
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 /**
- * Saves the e-mails oldest first, so status changes follow the real sequence, and returns how many were new.
- * The unique (lead_id, message_id) makes a re-run harmless: only a first insert changes the lead.
+ * Saves the e-mails and returns how many were new. The unique (lead_id, message_id) makes a re-run harmless: only
+ * a first insert changes the lead. The leads change after all rows are in, so each one's newest e-mail is known.
  */
 export async function recordEmails(emails: NewEmail[]): Promise<number> {
-  let saved = 0;
+  const added = new Map<string, NewEmail[]>();
+  let failure: MailDbError | null = null;
   for (const email of [...emails].sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at))) {
     const { error } = await db().from("lead_emails").insert(email);
     // 23505: recorded before; 23503: the lead was deleted after matching.
     if (error?.code === "23505" || error?.code === "23503") continue;
-    if (error) throw new MailDbError(error.message);
-    saved++;
-    await applyEffects(email);
+    if (error) {
+      failure = new MailDbError(error.message);
+      break;
+    }
+    added.set(email.lead_id, [...(added.get(email.lead_id) ?? []), email]);
   }
-  return saved;
+  // The rows saved before a failure still get their history: the next run skips them as recorded.
+  for (const [leadId, list] of added) await applyEffects(leadId, list);
+  if (failure) throw failure;
+  return [...added.values()].reduce((n, list) => n + list.length, 0);
 }
 
-/** Whether the lead has a normal e-mail newer than this one (in that direction). */
-async function newerExists(email: NewEmail, direction?: "in" | "out"): Promise<boolean> {
-  let query = db()
+/** The message id of the lead's newest e-mail that sets a next step: a normal one either way, or a bounce. */
+async function newestEmail(leadId: string): Promise<string | null> {
+  const { data, error } = await db()
     .from("lead_emails")
-    .select("id", { count: "exact", head: true })
-    .eq("lead_id", email.lead_id)
-    .eq("kind", "normal")
-    .gt("sent_at", email.sent_at);
-  if (direction) query = query.eq("direction", direction);
-  const { count, error } = await query;
+    .select("message_id")
+    .eq("lead_id", leadId)
+    .in("kind", ["normal", "bounce"])
+    .order("sent_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ message_id: string }>();
   if (error) throw new MailDbError(error.message);
-  return Boolean(count);
+  return data?.message_id ?? null;
 }
 
-/** The follow-up a sent e-mail sets replaces a reply task, or an empty or older follow-up of an open lead, never a task set by hand. */
+/**
+ * The follow-up a sent e-mail sets replaces a reply task, a check-the-address task (sent again, to a working
+ * address), or an empty or older follow-up of an open lead; never a task set by hand.
+ */
 const followUpReplaces = (lead: Lead) =>
-  lead.next_action === NEXT_ACTION ||
-  lead.next_action === MAIL_REPLY ||
+  [NEXT_ACTION, MAIL_REPLY, CHECK_ADDRESS].includes(lead.next_action ?? "") ||
   (!CLOSED.includes(lead.status) && (!lead.next_action || lead.next_action === FOLLOW_UP));
 
 /**
- * What a newly recorded e-mail does to its lead. A reply moves an early lead to "replied" and asks for an answer
- * (a closed lead is not reopened, it only gets the task); a sent e-mail moves a new or qualified lead to
- * "contacted" and sets the follow-up "Označiť ako oslovený" sets; a bounce asks to check the address. Tasks come
- * only from the newest e-mail of their kind, so a rescan of older mail does not bring back answered ones.
+ * The next step of the lead's newest e-mail: a reply asks for an answer (not on a won lead, whose mail is everyday
+ * business; a closed one gets the task without being reopened), a sent e-mail sets the follow-up "Označiť ako
+ * oslovený" sets, a bounce asks to check the address.
  */
-async function applyEffects(email: NewEmail) {
-  const { data: lead, error } = await db().from("leads").select("id, status, next_action, next_action_at").eq("id", email.lead_id).maybeSingle<Lead>();
+function taskFor(email: NewEmail, lead: Lead): Task | null {
+  if (email.kind === "bounce") return { next_action: CHECK_ADDRESS, next_action_at: today() };
+  if (email.direction === "in") return lead.status === "won" ? null : { next_action: MAIL_REPLY, next_action_at: today() };
+  return followUpReplaces(lead) ? { next_action: FOLLOW_UP, next_action_at: workdayIn(3, new Date(email.sent_at)) } : null;
+}
+
+/**
+ * What newly recorded e-mails do to their lead. In the order they were sent, a reply moves an early lead to
+ * "replied" and a sent e-mail moves a new or qualified lead to "contacted". The next step comes only from the lead's
+ * newest e-mail, so a rescan of older mail does not bring back answered ones. E-mails older than FRESH_MS change
+ * neither; every e-mail goes into the history.
+ */
+async function applyEffects(leadId: string, added: NewEmail[]) {
+  const { data: lead, error } = await db().from("leads").select("id, status, next_action, next_action_at").eq("id", leadId).maybeSingle<Lead>();
   if (error) throw new MailDbError(error.message);
   if (!lead) return;
 
-  let status: string | null = null;
-  let task: { next_action: string; next_action_at: string } | null = null;
-  if (email.kind === "normal" && email.direction === "in") {
-    if (REPLY_MOVES.includes(lead.status)) status = "replied";
-    if (!(await newerExists(email, "out"))) task = { next_action: MAIL_REPLY, next_action_at: today() };
-  } else if (email.kind === "normal") {
-    if (PRE_CONTACT.includes(lead.status)) status = "contacted";
-    if (followUpReplaces(lead) && !(await newerExists(email, "in"))) {
-      task = { next_action: FOLLOW_UP, next_action_at: workdayIn(3, new Date(email.sent_at)) };
-    }
-  } else if (email.kind === "bounce" && !(await newerExists(email))) {
-    task = { next_action: CHECK_ADDRESS, next_action_at: today() };
+  const fresh = added.filter((e) => Date.now() - Date.parse(e.sent_at) < FRESH_MS);
+  let status = lead.status;
+  for (const e of fresh) {
+    if (e.kind === "normal" && e.direction === "in" && REPLY_MOVES.includes(status)) status = "replied";
+    if (e.kind === "normal" && e.direction === "out" && PRE_CONTACT.includes(status)) status = "contacted";
   }
+  const newestId = fresh.length ? await newestEmail(lead.id) : null;
+  const newest = fresh.find((e) => e.message_id === newestId);
+  let task = newest ? taskFor(newest, lead) : null;
   if (task && task.next_action === lead.next_action && task.next_action_at === lead.next_action_at) task = null;
 
-  if (status || task) {
-    const { error: updateError } = await db().from("leads").update({ ...(status ? { status } : {}), ...task }).eq("id", lead.id);
+  const moved = status !== lead.status;
+  if (moved || task) {
+    const { error: updateError } = await db().from("leads").update({ ...(moved ? { status } : {}), ...task }).eq("id", lead.id);
     if (updateError) throw new MailDbError(updateError.message);
   }
-  // The history shows the e-mail when it was sent, not when the sync found it.
-  const at = Math.min(Date.parse(email.sent_at) || Date.now(), Date.now());
-  const events = [
-    {
-      lead_id: lead.id,
-      type: "email",
-      body: mailLog.event(email) + (task ? mailLog.task(task.next_action, task.next_action_at, lead) : ""),
-      created_at: new Date(at).toISOString(),
-    },
-    ...(status ? [{ lead_id: lead.id, type: "status", body: `${lead.status} → ${status}`, created_at: new Date().toISOString() }] : []),
-  ];
+  const events = added.map((e) => ({
+    lead_id: lead.id,
+    type: "email",
+    body: mailLog.event(e) + (task && e === newest ? mailLog.task(task.next_action, task.next_action_at, lead) : ""),
+    // The history shows the e-mail when it was sent, not when the sync found it.
+    created_at: new Date(Math.min(Date.parse(e.sent_at) || Date.now(), Date.now())).toISOString(),
+  }));
+  if (moved) events.push({ lead_id: lead.id, type: "status", body: `${lead.status} → ${status}`, created_at: new Date().toISOString() });
   const { error: eventError } = await db().from("lead_events").insert(events);
   if (eventError) throw new MailDbError(eventError.message);
 }

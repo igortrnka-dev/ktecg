@@ -33,36 +33,51 @@ export function headerLines(raw: Buffer | string | undefined): Map<string, strin
 
 const fold = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 
-/** Subject starts of out-of-office replies (accents folded), EN/DE/FR/SV/NO/DA/FI/SK/CS/PL/IT/NL/ES. */
+/**
+ * Subject starts of out-of-office replies (accents folded), EN/DE/FR/SV/NO/DA/FI/SK/CS/PL/IT/NL/ES. Whole phrases only:
+ * words such as "Abwesenheit", "Frånvaro" or "Fuori sede" also start ordinary subjects about staffing.
+ */
 const OUT_OF_OFFICE = [
   "automatic reply", "auto reply", "auto-reply", "autoreply", "auto response", "auto-response", "autoresponse",
   "out of office", "out of the office",
-  "automatische antwort", "abwesenheitsnotiz", "abwesenheit", "nicht im buro",
+  "automatische antwort", "abwesenheitsnotiz", "nicht im buro",
   "reponse automatique", "absence du bureau", "absent du bureau",
-  "autosvar", "automatiskt svar", "automatisk svar", "franvaro", "fraværsmelding", "ikke pa kontoret",
+  "autosvar", "automatiskt svar", "automatisk svar", "franvaromeddelande", "fraværsmelding", "ikke pa kontoret",
   "automaattinen vastaus", "poissa toimistolta",
-  "automaticka odpoved", "mimo kancelarie", "mimo kancelar", "nepritomnost",
-  "odpowiedz automatyczna", "automatyczna odpowiedz", "poza biurem", "nieobecnosc",
-  "risposta automatica", "fuori ufficio", "fuori sede",
-  "automatisch antwoord", "afwezig", "respuesta automatica", "fuera de la oficina",
+  "automaticka odpoved", "mimo kancelarie", "mimo kancelar", "nepritomnost v kancelari",
+  "odpowiedz automatyczna", "automatyczna odpowiedz", "poza biurem", "nieobecnosc w biurze",
+  "risposta automatica", "fuori ufficio",
+  "automatisch antwoord", "afwezigheidsbericht", "respuesta automatica", "fuera de la oficina",
 ];
-/** "Re:", "AW:", "SV:", "Odp:" … before the subject. */
-const REPLY_PREFIX = /^((re|aw|sv|vs|odp|antw|rif|r|fw|fwd|wg|tr)\s*:\s*)+/;
 
+/** Auto-replies put the phrase first ("Automatische Antwort: …"); "AW: Automatische Antwort: …" is a person answering. */
 export function isOutOfOffice(subject: string): boolean {
-  const s = fold(subject).trim().replace(REPLY_PREFIX, "");
-  return OUT_OF_OFFICE.some((phrase) => s.startsWith(phrase));
+  const s = fold(subject).trim();
+  return OUT_OF_OFFICE.some((phrase) => s.startsWith(phrase) && !/[\p{L}\p{N}]/u.test(s.charAt(phrase.length)));
 }
+
+/** noreply@, no-reply@, donotreply@ … */
+const NO_REPLY = /^(no[-_.]?reply|do[-_.]?not[-_.]?reply)\b/i;
+
+/** Newsletters and other list mail: not an answer from the lead, so it is not stored at all. */
+export const isListMail = (headers: Map<string, string>) => headers.has("list-id") || headers.has("list-unsubscribe");
 
 /**
  * bounce: a delivery report (from mailer-daemon/postmaster, or multipart/report with report-type delivery-status);
  * auto_reply: Auto-Submitted other than "no", X-Autoreply, X-Autorespond, Precedence auto_reply/bulk/junk, a read
- * receipt, or an out-of-office subject.
+ * receipt, and for incoming mail an out-of-office subject or a noreply sender without a Reply-To of a person.
  */
-export function mailKind(m: { direction: "in" | "out"; from: string; subject: string; headers: Map<string, string> }): MailKind {
+export function mailKind(m: {
+  direction: "in" | "out";
+  from: string;
+  replyTo?: string[];
+  subject: string;
+  headers: Map<string, string>;
+}): MailKind {
   const type = m.headers.get("content-type") ?? "";
   const report = /multipart\/report/i.test(type);
-  if (m.direction === "in" && (/^(mailer-daemon|postmaster)@/i.test(m.from) || (report && /report-type\s*=\s*"?delivery-status/i.test(type)))) {
+  const incoming = m.direction === "in";
+  if (incoming && (/^(mailer-daemon|postmaster)@/i.test(m.from) || (report && /report-type\s*=\s*"?delivery-status/i.test(type)))) {
     return "bounce";
   }
   const auto = m.headers.get("auto-submitted");
@@ -72,17 +87,33 @@ export function mailKind(m: { direction: "in" | "out"; from: string; subject: st
     m.headers.has("x-autorespond") ||
     /^(auto_reply|bulk|junk)$/i.test(m.headers.get("precedence") ?? "") ||
     (report && /report-type\s*=\s*"?disposition-notification/i.test(type)) ||
-    isOutOfOffice(m.subject)
+    (incoming && isOutOfOffice(m.subject)) ||
+    // A reply sent through a system from noreply@ names the person in Reply-To.
+    (incoming && NO_REPLY.test(m.from) && !(m.replyTo ?? []).some((a) => a !== m.from))
   ) {
     return "auto_reply";
   }
   return "normal";
 }
 
-/** Final-Recipient and Original-Recipient of a delivery report, plus an X-Failed-Recipients header. */
-export function failedRecipients(report: string, xFailed?: string): string[] {
-  const found = [...report.matchAll(/^\s*(?:final|original)-recipient\s*:\s*(?:rfc822\s*;)?\s*<?([^\s<>;]+@[^\s<>;]+?)>?\s*$/gim)].map((m) => m[1]);
-  return uniqueAddresses([...found, ...(xFailed ?? "").split(/[,\s]+/)]);
+const RECIPIENT = /^\s*(?:final|original)-recipient\s*:\s*(?:rfc822\s*;)?\s*<?([^\s<>;]+@[^\s<>;]+?)>?\s*$/gim;
+
+/**
+ * The recipients of delivery reports (RFC 3464) whose delivery failed for good: the per-recipient blocks with
+ * "Action: failed", or with a 5.x.x Status where the Action is missing. A delay warning or a success notice
+ * reports recipients but none that failed.
+ */
+export function deliveryReport(texts: string[]): { reported: boolean; failed: string[] } {
+  let reported = false;
+  const failed: string[] = [];
+  for (const block of texts.join("\n\n").replace(/\r\n?/g, "\n").split(/\n[ \t]*\n/)) {
+    const recipients = [...block.matchAll(RECIPIENT)].map((m) => m[1]);
+    if (!recipients.length) continue;
+    reported = true;
+    const action = block.match(/^\s*action\s*:\s*([a-z]+)/im)?.[1].toLowerCase();
+    if (action === "failed" || (!action && /^\s*status\s*:\s*5\./im.test(block))) failed.push(...recipients);
+  }
+  return { reported, failed: uniqueAddresses(failed) };
 }
 
 /** "wrote" in the languages of our customers, as in the attribution line of a quoted reply. */
@@ -94,30 +125,46 @@ const WROTE = new RegExp(`${WROTE_WORD}\\s*:\\s*$`, "i");
 const WROTE_BEFORE_NAME = new RegExp(`\\s${WROTE_WORD}\\s`, "i");
 /** The start of an attribution: "On Mon, 2 Nov 2026, Thomas Weidner" + "<t.weidner@…> wrote:". */
 const ATTRIBUTION_START = /^\s*(on|am|le|den|dňa|dna|dne|w dniu|il|el|op|em)\s/i;
+/** "-----Original Message-----", "---------- Forwarded message ---------" and their translations. */
 const ORIGINAL =
-  /^\s*-{2,}\s*(original message|ursprüngliche nachricht|originalnachricht|message d['’]origine|ursprungligt meddelande|opprinnelig melding|oprindelig meddelelse|alkuperäinen viesti|pôvodná správa|původní zpráva|oryginalna wiadomość|wiadomość oryginalna|messaggio originale|oorspronkelijk bericht)\s*-{2,}/i;
-/** Outlook puts the quoted message under a "From: / Sent: / To: / Subject:" block. */
-const QUOTE_FROM = /^\s*\*?(from|von|de|från|fra|lähettäjä|od|da|van)\s*\*?\s*:/i;
-const QUOTE_NEXT =
-  /^\s*\*?(sent|date|gesendet|datum|envoyé|skickat|sendt|lähetetty|odoslané|odesláno|wysłano|data|inviato|verzonden|to|an|à|till|til|vastaanottaja|komu|do|aan|subject|betreff|objet|ämne|emne|aihe|predmet|předmět|temat|oggetto|onderwerp)\s*\*?\s*:/i;
+  /^\s*-{2,}\s*(original message|forwarded message|ursprüngliche nachricht|originalnachricht|weitergeleitete nachricht|message d['’]origine|message transféré|ursprungligt meddelande|vidarebefordrat meddelande|opprinnelig melding|videresendt melding|oprindelig meddelelse|videresendt meddelelse|alkuperäinen viesti|välitetty viesti|pôvodná správa|preposlaná správa|původní zpráva|přeposlaná zpráva|oryginalna wiadomość|wiadomość oryginalna|wiadomość przekazana dalej|messaggio originale|messaggio inoltrato|oorspronkelijk bericht|doorgestuurd bericht)\s*-{2,}/i;
+/** Apple Mail's forward. */
+const FORWARDED = /^\s*(begin forwarded message|anfang der weitergeleiteten nachricht|début du message réexpédié)\s*:\s*$/i;
+/**
+ * Outlook puts the quoted message under a "From: … <address> / Sent: / To: / Subject:" block. The address and the
+ * Sent and Subject lines tell it from a date range in a request ("Od: 1. 12. 2026" / "Do: 31. 3. 2027").
+ */
+const QUOTE_FROM = /^\s*\*?(from|von|de|från|fra|lähettäjä|od|da|van)\s*\*?\s*:.*[@<]/i;
+const QUOTE_SENT = /^\s*\*?(sent|date|gesendet|datum|dátum|envoyé|skickat|sendt|lähetetty|odoslané|odesláno|wysłano|data|inviato|verzonden|enviado|fecha)\s*\*?\s*:/i;
+const QUOTE_SUBJECT = /^\s*\*?(subject|betreff|objet|ämne|emne|aihe|predmet|předmět|temat|oggetto|onderwerp|asunto)\s*\*?\s*:/i;
 
 /** The new text of an e-mail: the quoted history (attribution line, Outlook header block, "> " lines) removed. */
 export function stripQuoted(text: string): string {
   const lines = clean(text).replace(/\r\n?/g, "\n").split("\n");
+  const headerBlock = (i: number) =>
+    QUOTE_FROM.test(lines[i]) && [QUOTE_SENT, QUOTE_SUBJECT].every((re) => lines.slice(i + 1, i + 7).some((l) => re.test(l)));
+  // A real attribution names the address or is followed by "> " lines; "Am Montag schrieb ich Ihnen bereits:" is not one.
+  const attributed = (from: number, to: number) =>
+    lines.slice(from, to + 1).some((l) => /[@<]/.test(l)) || lines.slice(to + 1, to + 4).some((l) => /^\s*>/.test(l));
   let end = lines.length;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (ORIGINAL.test(line) || (QUOTE_FROM.test(line) && lines.slice(i + 1, i + 4).some((l) => QUOTE_NEXT.test(l)))) {
+    if (ORIGINAL.test(line) || FORWARDED.test(line) || headerBlock(i)) {
       end = i;
       break;
     }
     if (WROTE.test(line)) {
-      end = !ATTRIBUTION_START.test(line) && i > 0 && ATTRIBUTION_START.test(lines[i - 1]) ? i - 1 : i;
-      break;
-    }
-    if (ATTRIBUTION_START.test(line) && WROTE_BEFORE_NAME.test(line) && [line, lines[i + 1] ?? ""].some((l) => /:\s*$/.test(l))) {
-      end = i;
-      break;
+      const start = !ATTRIBUTION_START.test(line) && i > 0 && ATTRIBUTION_START.test(lines[i - 1]) ? i - 1 : i;
+      if (attributed(start, i)) {
+        end = start;
+        break;
+      }
+    } else if (ATTRIBUTION_START.test(line) && WROTE_BEFORE_NAME.test(line)) {
+      const last = /:\s*$/.test(line) ? i : i + 1;
+      if (/:\s*$/.test(lines[last] ?? "") && attributed(i, last)) {
+        end = i;
+        break;
+      }
     }
   }
   const kept = lines.slice(0, end).filter((l) => !/^\s*>/.test(l));

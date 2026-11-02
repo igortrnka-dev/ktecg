@@ -9,7 +9,8 @@ import PageNotice from "@/components/admin/PageNotice";
 import { COMPANY_MAILBOX, mailConfigured, missingMailEnv, ownAddress } from "@/lib/mail/config";
 import { isRunning, readMailState } from "@/lib/mail/state";
 import { maybeSyncMail } from "@/lib/mail/sync";
-import { outreachStats, waitingLeads } from "@/lib/mail/stats";
+import { orNull, outreachStats, waitingLeads, type OutreachStats } from "@/lib/mail/stats";
+import { MAIL_ERROR } from "@/lib/mail/errors";
 import { mailRoute, sender } from "@/lib/mail/text";
 import { simulateMail } from "@/lib/demo/mode";
 import { plural } from "@/lib/plural";
@@ -27,6 +28,8 @@ const FILTERS = { all: "Všetko", in: "Prijaté", out: "Odoslané", auto: "Autom
 type Filter = keyof typeof FILTERS;
 
 const COLUMNS = "id, lead_id, direction, kind, from_email, from_name, to_emails, cc_emails, subject, snippet, sent_at, leads(company_name, status)";
+
+const NO_STATS: OutreachStats = { outreached: 0, replied: 0, medianHours: null, bounces: 0, autoReplies: 0, countries: [] };
 
 const messages = (n: number) => `${n} ${plural(n, "správa", "správy", "správ")}`;
 const emails = (n: number) => `${n} ${plural(n, "nový e-mail", "nové e-maily", "nových e-mailov")}`;
@@ -46,9 +49,9 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
   if (filter === "in" || filter === "out") recent = recent.eq("direction", filter).eq("kind", "normal");
   if (filter === "auto") recent = recent.eq("kind", "auto_reply");
   if (filter === "bounce") recent = recent.eq("kind", "bounce");
-  const [stats, waiting, { data: replyRows }, { data: recentRows }] = await Promise.all([
-    outreachStats(days),
-    waitingLeads(),
+  const [statsOrNull, waitingOrNull, { data: replyRows }, { data: recentRows }] = await Promise.all([
+    orNull(outreachStats(days)),
+    orNull(waitingLeads()),
     db()
       .from("lead_emails")
       .select(COLUMNS)
@@ -59,6 +62,9 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
       .limit(20),
     recent,
   ]);
+  const unreadable = !statsOrNull || !waitingOrNull;
+  const stats = statsOrNull ?? NO_STATS;
+  const waiting = waitingOrNull ?? [];
   const replies = (replyRows ?? []) as unknown as MailRow[];
   const rows = (recentRows ?? []) as unknown as MailRow[];
 
@@ -93,6 +99,7 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
           Synchronizácia hotová: {synced ? `${emails(synced)} k leadom` : "žiadne nové e-maily k leadom"}.
         </PageNotice>
       ) : null}
+      {unreadable && <p className="notice notice--error" role="alert">{MAIL_ERROR.read}</p>}
 
       <section className="card" aria-labelledby="mail-box">
         <div className="card__head">
@@ -161,7 +168,7 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
           <h2 id="mail-progress">Priebeh oslovovania</h2>
           <nav className="seg" aria-label="Obdobie">
             {[30, 90].map((p) => (
-              <Link key={p} href={href({ period: p })} aria-current={p === days ? "true" : undefined}>{p} dní</Link>
+              <Link key={p} href={href({ period: p })} scroll={false} aria-current={p === days ? "true" : undefined}>{p} dní</Link>
             ))}
           </nav>
         </div>
@@ -251,7 +258,7 @@ export default async function Mail({ searchParams }: { searchParams: Promise<Sea
           <h2 id="mail-all">Všetka zaznamenaná pošta</h2>
           <nav className="seg" aria-label="Filter pošty">
             {(Object.keys(FILTERS) as Filter[]).map((f) => (
-              <Link key={f} href={href({ filter: f })} aria-current={f === filter ? "true" : undefined}>{FILTERS[f]}</Link>
+              <Link key={f} href={href({ filter: f })} scroll={false} aria-current={f === filter ? "true" : undefined}>{FILTERS[f]}</Link>
             ))}
           </nav>
         </div>

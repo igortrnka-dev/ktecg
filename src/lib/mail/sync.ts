@@ -3,7 +3,7 @@ import { simpleParser, type AddressObject } from "mailparser";
 import { mailConfig, mailConfigured, ownAddress, type MailConfig } from "./config";
 import { MailStepError, logText, mailErrorText } from "./errors";
 import { leadMatcher, type LeadMatcher } from "./match";
-import { capBody, clean, failedRecipients, headerLines, mailKind, normAddress, snippetOf, stripQuoted, uniqueAddresses } from "./parse";
+import { capBody, clean, deliveryReport, headerLines, isListMail, mailKind, normAddress, snippetOf, stripQuoted, uniqueAddresses } from "./parse";
 import { recordEmails, type NewEmail } from "./record";
 import { AUTO_SYNC_MS, isRunning, readMailState, writeMailState, type FolderCursor, type MailSyncState } from "./state";
 
@@ -19,7 +19,9 @@ const TIMEOUT_MS = 20_000;
 /** Folder names to try when the server marks no folder as \Sent and IMAP_SENT_FOLDER is not set. */
 const SENT_NAMES = ["sent", "inbox.sent", "sent items", "odoslané"];
 /** Just the headers that decide the kind of a message, fetched with the envelope. */
-const KIND_HEADERS = ["auto-submitted", "x-autoreply", "x-autorespond", "precedence", "content-type", "x-failed-recipients"];
+const KIND_HEADERS = [
+  "auto-submitted", "x-autoreply", "x-autorespond", "precedence", "content-type", "x-failed-recipients", "list-id", "list-unsubscribe",
+];
 
 export type SyncResult =
   | { status: "ok"; saved: number; scanned: number; remaining: number }
@@ -184,15 +186,17 @@ async function readFolder(
       const from = { address: normAddress(env.from?.[0]?.address), name: clean(env.from?.[0]?.name).trim() || null };
       const direction = defaultDirection === "in" && from.address === ownAddress() ? "out" : defaultDirection;
       const headers = headerLines(msg.headers);
+      if (direction === "in" && isListMail(headers)) continue;
       let subject = clean(env.subject).trim().slice(0, 500) || null;
-      let kind = mailKind({ direction, from: from.address, subject: subject ?? "", headers });
+      const replyTo = addresses(env.replyTo);
+      let kind = mailKind({ direction, from: from.address, replyTo, subject: subject ?? "", headers });
       const to = addresses(env.to);
       const cc = addresses(env.cc);
-      let leadIds = kind === "bounce" ? [] : match(direction === "in" ? [from.address, ...addresses(env.replyTo)] : [...to, ...cc]);
+      let leadIds = kind === "bounce" ? [] : match(direction === "in" ? [from.address, ...replyTo] : [...to, ...cc]);
       if (kind !== "bounce" && !leadIds.length) continue;
 
       let text = "";
-      let failed = kind === "bounce" ? failedRecipients("", headers.get("x-failed-recipients")) : [];
+      let failed = kind === "bounce" ? uniqueAddresses((headers.get("x-failed-recipients") ?? "").split(/[,\s]+/)) : [];
       let returnedSubject: string | null = null;
       if ((msg.size ?? 0) <= MAX_SOURCE) {
         const full = await client.fetchOne(String(msg.uid), { source: true }, { uid: true });
@@ -202,11 +206,13 @@ async function readFolder(
           // The parser also decodes headers written in raw 8-bit, which the envelope leaves garbled.
           subject = clean(parsed.subject).trim().slice(0, 500) || subject;
           from.name = clean(parsed.from?.value[0]?.name).trim() || from.name;
-          if (kind === "normal") kind = mailKind({ direction, from: from.address, subject: subject ?? "", headers });
+          if (kind === "normal") kind = mailKind({ direction, from: from.address, replyTo, subject: subject ?? "", headers });
           if (kind === "bounce") {
             const returned = await returnedMessage(parsed.attachments);
-            failed = uniqueAddresses([...failed, ...failedRecipients(parsed.text ?? ""), ...returned.reports]);
-            if (!failed.length) failed = returned.to;
+            const report = deliveryReport([parsed.text ?? "", ...returned.reports]);
+            failed = uniqueAddresses([...failed, ...report.failed]);
+            // A delay warning or a success notice reports no failed recipient: it matches no lead and is not stored.
+            if (!failed.length && !report.reported) failed = returned.to;
             returnedSubject = returned.subject;
           }
         }
@@ -223,8 +229,8 @@ async function readFolder(
           kind,
           from_email: from.address || null,
           from_name: from.name?.slice(0, 200) ?? null,
-          // For a bounce: the recipients that failed and the subject of the returned e-mail.
-          to_emails: kind === "bounce" ? failed : to,
+          // For a bounce: this lead's recipients that failed and the subject of the returned e-mail.
+          to_emails: kind === "bounce" ? failed.filter((a) => match([a]).includes(lead_id)) : to,
           cc_emails: cc,
           subject: kind === "bounce" ? (returnedSubject ?? subject) : subject,
           snippet: snippetOf(text),
@@ -244,7 +250,7 @@ async function readFolder(
 async function returnedMessage(attachments: { contentType: string; content: Buffer }[]) {
   const result = { reports: [] as string[], to: [] as string[], subject: null as string | null };
   for (const a of attachments) {
-    if (/^message\/(global-)?delivery-status$/i.test(a.contentType)) result.reports.push(...failedRecipients(a.content.toString()));
+    if (/^message\/(global-)?delivery-status$/i.test(a.contentType)) result.reports.push(a.content.toString());
     if (/^(message\/rfc822|message\/global|text\/rfc822-headers|message\/global-headers)$/i.test(a.contentType)) {
       const original = await simpleParser(a.content, { skipImageLinks: true, skipTextLinks: true, skipTextToHtml: true });
       result.to.push(...parsedAddresses(original.to));

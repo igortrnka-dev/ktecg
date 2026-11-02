@@ -21,10 +21,12 @@ admin that uses Claude to find, qualify and draft outreach to sales leads.
     leads, so the admin shows how the outreach is going: leads written to, reply rate and median time to reply, bounces
     and auto-replies (30 or 90 days, also per country), new replies, contacted leads waiting more than 7 days for an
     answer, and every recorded e-mail. A lead's detail lists its e-mails. An incoming reply moves a new, qualified or
-    contacted lead to *Odpovedal* and sets the next step "Odpovedať na e-mail" for today (later and closed leads keep
-    their status and only get the next step); a sent e-mail moves a new or qualified lead to *Oslovený* and sets the
-    follow-up unless a next step was set by hand; a bounce sets "Overiť e-mail kontaktu". Each recorded e-mail is
-    written to the lead's history. Read-only: nothing is sent, moved or marked as read.
+    contacted lead to *Odpovedal*; a sent e-mail moves a new or qualified lead to *Oslovený*. The next step comes from
+    the lead's newest e-mail: a reply sets "Odpovedať na e-mail" for today (later and closed leads keep their status
+    and only get the step; a won customer's mail sets none), a sent e-mail sets the follow-up unless a next step was
+    set by hand, a bounce sets "Overiť e-mail kontaktu". E-mails older than 14 days (the first sync and *Prehľadať
+    znova 90 dní* read 90 days back) change neither status nor next step. Each recorded e-mail is written to the
+    lead's history. Read-only: nothing is sent, moved or marked as read.
   - *Nastavenia*: the company profile / ideal-customer text Claude works from. Claude is told to use only
     the facts in it. 0001_init.sql seeds it once, so a project that ran an older 0001 still has the old
     default text (it mentioned Switzerland, the UK, "certified" welders and engagement sizes, and lacked the
@@ -39,7 +41,8 @@ Stack: Next.js 15 (App Router), Supabase (Postgres + Auth), Anthropic API (`clau
    `supabase/migrations/0002_inquiry_duration_shift.sql`, `supabase/migrations/0003_market_reports.sql` and then
    `supabase/migrations/0004_mail.sql` in the SQL editor. 0002–0004 are safe to run again; a project set up with an
    older 0001 needs 0002, or every website inquiry fails, an existing project needs 0003 for *Analýzy trhu* and 0004
-   for *Pošta*.
+   for *Pošta*. Run 0004 before deploying the version with *Pošta*; until then *Pošta* and the mail card of *Prehľad*
+   say the e-mails could not be loaded.
    In *Authentication → Users* add the admin user(s) with a password and tick *Auto Confirm User*
    (the admin only accepts confirmed e-mails listed in `ADMIN_EMAILS`).
    Then in *Authentication → Sign In / Providers* turn off *Allow new users to sign up* (it is on by default)
@@ -77,7 +80,8 @@ Render dashboard (`NEXT_PUBLIC_SITE_URL` is the public URL of the web service, s
   On a validation error it answers 400 `{"error":"invalid","fields":[…]}` with the failing field names.
 - *Pošta* stores only e-mails that belong to a lead: an incoming one whose sender (or Reply-To) is a contact's
   address or on the lead's domain or a subdomain of it, an outgoing one by its To/Cc, and a bounce by the address that
-  failed. Free-mail addresses match only a contact's exact address, and KTechnology's own domain never matches.
+  failed for good (a delay warning is not a bounce). Free-mail addresses match only a contact's exact address, and
+  KTechnology's own domain never matches. Newsletters and other list mail (List-Id, List-Unsubscribe) are not stored.
   For each it keeps the addresses, subject, date and the plain text without the quoted earlier messages (at most
   20 000 characters; no attachments or HTML). Other mail is looked at only by its headers and is not stored. The
   mailbox is opened read-only (IMAP EXAMINE over TLS, certificates checked); `settings.mail_sync` keeps a cursor per
@@ -88,6 +92,7 @@ Render dashboard (`NEXT_PUBLIC_SITE_URL` is the public URL of the web service, s
   the IMAP variables are set, the cron job's call answers 503 and its runs fail.
 - *Zmazať lead* deletes the lead with its history, its recorded e-mails, every website inquiry linked to it or sent
   from one of its contacts' e-mail addresses (unless another lead owns it), and replaces the contacts' e-mails, full
-  names, phone numbers and LinkedIn profiles in all AI prospecting run logs with "[vymazané]". A later prospecting run
-  can find the company again from public sources, and if it becomes a lead again, *Prehľadať znova 90 dní* records its
-  e-mails from the last 90 days again (the mailbox itself is not changed).
+  names, phone numbers and LinkedIn profiles with "[vymazané]" in all AI prospecting run logs and in other leads'
+  recorded e-mails and their e-mail history lines (a message sent to both companies, a bounce for both). A later
+  prospecting run can find the company again from public sources, and if it becomes a lead again, *Prehľadať znova
+  90 dní* records its e-mails from the last 90 days again (the mailbox itself is not changed).

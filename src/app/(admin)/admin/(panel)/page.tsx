@@ -6,7 +6,8 @@ import Icon from "@/components/admin/Icon";
 import { marketTitle } from "@/lib/market";
 import { mailConfigured } from "@/lib/mail/config";
 import { maybeSyncMail } from "@/lib/mail/sync";
-import { newRepliesCount, outreachStats } from "@/lib/mail/stats";
+import { newRepliesCount, orNull, outreachStats } from "@/lib/mail/stats";
+import { MAIL_ERROR } from "@/lib/mail/errors";
 import { simulateMail } from "@/lib/demo/mode";
 
 const HOT_STATUSES = ["new", "qualified"];
@@ -33,7 +34,9 @@ export default async function Dashboard() {
       db().from("market_reports").select("id, country, roles, status, opportunity:report->>opportunity, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
 
-  const [newReplies, mail] = mailOn ? await Promise.all([newRepliesCount(7), outreachStats(30)]) : [0, null];
+  const mail = mailOn
+    ? await orNull(Promise.all([newRepliesCount(7), outreachStats(30)]).then(([newReplies, stats]) => ({ newReplies, stats })))
+    : null;
 
   const byStatus = Object.fromEntries(STATUSES.map((s, i) => [s, byStatusCount[i].count ?? 0]));
   const total = Object.values(byStatus).reduce((sum, n) => sum + n, 0);
@@ -128,13 +131,15 @@ export default async function Dashboard() {
         {mail ? (
           <div className="card__body">
             <div className="stats">
-              <Link href="/admin/mail" className="stat"><strong>{newReplies}</strong><span>nové odpovede za 7 dní</span></Link>
+              <Link href="/admin/mail" className="stat"><strong>{mail.newReplies}</strong><span>nové odpovede za 7 dní</span></Link>
               <Link href="/admin/mail" className="stat">
-                <strong>{percent(mail.replied, mail.outreached)}</strong>
-                <span>miera odpovedí za 30 dní ({mail.replied} z {mail.outreached} oslovených)</span>
+                <strong>{percent(mail.stats.replied, mail.stats.outreached)}</strong>
+                <span>miera odpovedí za 30 dní ({mail.stats.replied} z {mail.stats.outreached} oslovených)</span>
               </Link>
             </div>
           </div>
+        ) : mailOn ? (
+          <p className="empty">{MAIL_ERROR.read}</p>
         ) : (
           <p className="empty">
             Schránka nie je pripojená, odpovede firiem sa tu zatiaľ neukazujú. <Link href="/admin/mail" className="link">Pripojiť schránku</Link>

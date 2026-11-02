@@ -117,7 +117,7 @@ export default async function LeadDetail({
         : "",
     ])}.`,
     terms.emails.length || terms.names.length || terms.phones.length || terms.profiles.length
-      ? `Mená, e-maily, telefónne čísla a LinkedIn profily kontaktov sa v logoch AI vyhľadávania nahradia textom „${REDACTED}“.`
+      ? `Mená, e-maily, telefónne čísla a LinkedIn profily kontaktov sa v logoch AI vyhľadávania a v e-mailoch iných leadov (napr. v kópii) nahradia textom „${REDACTED}“.`
       : "",
     othersText,
     "Ďalšie AI vyhľadávanie môže firmu z verejných zdrojov nájsť znova.",
@@ -349,7 +349,8 @@ export default async function LeadDetail({
                 <p>
                   Pri spame, testovacom zázname alebo žiadosti o vymazanie údajov. Zmaže lead s kontaktmi, históriou a e-mailmi
                   z pošty a dopyty z webu priradené k nemu alebo odoslané z e-mailov jeho kontaktov (okrem dopytov iných leadov). V logoch AI
-                  vyhľadávania nahradí mená, e-maily, telefónne čísla a LinkedIn profily kontaktov textom „{REDACTED}“.
+                  vyhľadávania a v e-mailoch iných leadov (napr. v kópii) nahradí mená, e-maily, telefónne čísla a LinkedIn profily kontaktov
+                  textom „{REDACTED}“.
                   Ďalšie AI vyhľadávanie môže firmu z verejných zdrojov nájsť znova.
                 </p>
                 {others.length > 0 && (

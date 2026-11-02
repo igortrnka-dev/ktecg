@@ -886,7 +886,9 @@ details.more[open] > summary {
   margin-left: 4px;
   vertical-align: -1px;
 }
-.clamp {
+/* .table .clamp outranks .table .sub { display: block }, which would switch the clamp off. */
+.clamp,
+.table .clamp {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

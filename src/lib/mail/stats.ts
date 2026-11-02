@@ -35,6 +35,16 @@ export type OutreachStats = {
 
 export const NO_COUNTRY = "Neuvedená";
 
+/** Null instead of the error page when lead_emails cannot be read (e.g. 0004_mail.sql not run yet); the page says so. */
+export async function orNull<T>(stats: Promise<T>): Promise<T | null> {
+  try {
+    return await stats;
+  } catch (err) {
+    console.error("Mail stats failed:", err instanceof Error ? err.message : err);
+    return null;
+  }
+}
+
 function median(values: number[]): number | null {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);

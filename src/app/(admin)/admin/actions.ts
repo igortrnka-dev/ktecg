@@ -11,7 +11,7 @@ import { normalizeDomain } from "@/lib/ai/client";
 import { aiErrorText } from "@/lib/ai/errors";
 import { enrichLead, writeOutreach } from "@/lib/ai/leads";
 import { FOLLOW_UP, NEXT_ACTION, workdayIn } from "@/lib/inquiries";
-import { leadInquiryIds, redactRunLogs } from "@/lib/erase";
+import { leadInquiryIds, redactOtherMail, redactRunLogs } from "@/lib/erase";
 import { fmtDay, PRE_CONTACT } from "@/components/admin/ui";
 import { isDemo, simulateAi, simulateMail } from "@/lib/demo/mode";
 import { demoSignIn, demoSignOut } from "@/lib/demo/session";
@@ -156,7 +156,8 @@ export async function addLead(form: FormData) {
 /**
  * Deletes a lead with its history and recorded e-mails (spam, test records, erasure requests), the website
  * inquiries linked to it or sent from its contacts' addresses, and the contacts' e-mails and full names in the
- * prospecting run logs.
+ * prospecting run logs and in other leads' recorded e-mails. The lead's e-mails go with it (on delete cascade),
+ * also while 0004_mail.sql has not been run.
  */
 export async function deleteLead(form: FormData) {
   await requireAdmin();
@@ -166,8 +167,8 @@ export async function deleteLead(form: FormData) {
   const inquiryIds = await leadInquiryIds(id, lead.contacts);
   if (inquiryIds.length) check(await db().from("inquiries").delete().in("id", inquiryIds));
   await redactRunLogs(lead.contacts);
+  await redactOtherMail(id, lead.contacts);
   check(await db().from("lead_events").delete().eq("lead_id", id));
-  check(await db().from("lead_emails").delete().eq("lead_id", id));
   check(await db().from("leads").delete().eq("id", id));
   revalidatePath("/admin", "layout");
   redirect(`/admin/leads?deleted=${encodeURIComponent(lead.company_name)}`);
