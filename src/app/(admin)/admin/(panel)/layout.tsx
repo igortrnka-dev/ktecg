@@ -21,6 +21,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <NavLink href="/admin" icon="home">Prehľad</NavLink>
           <NavLink href="/admin/leads" icon="leads">Leady</NavLink>
           <NavLink href="/admin/inquiries" icon="inbox">Dopyty z webu</NavLink>
+          <NavLink href="/admin/mail" icon="mailbox">Pošta</NavLink>
           <NavLink href="/admin/campaigns" icon="spark">AI vyhľadávanie</NavLink>
           <NavLink href="/admin/market" icon="globe">Analýzy trhu</NavLink>
           <NavLink href="/admin/settings" icon="settings">Nastavenia</NavLink>

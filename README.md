@@ -17,6 +17,14 @@ admin that uses Claude to find, qualify and draft outreach to sales leads.
     hiring, competitors, wages and rates for leased staff, rules for leasing and posting workers, seasonality) and saves a
     sourced report in Slovak. From it, companies go into the pipeline with "Pridať ako lead" (an existing lead with the
     same domain is linked instead), and "Vytvoriť kampaň z analýzy" creates an inactive prospecting campaign.
+  - *Pošta*: reads the company mailbox (`office@ktechnology.sk`) over IMAP and records the e-mails exchanged with
+    leads, so the admin shows how the outreach is going: leads written to, reply rate and median time to reply, bounces
+    and auto-replies (30 or 90 days, also per country), new replies, contacted leads waiting more than 7 days for an
+    answer, and every recorded e-mail. A lead's detail lists its e-mails. An incoming reply moves a new, qualified or
+    contacted lead to *Odpovedal* and sets the next step "Odpovedať na e-mail" for today (later and closed leads keep
+    their status and only get the next step); a sent e-mail moves a new or qualified lead to *Oslovený* and sets the
+    follow-up unless a next step was set by hand; a bounce sets "Overiť e-mail kontaktu". Each recorded e-mail is
+    written to the lead's history. Read-only: nothing is sent, moved or marked as read.
   - *Nastavenia*: the company profile / ideal-customer text Claude works from. Claude is told to use only
     the facts in it. 0001_init.sql seeds it once, so a project that ran an older 0001 still has the old
     default text (it mentioned Switzerland, the UK, "certified" welders and engagement sizes, and lacked the
@@ -28,21 +36,27 @@ Stack: Next.js 15 (App Router), Supabase (Postgres + Auth), Anthropic API (`clau
 ## Setup
 
 1. **Supabase** – create a project, then run `supabase/migrations/0001_init.sql`, then
-   `supabase/migrations/0002_inquiry_duration_shift.sql` and then `supabase/migrations/0003_market_reports.sql` in
-   the SQL editor. 0002 and 0003 are safe to run again; a project set up with an older 0001 needs 0002, or every
-   website inquiry fails, and an existing project needs 0003 for *Analýzy trhu*.
+   `supabase/migrations/0002_inquiry_duration_shift.sql`, `supabase/migrations/0003_market_reports.sql` and then
+   `supabase/migrations/0004_mail.sql` in the SQL editor. 0002–0004 are safe to run again; a project set up with an
+   older 0001 needs 0002, or every website inquiry fails, an existing project needs 0003 for *Analýzy trhu* and 0004
+   for *Pošta*.
    In *Authentication → Users* add the admin user(s) with a password and tick *Auto Confirm User*
    (the admin only accepts confirmed e-mails listed in `ADMIN_EMAILS`).
    Then in *Authentication → Sign In / Providers* turn off *Allow new users to sign up* (it is on by default)
    and leave *Confirm email* on, so nobody can create an account with the public anon key.
 2. **Env vars** – copy `.env.example` to `.env.local` and fill in the values.
+   For *Pošta* set `IMAP_HOST=imap.websupport.sk`, `IMAP_PORT=993`, `IMAP_USER=office@ktechnology.sk` and
+   `IMAP_PASSWORD` (the mailbox's password, as set in the Websupport admin). The sent folder is found on its own
+   (`\Sent`, then *Sent*, *INBOX.Sent*, *Sent Items*, *Odoslané*); set `IMAP_SENT_FOLDER` to its exact name only if
+   *Pošta* says it was not found.
+   Without these three values the rest of the admin works and *Pošta* explains what is missing.
 3. `npm install && npm run dev` → http://localhost:3000 and http://localhost:3000/admin
 
 ## Deploy on Render
 
-Use *New → Blueprint* and point it at this repo; `render.yaml` creates the web service and the daily
-prospecting cron job. Fill in the env vars marked `sync: false` in the Render dashboard
-(`NEXT_PUBLIC_SITE_URL` is the public URL of the web service, set it on both services).
+Use *New → Blueprint* and point it at this repo; `render.yaml` creates the web service, the daily
+prospecting cron job and the mail cron job (every 15 minutes). Fill in the env vars marked `sync: false` in the
+Render dashboard (`NEXT_PUBLIC_SITE_URL` is the public URL of the web service, set it on both services).
 
 ## Notes
 
@@ -61,6 +75,19 @@ prospecting cron job. Fill in the env vars marked `sync: false` in the Render da
   in total, inquiries are still saved and put into the pipeline, but Claude does not assess them (the lead's
   history says so and the server log warns once per 10 minutes), so a flood cannot lock real buyers out.
   On a validation error it answers 400 `{"error":"invalid","fields":[…]}` with the failing field names.
-- *Zmazať lead* deletes the lead with its history, every website inquiry linked to it or sent from one of its
-  contacts' e-mail addresses (unless another lead owns it), and replaces the contacts' e-mails, full names, phone
-  numbers and LinkedIn profiles in all AI prospecting run logs with "[vymazané]". A later prospecting run can find the company again from public sources.
+- *Pošta* stores only e-mails that belong to a lead: an incoming one whose sender (or Reply-To) is a contact's
+  address or on the lead's domain or a subdomain of it, an outgoing one by its To/Cc, and a bounce by the address that
+  failed. Free-mail addresses match only a contact's exact address, and KTechnology's own domain never matches.
+  For each it keeps the addresses, subject, date and the plain text without the quoted earlier messages (at most
+  20 000 characters; no attachments or HTML). Other mail is looked at only by its headers and is not stored. The
+  mailbox is opened read-only (IMAP EXAMINE over TLS, certificates checked); `settings.mail_sync` keeps a cursor per
+  folder, so each run reads only new messages (at most 300 per folder; the rest follow in the next runs). The first
+  run, or *Prehľadať znova 90 dní*, goes back 90 days; e-mails already recorded are not stored or acted on twice.
+  The sync runs every 15 minutes through the Render cron job (a separate paid service), in the background when
+  *Pošta* or *Prehľad* is opened and the last run is older than 5 minutes, and with *Synchronizovať teraz*. Until
+  the IMAP variables are set, the cron job's call answers 503 and its runs fail.
+- *Zmazať lead* deletes the lead with its history, its recorded e-mails, every website inquiry linked to it or sent
+  from one of its contacts' e-mail addresses (unless another lead owns it), and replaces the contacts' e-mails, full
+  names, phone numbers and LinkedIn profiles in all AI prospecting run logs with "[vymazané]". A later prospecting run
+  can find the company again from public sources, and if it becomes a lead again, *Prehľadať znova 90 dní* records its
+  e-mails from the last 90 days again (the mailbox itself is not changed).

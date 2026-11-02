@@ -10,15 +10,17 @@ import { runInProgress, startRun } from "@/lib/ai/prospect";
 import { normalizeDomain } from "@/lib/ai/client";
 import { aiErrorText } from "@/lib/ai/errors";
 import { enrichLead, writeOutreach } from "@/lib/ai/leads";
-import { FOLLOW_UP, NEXT_ACTION } from "@/lib/inquiries";
+import { FOLLOW_UP, NEXT_ACTION, workdayIn } from "@/lib/inquiries";
 import { leadInquiryIds, redactRunLogs } from "@/lib/erase";
 import { fmtDay, PRE_CONTACT } from "@/components/admin/ui";
-import { isDemo, simulateAi } from "@/lib/demo/mode";
+import { isDemo, simulateAi, simulateMail } from "@/lib/demo/mode";
 import { demoSignIn, demoSignOut } from "@/lib/demo/session";
 import { simulateEnrich, simulateMarketReport, simulateOutreach, simulateRun } from "@/lib/demo/ai";
 import { createMarketReport, startMarketReport } from "@/lib/ai/market";
 import { marketLog } from "@/lib/ai/runlog";
 import { httpUrl, marketTitle, type MarketReportRow } from "@/lib/market";
+import { syncMail, type SyncResult } from "@/lib/mail/sync";
+import { simulateMailSync } from "@/lib/demo/mail";
 
 const list = (v: FormDataEntryValue | null) =>
   String(v ?? "")
@@ -152,8 +154,9 @@ export async function addLead(form: FormData) {
 }
 
 /**
- * Deletes a lead with its history (spam, test records, erasure requests), the website inquiries linked to it
- * or sent from its contacts' addresses, and the contacts' e-mails and full names in the prospecting run logs.
+ * Deletes a lead with its history and recorded e-mails (spam, test records, erasure requests), the website
+ * inquiries linked to it or sent from its contacts' addresses, and the contacts' e-mails and full names in the
+ * prospecting run logs.
  */
 export async function deleteLead(form: FormData) {
   await requireAdmin();
@@ -164,6 +167,7 @@ export async function deleteLead(form: FormData) {
   if (inquiryIds.length) check(await db().from("inquiries").delete().in("id", inquiryIds));
   await redactRunLogs(lead.contacts);
   check(await db().from("lead_events").delete().eq("lead_id", id));
+  check(await db().from("lead_emails").delete().eq("lead_id", id));
   check(await db().from("leads").delete().eq("id", id));
   revalidatePath("/admin", "layout");
   redirect(`/admin/leads?deleted=${encodeURIComponent(lead.company_name)}`);
@@ -201,15 +205,6 @@ export async function rewriteOutreach(form: FormData) {
     await logAiFailure(id, "Claude e-mail neprepísal", err);
   }
   revalidatePath(`/admin/leads/${id}`);
-}
-
-/** `days` from today (UTC, like the inquiry task), moved to Monday when it falls on a weekend. */
-function workdayIn(days: number): string {
-  const date = new Date();
-  date.setUTCDate(date.getUTCDate() + days);
-  const weekday = date.getUTCDay();
-  if (weekday === 6 || weekday === 0) date.setUTCDate(date.getUTCDate() + (weekday === 6 ? 2 : 1));
-  return date.toISOString().slice(0, 10);
 }
 
 /**
@@ -374,4 +369,26 @@ export async function createCampaignFromReport(form: FormData) {
   );
   revalidatePath("/admin/campaigns");
   redirect(`/admin/campaigns?created=${encodeURIComponent(name)}`);
+}
+
+/** Back to Pošta with what the sync did; a failure is shown from the stored state on the page. */
+function afterMailSync(result: SyncResult): never {
+  revalidatePath("/admin", "layout");
+  if (result.status === "ok") redirect(`/admin/mail?synced=${result.saved}`);
+  redirect(result.status === "busy" ? "/admin/mail?busy=1" : "/admin/mail");
+}
+
+/** "Synchronizovať teraz": reads new mail now; in the preview without IMAP settings, finds a sample reply. */
+export async function syncMailNow() {
+  await requireAdmin();
+  afterMailSync(simulateMail() ? await simulateMailSync() : await syncMail());
+}
+
+/**
+ * "Prehľadať znova 90 dní": forgets where each folder was read up to and reads the last 90 days again, for leads
+ * added after their e-mails arrived. E-mails already recorded are skipped, so nothing is saved twice.
+ */
+export async function rescanMail() {
+  await requireAdmin();
+  afterMailSync(simulateMail() ? await simulateMailSync() : await syncMail({ reset: true }));
 }

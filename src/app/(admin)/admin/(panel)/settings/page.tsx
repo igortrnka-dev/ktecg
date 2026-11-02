@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { getCompanyProfile } from "@/lib/ai/client";
 import SubmitButton from "@/components/admin/SubmitButton";
+import { mailConfigured } from "@/lib/mail/config";
 import { saveSettings } from "../../actions";
 
 export default async function Settings() {
@@ -10,11 +11,13 @@ export default async function Settings() {
     supabase: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     anthropic: Boolean(process.env.ANTHROPIC_API_KEY),
     cron: Boolean(process.env.CRON_SECRET),
+    mail: mailConfigured(),
   };
   const connections = [
     { name: "Databáza (Supabase)", ok: ready.supabase, hint: "ukladá leady, kampane a dopyty" },
     { name: "Claude (Anthropic API)", ok: ready.anthropic, hint: "hľadá firmy, hodnotí ich a píše e-maily" },
     { name: "Denné automatické hľadanie", ok: ready.cron, hint: "spúšťa kampane každé ráno" },
+    { name: "Pošta (IMAP)", ok: ready.mail, hint: "číta e-maily s firmami z leadov, nastavenie je v časti Pošta" },
   ];
   return (
     <>

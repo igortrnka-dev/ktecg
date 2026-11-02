@@ -2,17 +2,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/supabase/admin";
-import { Due, PRE_CONTACT, Score, Status, STATUSES, statusLabel, sourceLabel, fmtDate, fmtDay } from "@/components/admin/ui";
+import { Due, MailBadge, PRE_CONTACT, Score, Status, STATUSES, statusLabel, sourceLabel, fmtDate, fmtDay } from "@/components/admin/ui";
 import SubmitButton from "@/components/admin/SubmitButton";
 import PageNotice from "@/components/admin/PageNotice";
 import Icon from "@/components/admin/Icon";
 import { plural } from "@/lib/plural";
 import { erasureTerms, leadInquiryIds, otherLeadsWithContacts, REDACTED } from "@/lib/erase";
 import { NEXT_ACTION } from "@/lib/inquiries";
+import { longerThanSnippet } from "@/lib/mail/parse";
+import { mailRoute } from "@/lib/mail/text";
 import { deleteLead, enrich, logContacted, rewriteOutreach, updateLead } from "../../../actions";
 
 type Signal = { type: string; detail: string; url: string };
 type Contact = { name: string; role: string; email: string; phone: string; linkedin: string };
+type Email = {
+  id: string; direction: string; kind: string; from_email: string | null; from_name: string | null; to_emails: string[];
+  cc_emails: string[]; subject: string | null; snippet: string | null; body: string | null; sent_at: string;
+};
 
 const LANGS = ["en", "de", "fr", "sv", "sk", "cs", "pl", "nl", "da", "no", "fi", "it", "es", "hu"];
 
@@ -33,7 +39,14 @@ const eventLabel: Record<string, string> = {
   ai: "Claude",
   outreach: "Oslovenie",
   inquiry: "Dopyt z webu",
+  email: "E-mail",
 };
+
+/** "a, b a c" */
+function andList(items: string[]) {
+  const list = items.filter(Boolean);
+  return list.length > 1 ? `${list.slice(0, -1).join(", ")} a ${list[list.length - 1]}` : list.join("");
+}
 
 /** Status changes are stored as "qualified → contacted"; show them with the Slovak names. */
 function eventBody(type: string, body: string) {
@@ -51,12 +64,20 @@ export default async function LeadDetail({
   await requireAdmin();
   const { id } = await params;
   const { existing } = await searchParams;
-  const [{ data: lead }, { data: events }, { data: inquiry }] = await Promise.all([
+  const [{ data: lead }, { data: events }, { data: inquiry }, { data: emailRows, count: emailTotal }] = await Promise.all([
     db().from("leads").select("*, campaigns(name)").eq("id", id).single(),
     db().from("lead_events").select("*").eq("lead_id", id).order("created_at", { ascending: false }),
     db().from("inquiries").select("locale, created_at").eq("lead_id", id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    db()
+      .from("lead_emails")
+      .select("id, direction, kind, from_email, from_name, to_emails, cc_emails, subject, snippet, body, sent_at", { count: "exact" })
+      .eq("lead_id", id)
+      .order("sent_at", { ascending: false })
+      .limit(100),
   ]);
   if (!lead) notFound();
+  const emails = (emailRows ?? []) as Email[];
+  const emailCount = emailTotal ?? emails.length;
 
   const signals = (lead.signals ?? []) as Signal[];
   const contacts = (lead.contacts ?? []) as Contact[];
@@ -87,11 +108,14 @@ export default async function LeadDetail({
   const draftLanguage = inquiryLanguage ?? lead.outreach_language ?? "en";
   const deleteConfirm = [
     `Naozaj zmazať lead „${lead.company_name}“?`,
-    `Zmaže sa lead s kontaktmi a signálmi, jeho história (${eventCount} ${plural(eventCount, "záznam", "záznamy", "záznamov")})` +
-      (inquiries
-        ? ` a ${inquiries} ${plural(inquiries, "dopyt", "dopyty", "dopytov")} z webu ` +
-          `(${plural(inquiries, "priradený k leadu alebo odoslaný", "priradené k leadu alebo odoslané", "priradených k leadu alebo odoslaných")} z e-mailov jeho kontaktov).`
-        : "."),
+    `Zmaže sa lead s kontaktmi a signálmi, ${andList([
+      `jeho história (${eventCount} ${plural(eventCount, "záznam", "záznamy", "záznamov")})`,
+      emailCount ? `${emailCount} ${plural(emailCount, "e-mail", "e-maily", "e-mailov")} z pošty` : "",
+      inquiries
+        ? `${inquiries} ${plural(inquiries, "dopyt", "dopyty", "dopytov")} z webu ` +
+          `(${plural(inquiries, "priradený k leadu alebo odoslaný", "priradené k leadu alebo odoslané", "priradených k leadu alebo odoslaných")} z e-mailov jeho kontaktov)`
+        : "",
+    ])}.`,
     terms.emails.length || terms.names.length || terms.phones.length || terms.profiles.length
       ? `Mená, e-maily, telefónne čísla a LinkedIn profily kontaktov sa v logoch AI vyhľadávania nahradia textom „${REDACTED}“.`
       : "",
@@ -200,6 +224,37 @@ export default async function LeadDetail({
           </section>
 
           <section className="card">
+            <div className="card__head">
+              <h2>E-maily <span className="count">{emailCount}</span></h2>
+              <Link href="/admin/mail" className="link small">Pošta</Link>
+            </div>
+            {emails.length === 0 ? (
+              <p className="empty">Zatiaľ žiadne e-maily zo schránky.</p>
+            ) : (
+              <ul className="list">
+                {emails.map((e) => (
+                  <li key={e.id} className="mail">
+                    <div className="mail__head">
+                      <MailBadge direction={e.direction} kind={e.kind} />
+                      <time className="mail__time" dateTime={e.sent_at}>{fmtDate(e.sent_at)}</time>
+                    </div>
+                    <span className="mail__meta">{mailRoute(e)}</span>
+                    <span className="mail__subject">{e.subject || "(bez predmetu)"}</span>
+                    {e.snippet && <p className="mail__snippet">{e.snippet}</p>}
+                    {e.body && longerThanSnippet(e.body) && (
+                      <details className="more">
+                        <summary>Celý text</summary>
+                        <pre className="log log--tall mailbody">{e.body}</pre>
+                      </details>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {emailCount > emails.length && <p className="muted small mail__more">Zobrazených je posledných {emails.length} e-mailov.</p>}
+          </section>
+
+          <section className="card">
             <div className="card__head"><h2>História</h2></div>
             {(events ?? []).length === 0 ? (
               <p className="empty">Zatiaľ bez záznamov.</p>
@@ -292,8 +347,8 @@ export default async function LeadDetail({
               <div>
                 <h2>Zmazať lead</h2>
                 <p>
-                  Pri spame, testovacom zázname alebo žiadosti o vymazanie údajov. Zmaže lead s kontaktmi a históriou a dopyty
-                  z webu priradené k nemu alebo odoslané z e-mailov jeho kontaktov (okrem dopytov iných leadov). V logoch AI
+                  Pri spame, testovacom zázname alebo žiadosti o vymazanie údajov. Zmaže lead s kontaktmi, históriou a e-mailmi
+                  z pošty a dopyty z webu priradené k nemu alebo odoslané z e-mailov jeho kontaktov (okrem dopytov iných leadov). V logoch AI
                   vyhľadávania nahradí mená, e-maily, telefónne čísla a LinkedIn profily kontaktov textom „{REDACTED}“.
                   Ďalšie AI vyhľadávanie môže firmu z verejných zdrojov nájsť znova.
                 </p>

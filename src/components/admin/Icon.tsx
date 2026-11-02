@@ -20,6 +20,7 @@ const PATHS = {
   link: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
   trash: "M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3",
   globe: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M3.5 9h17M3.5 15h17M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18",
+  mailbox: "M3 9.5 12 3.5l9 6V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM3 10l9 6 9-6",
 } as const;
 
 export type IconName = keyof typeof PATHS;

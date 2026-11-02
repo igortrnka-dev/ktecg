@@ -3,6 +3,9 @@ import { AI_ERROR } from "../ai/errors";
 import { marketLog, runLog } from "../ai/runlog";
 import type { MarketReportData } from "../ai/schemas";
 import { NEXT_ACTION } from "../inquiries";
+import { COMPANY_MAILBOX } from "../mail/config";
+import { snippetOf } from "../mail/parse";
+import { CHECK_ADDRESS, mailLog } from "../mail/text";
 
 /*
  * Sample data for the local admin preview. Every company is fictional and uses the
@@ -355,7 +358,9 @@ export function seed(): Record<string, Row[]> {
     }),
   ];
 
-  type LeadSeed = Row & { events?: [type: string, body: string, hoursAgo: number][] };
+  /** A sample e-mail with the lead's first contact; "outreach" as the body stands for the lead's outreach e-mail. */
+  type MailSeed = { dir: "in" | "out"; kind?: "normal" | "auto_reply" | "bounce"; hours: number; subject: string; body: string };
+  type LeadSeed = Row & { events?: [type: string, body: string, hoursAgo: number][]; mails?: MailSeed[] };
   const leadSeeds: LeadSeed[] = [
     {
       company_name: "Brenner Achsentechnik GmbH",
@@ -438,11 +443,20 @@ export function seed(): Record<string, Row[]> {
       campaign_id: de,
       next_action: "Pripomenúť sa e-mailom",
       next_action_at: day(-1),
-      created_at: ago(3),
+      created_at: ago(12),
       events: [
-        ["created", "Nájdené AI vyhľadávaním. Skóre 74, tier B.", 72],
-        ["status", "qualified → contacted", 50],
-        ["outreach", "Odoslaný prvý e-mail.", 50],
+        ["created", "Nájdené AI vyhľadávaním. Skóre 74, tier B.", 288],
+        ["status", "qualified → contacted", 240],
+      ],
+      mails: [
+        { dir: "out", hours: 240, subject: "Schweißer und Rohrschlosser für Ihre Serviceschiffe", body: "outreach" },
+        {
+          dir: "in",
+          kind: "auto_reply",
+          hours: 239.9,
+          subject: "Automatische Antwort: Schweißer und Rohrschlosser für Ihre Serviceschiffe",
+          body: "Vielen Dank für Ihre Nachricht. Ich bin derzeit nicht im Büro und habe keinen Zugriff auf meine E-Mails. In dringenden Fällen wenden Sie sich bitte an fertigung@weserwerft.example.\n\nJana Hansen",
+        },
       ],
     },
     {
@@ -473,6 +487,15 @@ export function seed(): Record<string, Row[]> {
         ["status", "qualified → contacted", 120],
         ["status", "contacted → replied", 20],
       ],
+      mails: [
+        { dir: "out", hours: 120, subject: "Stahlbaumonteure für Ihre Projekte in Oberösterreich", body: "outreach" },
+        {
+          dir: "in",
+          hours: 20,
+          subject: "AW: Stahlbaumonteure für Ihre Projekte in Oberösterreich",
+          body: "Guten Tag,\n\ndanke für Ihre Nachricht. Wir überlegen, ab dem Frühjahr 8 Stahlbaumonteure für etwa sechs Monate einzusetzen. Bitte schicken Sie uns ein unverbindliches Angebot mit Stundensätzen inklusive Unterkunft.\n\nMit freundlichen Grüßen\nStefan Gruber\nGeschäftsführer",
+        },
+      ],
     },
     {
       company_name: "Vestfjord Prosess AS",
@@ -500,7 +523,22 @@ export function seed(): Record<string, Row[]> {
       events: [
         ["created", "Nájdené AI vyhľadávaním. Skóre 84, tier A.", 192],
         ["status", "qualified → contacted", 170],
-        ["status", "contacted → meeting", 30],
+        ["status", "contacted → replied", 52],
+        ["status", "replied → meeting", 30],
+      ],
+      mails: [
+        {
+          dir: "out",
+          hours: 170,
+          subject: "Fagarbeidere til vedlikeholdsstansen i Mo i Rana",
+          body: "Hei Ingrid,\n\nVi så at Vestfjord Prosess forbereder høststansen av ovnen. KTechnology leier ut erfarne industrirørleggere, sveisere og industrimekanikere, med reise, innkvartering og en koordinator på stedet.\n\nHar du tid til en kort prat neste uke?\n\nMed vennlig hilsen\nKTechnology",
+        },
+        {
+          dir: "in",
+          hours: 52,
+          subject: "SV: Fagarbeidere til vedlikeholdsstansen i Mo i Rana",
+          body: "Hei,\n\ntakk for henvendelsen. Vi trenger trolig 6–8 personer til stansen. Kan vi ta et Teams-møte torsdag kl. 10?\n\nHilsen\nIngrid Solberg\nVedlikeholdsleder",
+        },
       ],
     },
     {
@@ -528,8 +566,18 @@ export function seed(): Record<string, Row[]> {
       events: [
         ["created", "Nájdené AI vyhľadávaním. Skóre 86, tier A.", 312],
         ["status", "qualified → contacted", 300],
-        ["status", "contacted → meeting", 220],
+        ["status", "contacted → replied", 290],
+        ["status", "replied → meeting", 220],
         ["status", "meeting → won", 40],
+      ],
+      mails: [
+        { dir: "out", hours: 300, subject: "Rohrschlosser und WIG-Schweißer für Ihr Chemieprojekt", body: "outreach" },
+        {
+          dir: "in",
+          hours: 290,
+          subject: "AW: Rohrschlosser und WIG-Schweißer für Ihr Chemieprojekt",
+          body: "Guten Tag,\n\ndas passt gut: Für die Rohrleitungsmontage suchen wir ab nächstem Monat Verstärkung. Rufen Sie mich bitte morgen Vormittag an.\n\nGruß\nMichael Brandt",
+        },
       ],
     },
     {
@@ -572,11 +620,26 @@ export function seed(): Record<string, Row[]> {
       outreach_language: "pl",
       outreach_subject: "Spawacze i monterzy konstrukcji stalowych do projektów offshore",
       outreach_body: "Szanowny Panie,\n\nw związku z rozbudową Państwa hali prefabrykacji chcielibyśmy zaproponować wsparcie: KTechnology zapewnia doświadczonych spawaczy i monterów konstrukcji stalowych, sprawdzonych w praktycznych testach, wraz z zakwaterowaniem i koordynacją.\n\nCzy znalazłby Pan 15 minut na krótką rozmowę w przyszłym tygodniu?\n\nZ poważaniem\nZespół KTechnology",
-      status: "new",
+      status: "contacted",
       source: "ai_prospecting",
       campaign_id: cnc,
+      next_action: CHECK_ADDRESS,
+      next_action_at: day(-3),
       created_at: ago(9),
-      events: [["created", "Nájdené AI vyhľadávaním. Skóre 58, tier B.", 216]],
+      events: [
+        ["created", "Nájdené AI vyhľadávaním. Skóre 58, tier B.", 216],
+        ["status", "new → contacted", 72],
+      ],
+      mails: [
+        { dir: "out", hours: 72, subject: "Spawacze i monterzy konstrukcji stalowych do projektów offshore", body: "outreach" },
+        {
+          dir: "in",
+          kind: "bounce",
+          hours: 71.9,
+          subject: "Spawacze i monterzy konstrukcji stalowych do projektów offshore",
+          body: "This is the mail system at host mail.example.\n\nI'm sorry to have to inform you that your message could not be delivered to one or more recipients.\n\n<m.wisniewski@wisla-konstrukcje.example>: host mx.wisla-konstrukcje.example said: 550 5.1.1 User unknown",
+        },
+      ],
     },
     {
       company_name: "Hamar Treforedling AS",
@@ -714,7 +777,8 @@ export function seed(): Record<string, Row[]> {
 
   const leads: Row[] = [];
   const lead_events: Row[] = [];
-  for (const { events = [], ...lead } of leadSeeds) {
+  const lead_emails: Row[] = [];
+  for (const { events = [], mails = [], ...lead } of leadSeeds) {
     const row: Row = {
       id: randomUUID(),
       website: lead.website ?? `https://${lead.domain}`,
@@ -728,6 +792,31 @@ export function seed(): Record<string, Row[]> {
     leads.push(row);
     for (const [type, body, hoursAgo] of events) {
       lead_events.push({ id: randomUUID(), lead_id: row.id, type, body, created_at: ago(0, hoursAgo) });
+    }
+    for (const m of mails) {
+      const person = row.contacts[0];
+      const bounce = m.kind === "bounce";
+      const body = m.body === "outreach" ? row.outreach_body : m.body;
+      const email = {
+        id: randomUUID(),
+        lead_id: row.id,
+        message_id: `<seed-${randomUUID()}@ktechnology.example>`,
+        folder: m.dir === "out" ? "Sent" : "INBOX",
+        direction: m.dir,
+        kind: m.kind ?? "normal",
+        from_email: bounce ? "mailer-daemon@mail.example" : m.dir === "in" ? person.email : COMPANY_MAILBOX,
+        from_name: bounce ? "Mail Delivery System" : m.dir === "in" ? person.name : "KTechnology",
+        to_emails: m.dir === "in" && !bounce ? [COMPANY_MAILBOX] : [person.email],
+        cc_emails: [],
+        subject: m.subject,
+        snippet: snippetOf(body),
+        body,
+        sent_at: ago(0, m.hours),
+        in_reply_to: null,
+        created_at: ago(0, m.hours),
+      };
+      lead_emails.push(email);
+      lead_events.push({ id: randomUUID(), lead_id: row.id, type: "email", body: mailLog.event(email), created_at: email.sent_at });
     }
   }
 
@@ -796,7 +885,22 @@ export function seed(): Record<string, Row[]> {
     leads,
     lead_events,
     inquiries,
-    settings: [{ key: "company_profile", value: COMPANY_PROFILE, updated_at: ago(14) }],
+    settings: [
+      { key: "company_profile", value: COMPANY_PROFILE, updated_at: ago(14) },
+      {
+        key: "mail_sync",
+        value: {
+          folders: {},
+          last_run_at: ago(0, 0.3),
+          last_ok_at: ago(0, 0.3),
+          last_error: null,
+          running_since: null,
+          stats: { scanned: 14, matched: 0, saved: 0, remaining: 0 },
+        },
+        updated_at: ago(0, 0.3),
+      },
+    ],
     market_reports,
+    lead_emails,
   };
 }

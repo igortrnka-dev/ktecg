@@ -109,6 +109,15 @@ function details(q: InquiryRow): string {
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+/** `days` after `from` (UTC, like the inquiry task), moved to Monday when it falls on a weekend. */
+export function workdayIn(days: number, from = new Date()): string {
+  const date = new Date(from);
+  date.setUTCDate(date.getUTCDate() + days);
+  const weekday = date.getUTCDay();
+  if (weekday === 6 || weekday === 0) date.setUTCDate(date.getUTCDate() + (weekday === 6 ? 2 : 1));
+  return date.toISOString().slice(0, 10);
+}
 const sameEmail = (a?: string | null, b?: string | null) => Boolean(a && b && a.trim().toLowerCase() === b.trim().toLowerCase());
 
 async function logEvent(leadId: string, type: string, body: string) {

@@ -24,6 +24,16 @@ services:
         sync: false
       - key: CRON_SECRET
         generateValue: true
+      - key: IMAP_HOST
+        sync: false
+      - key: IMAP_PORT
+        sync: false
+      - key: IMAP_USER
+        sync: false
+      - key: IMAP_PASSWORD
+        sync: false
+      - key: IMAP_SENT_FOLDER
+        sync: false
 
   # Daily AI prospecting: runs every active campaign at 06:00 UTC.
   - type: cron
@@ -34,6 +44,24 @@ services:
     schedule: "0 6 * * *"
     buildCommand: "true"
     startCommand: 'curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/cron/prospect"'
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: ktechnology
+          envVarKey: CRON_SECRET
+
+  # Mailbox sync for "Pošta": reads new mail every 15 minutes (read-only).
+  - type: cron
+    name: ktechnology-mail
+    runtime: node
+    plan: starter
+    region: frankfurt
+    schedule: "*/15 * * * *"
+    buildCommand: "true"
+    startCommand: 'curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "$NEXT_PUBLIC_SITE_URL/api/cron/mail"'
     envVars:
       - key: NEXT_PUBLIC_SITE_URL
         sync: false
