@@ -18,11 +18,14 @@ Downloaded on 2026-10-29, resized to max 1600px wide.
 | trade-machining.jpg | Rafael Juárez | https://unsplash.com/photos/hTUdXgbhd3o |
 | trade-electrical.jpg | Jimmy Nilsson Masth | https://unsplash.com/photos/U3GiK1u5j24 |
 | contact.jpg | Christopher Burns | https://unsplash.com/photos/8KfCR12oeUM |
+| sector-energy.jpg | iSawRed | https://unsplash.com/photos/pCZsRKT-_Ns (downloaded 2026-11-02) |
+| included.jpg | Ümit Yıldırım | https://unsplash.com/photos/Ass0DusYDk4 (downloaded 2026-11-02) |
 
 ## Removed
 
-These stock photos were deleted; the page shows the abstract art in their place
-(see `src/components/site/Services.tsx` and `Sectors.tsx`):
+These stock photos were deleted. A slot whose file is missing shows the abstract art (see
+`src/components/site/Photo.tsx`). `service-mobilisation.jpg` is still missing; `sector-energy.jpg` and `included.jpg`
+were replaced on 2026-11-02 by the photos listed above (plant pipework without people; a hard hat in a factory hall):
 
 - `service-mobilisation.jpg` (Ben Koorengevel): the welder works barefoot on an open roof frame
   without gloves, helmet or fall protection, which contradicts "PPE included".
@@ -31,4 +34,5 @@ These stock photos were deleted; the page shows the abstract art in their place
 - `sector-energy.jpg` (Nicolas HIPPERT): a nuclear power station, which implies nuclear-site work
   the site does not claim.
 
-Replace them with photos of our own crews in full PPE, then show them in the component again.
+A photo in these slots must show any worker in full PPE for the task, and no nuclear or construction site
+(§1b AÜG). Photos of our own crews are best.
