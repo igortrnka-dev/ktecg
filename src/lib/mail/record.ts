@@ -39,12 +39,32 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 /**
  * Saves the e-mails and returns how many were new. The unique (lead_id, message_id) makes a re-run harmless: only
- * a first insert changes the lead. The leads change after all rows are in, so each one's newest e-mail is known.
+ * a first insert changes the lead. It goes lead by lead, so a failed write costs only that lead: the cursors stay
+ * put and the next run tries it again, while the leads already done skip their e-mails as recorded.
  */
 export async function recordEmails(emails: NewEmail[]): Promise<number> {
-  const added = new Map<string, NewEmail[]>();
-  let failure: MailDbError | null = null;
+  const byLead = new Map<string, NewEmail[]>();
   for (const email of [...emails].sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at))) {
+    byLead.set(email.lead_id, [...(byLead.get(email.lead_id) ?? []), email]);
+  }
+  let saved = 0;
+  let failure: unknown = null;
+  for (const [leadId, list] of byLead) {
+    try {
+      saved += await recordLead(leadId, list);
+    } catch (err) {
+      failure ??= err;
+    }
+  }
+  if (failure) throw failure;
+  return saved;
+}
+
+/** One lead's e-mails, then what they change: the lead's newest e-mail is known once all its rows are in. */
+async function recordLead(leadId: string, list: NewEmail[]): Promise<number> {
+  const added: NewEmail[] = [];
+  let failure: MailDbError | null = null;
+  for (const email of list) {
     const { error } = await db().from("lead_emails").insert(email);
     // 23505: recorded before; 23503: the lead was deleted after matching.
     if (error?.code === "23505" || error?.code === "23503") continue;
@@ -52,12 +72,20 @@ export async function recordEmails(emails: NewEmail[]): Promise<number> {
       failure = new MailDbError(error.message);
       break;
     }
-    added.set(email.lead_id, [...(added.get(email.lead_id) ?? []), email]);
+    added.push(email);
   }
-  // The rows saved before a failure still get their history: the next run skips them as recorded.
-  for (const [leadId, list] of added) await applyEffects(leadId, list);
+  // The rows saved before a failed insert still get their history: the next run skips them as recorded.
+  if (added.length) {
+    try {
+      await applyEffects(leadId, added);
+    } catch (err) {
+      // Removed again, the rows count as new on the next run, which then changes the lead after all.
+      await db().from("lead_emails").delete().eq("lead_id", leadId).in("message_id", added.map((e) => e.message_id));
+      throw err;
+    }
+  }
   if (failure) throw failure;
-  return [...added.values()].reduce((n, list) => n + list.length, 0);
+  return added.length;
 }
 
 /** The message id of the lead's newest e-mail that sets a next step: a normal one either way, or a bounce. */
@@ -129,5 +157,6 @@ async function applyEffects(leadId: string, added: NewEmail[]) {
   }));
   if (moved) events.push({ lead_id: lead.id, type: "status", body: `${lead.status} → ${status}`, created_at: new Date().toISOString() });
   const { error: eventError } = await db().from("lead_events").insert(events);
-  if (eventError) throw new MailDbError(eventError.message);
+  // 23503: the lead was deleted meanwhile, and its e-mails with it.
+  if (eventError && eventError.code !== "23503") throw new MailDbError(eventError.message);
 }
