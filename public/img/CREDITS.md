@@ -21,6 +21,7 @@ Downloaded on 2026-10-29, resized to max 1600px wide.
 | sector-energy.jpg | iSawRed | https://unsplash.com/photos/pCZsRKT-_Ns (downloaded 2026-11-02) |
 | included.jpg | Ümit Yıldırım | https://unsplash.com/photos/Ass0DusYDk4 (downloaded 2026-11-02) |
 | service-mobilisation.jpg | Armin Iranzad | https://unsplash.com/photos/1YkvAHgw6fo (downloaded 2026-11-02, cropped to the crew) |
+| sector-buildings.jpg | K. K. Yam Amot | https://unsplash.com/photos/zRmCWjppTV0 (downloaded 2026-11-04, finished office tower at night, cropped 4:3) |
 
 ## Removed
 
