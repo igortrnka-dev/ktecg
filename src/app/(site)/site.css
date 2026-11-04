@@ -145,15 +145,15 @@ p {
   }
 }
 
-/* subpages open with their content: short entrance, no hero-style wait */
+/* Subpages open with their content in place: the entrance motion (bar included) is for the homepage only. */
 .crumbs.enter,
 .phead.enter,
 .trade__skills.enter,
 .trade__media.enter,
 .pfacts.enter,
-.contact.enter {
-  animation-delay: 0.05s;
-  animation-duration: 0.6s;
+.contact.enter,
+.page:not(:has(.hero)) .nav {
+  animation: none;
 }
 
 /* scroll reveal: 10px fade-up (only once JS is running) */
