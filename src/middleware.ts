@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
+import { isSitePath } from "@/content/site";
 import { updateSession } from "@/lib/supabase/middleware";
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
@@ -49,9 +50,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  // The locale homepage is the only page under /<locale>; anything deeper renders the localized 404 page in
-  // [locale]/[...rest], which cannot set its own status.
-  const response = NextResponse.next(rest.some(Boolean) ? { status: 404 } : undefined);
+  // Paths that are not a page of the site (content/site.ts) are rewritten to the localized 404 page in
+  // [locale]/[...rest], which cannot set its own status. The rewrite also keeps an unknown trade or project slug away
+  // from services/[trade] and projects/[slug], which only render the slugs they were built with.
+  const path = rest.filter(Boolean).join("/");
+  let response: NextResponse;
+  if (isSitePath(path)) {
+    response = NextResponse.next();
+  } else {
+    url.pathname = `/${locale}/404`;
+    response = NextResponse.rewrite(url, { status: 404 });
+  }
   // Remember the language the visitor last used, so the bare domain brings them back to it.
   if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
     response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });

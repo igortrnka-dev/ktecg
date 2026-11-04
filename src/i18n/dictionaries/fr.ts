@@ -4,15 +4,16 @@ const fr: Dictionary = {
   meta: {
     title: "KTechnology — Mise à disposition de soudeurs, tuyauteurs et électriciens",
     description:
-      "KTechnology s.r.o. met à disposition des soudeurs, tuyauteurs, électriciens, mécaniciens et opérateurs aux compétences testées pour des projets industriels en Europe et dans le monde. Formulaires A1, transport et hébergement pris en charge, équipe sur site en 14 jours environ.",
+      "KTechnology s.r.o. met à disposition des soudeurs, tuyauteurs, électriciens, mécaniciens et opérateurs aux compétences testées pour des projets industriels en Europe et en Scandinavie. Formulaires A1, transport et hébergement pris en charge, équipe sur site en 14 jours environ.",
   },
   nav: {
+    home: "Accueil",
     services: "Services",
-    trades: "Métiers",
     sectors: "Secteurs",
-    process: "Fonctionnement",
-    faq: "FAQ",
+    projects: "Projets",
+    about: "À propos",
     contact: "Contact",
+    breadcrumb: "Fil d’Ariane",
     cta: "Faire une demande",
     language: "Langue",
     menu: "Menu",
@@ -21,7 +22,7 @@ const fr: Dictionary = {
     ctaShort: "Devis",
   },
   hero: {
-    eyebrow: "Mise à disposition de personnel industriel\u00a0· Europe et international",
+    eyebrow: "Mise à disposition de personnel industriel\u00a0· Europe et Scandinavie",
     title: "Soudeurs, tuyauteurs et électriciens qualifiés sur votre site en 14\u00a0jours environ",
     lead:
       "Nous mettons des ouvriers et techniciens testés à la disposition d’industriels, d’entreprises de travaux et de sociétés EPC dans toute l’Europe, et prenons en charge contrats, formulaires A1 ou permis de travail, assurance, transport et hébergement. Un seul interlocuteur, une seule facture.",
@@ -52,6 +53,7 @@ const fr: Dictionary = {
     label: "Services",
     title: "Ce que nous proposons",
     lead: "Mise à disposition de personnel industriel : d’un seul spécialiste à une équipe complète, pour la durée de votre projet.",
+    more: "Tous les services et métiers",
     items: [
       {
         title: "Mise à disposition de personnel",
@@ -75,17 +77,59 @@ const fr: Dictionary = {
     title: "Les profils que nous mettons à disposition",
     lead: "Des professionnels expérimentés. Chacun passe un test pratique et une vérification des certificats avant sa mission.",
     items: [
-      { name: "Soudeurs", skills: ["MIG/MAG", "TIG", "Électrode enrobée", "Acier & inox"] },
-      { name: "Tuyauteurs", skills: ["Tuyauterie industrielle", "Isométriques", "Préfabrication", "Montage"] },
-      { name: "Monteurs en charpente métallique", skills: ["Structures métalliques", "Plans techniques", "Montage", "Boulonnage"] },
-      { name: "Électriciens industriels", skills: ["Installation", "Câblage & chemins de câbles", "Armoires électriques"] },
-      { name: "Techniciens automatisme", skills: ["Automates (PLC)", "Mise en service", "Dépannage"] },
-      { name: "Mécaniciens & monteurs industriels", skills: ["Installation de machines", "Alignement", "Maintenance d’arrêt"] },
-      { name: "Opérateurs CNC & machines", skills: ["Tournage & fraisage", "Réglage machine", "Métrologie"] },
-      { name: "Opérateurs de montage", skills: ["Montage sur ligne", "Contrôle qualité", "Travail posté"] },
-      { name: "Techniciens instrumentation & régulation", skills: ["Mesure & régulation", "Étalonnage des instruments", "Capteurs & boucles de régulation"] },
+      {
+        name: "Soudeurs",
+        skills: ["MIG/MAG", "TIG", "Électrode enrobée", "Acier & inox"],
+        body: "Des soudeurs expérimentés en soudage MIG/MAG, TIG et à l’électrode enrobée, sur acier au carbone et inox.",
+      },
+      {
+        name: "Tuyauteurs",
+        skills: ["Tuyauterie industrielle", "Isométriques", "Préfabrication", "Montage"],
+        body: "Des tuyauteurs qui préfabriquent et montent la tuyauterie industrielle d’après les isométriques.",
+      },
+      {
+        name: "Monteurs en charpente métallique",
+        skills: ["Structures métalliques", "Plans techniques", "Montage", "Boulonnage"],
+        body: "Des monteurs qui fabriquent et assemblent des structures métalliques d’après les plans techniques, assemblages boulonnés compris.",
+      },
+      {
+        name: "Électriciens industriels",
+        skills: ["Installation", "Câblage & chemins de câbles", "Armoires électriques"],
+        body: "Des électriciens pour les installations industrielles : tirage de câbles, pose de chemins de câbles et câblage d’armoires électriques.",
+      },
+      {
+        name: "Techniciens automatisme",
+        skills: ["Automates (PLC)", "Mise en service", "Dépannage"],
+        body: "Des techniciens pour la programmation d’automates (PLC), la mise en service des équipements et le dépannage.",
+      },
+      {
+        name: "Mécaniciens & monteurs industriels",
+        skills: ["Installation de machines", "Alignement", "Maintenance d’arrêt"],
+        body: "Des mécaniciens qui installent et alignent les machines et assurent la maintenance pendant les arrêts techniques.",
+      },
+      {
+        name: "Opérateurs CNC & machines",
+        skills: ["Tournage & fraisage", "Réglage machine", "Métrologie"],
+        body: "Des opérateurs pour le tournage et le fraisage, le réglage des machines et le contrôle dimensionnel des pièces.",
+      },
+      {
+        name: "Opérateurs de montage",
+        skills: ["Montage sur ligne", "Contrôle qualité", "Travail posté"],
+        body: "Des opérateurs pour le montage sur ligne et le contrôle qualité, habitués au travail posté.",
+      },
+      {
+        name: "Techniciens instrumentation & régulation",
+        skills: ["Mesure & régulation", "Étalonnage des instruments", "Capteurs & boucles de régulation"],
+        body: "Des techniciens en mesure et régulation : étalonnage des instruments, capteurs et boucles de régulation.",
+      },
     ],
     note: "Besoin d’un autre profil ? Contactez-nous : notre réseau couvre la plupart des métiers industriels.",
+    open: "Détails du métier",
+    skillsTitle: "Compétences",
+    vetting: "Chaque intervenant passe un test pratique et une vérification des certificats avant sa mission.",
+    projectsTitle: "Projets associés",
+    others: "Autres métiers",
+    metaSuffix: "mise à disposition de personnel industriel | KTechnology",
   },
   included: {
     label: "Tout inclus",
@@ -107,6 +151,7 @@ const fr: Dictionary = {
   sectors: {
     label: "Secteurs",
     title: "Où travaillent nos équipes",
+    lead: "Les secteurs dans lesquels nos équipes renforcent celles des industriels, des entreprises de travaux et des sociétés EPC.",
     items: [
       { name: "Automobile & équipementiers", tags: "Automatisation · Programmation · Robotique" },
       { name: "Métallurgie & soudage", tags: "MIG/MAG · TIG · Charpente métallique" },
@@ -114,6 +159,7 @@ const fr: Dictionary = {
       { name: "Construction navale & offshore", tags: "Coque · Armement · Tuyauterie" },
       { name: "Électricité & automatisme", tags: "Installation · PLC · Mise en service" },
       { name: "Logistique & production", tags: "Opérateurs · Caristes · Entrepôt" },
+      { name: "Bâtiments tertiaires & de bureaux", tags: "Électricité · Lots techniques · Mesure & régulation" },
     ],
   },
   process: {
@@ -154,7 +200,7 @@ const fr: Dictionary = {
   },
   reach: {
     label: "Zones d’intervention",
-    title: "Basés en Slovaquie, présents sur des sites industriels dans toute l’Europe et au-delà",
+    title: "Basés en Slovaquie, présents sur des sites industriels en Europe et en Scandinavie",
     countries: [
       "Allemagne", "Autriche", "Suède", "Norvège", "Finlande", "Danemark",
       "Pays-Bas", "Belgique", "France", "Pologne", "Tchéquie", "Slovaquie", "Émirats arabes unis",
@@ -225,6 +271,73 @@ const fr: Dictionary = {
       consent: "Nous utilisons vos données uniquement pour répondre à cette demande et établir un devis.",
     },
   },
+  projects: {
+    label: "Projets",
+    title: "Projets et références",
+    lead: "Une sélection de projets sur lesquels ont travaillé nos soudeurs, monteurs, électriciens et techniciens.",
+    empty: "Nous préparons actuellement la présentation de nos projets réalisés. Écrivez-nous : nous vous parlerons volontiers de projets dans votre secteur.",
+    open: "Détails du projet",
+    metaSuffix: "projet | KTechnology",
+    facts: { country: "Pays", sector: "Secteur", year: "Année", team: "Intervenants", duration: "Durée" },
+    scopeTitle: "Périmètre des travaux",
+    tradesTitle: "Métiers mobilisés",
+    stats: {
+      label: "En chiffres",
+      title: "KTechnology en chiffres",
+      projects: "Projets réalisés",
+      countries: "Pays",
+      workers: "Intervenants vérifiés",
+    },
+  },
+  about: {
+    label: "À propos",
+    title: "Des professionnels de l’industrie venus de Slovaquie pour vos projets en Europe et en Scandinavie",
+    lead: "KTechnology s.r.o. est une entreprise slovaque spécialisée dans la mise à disposition d’ouvriers et de techniciens qualifiés auprès d’industriels, d’entreprises de travaux et de sociétés EPC.",
+    body: [
+      "Nous mettons à disposition des soudeurs, tuyauteurs, monteurs en charpente métallique, électriciens, mécaniciens, techniciens et opérateurs, d’un seul spécialiste à une équipe complète, pour toute la durée de votre projet. Chaque intervenant passe un test pratique et une vérification des certificats avant sa mission.",
+      "Nous prenons en charge tout ce qui entoure l’équipe : contrats, formulaires A1 et permis de travail, assurance, EPI, transport et hébergement. Pendant le projet, vous avez un seul coordinateur et recevez une seule facture.",
+    ],
+  },
+  cta: {
+    title: "Besoin de renforcer votre équipe ?",
+    body: "Envoyez-nous votre demande : sous un jour ouvré, nous vous répondons avec les disponibilités et un devis.",
+    email: "Ou écrivez-nous",
+  },
+  pages: {
+    services: {
+      meta: {
+        title: "Services et métiers – Mise à disposition de personnel industriel | KTechnology",
+        description:
+          "Mise à disposition de personnel, renforts pour arrêts techniques et montées en cadence, mobilisation clé en main : soudeurs, tuyauteurs, électriciens, mécaniciens, techniciens et opérateurs, testés avant leur mission.",
+      },
+    },
+    sectors: {
+      meta: {
+        title: "Secteurs – KTechnology",
+        description:
+          "Où travaillent nos équipes : automobile, métallurgie, énergie, construction navale et offshore, électricité et automatisme, logistique et production, bâtiments tertiaires et de bureaux.",
+      },
+    },
+    projects: {
+      meta: {
+        title: "Projets et références – KTechnology",
+        description: "Les projets sur lesquels ont travaillé nos soudeurs, monteurs, électriciens et techniciens en Europe et en Scandinavie.",
+      },
+    },
+    about: {
+      meta: {
+        title: "À propos – KTechnology",
+        description:
+          "KTechnology s.r.o., entreprise slovaque, met des ouvriers et techniciens qualifiés à la disposition d’industriels, d’entreprises de travaux et de sociétés EPC en Europe et en Scandinavie.",
+      },
+    },
+    contact: {
+      meta: {
+        title: "Contact – Faire une demande | KTechnology",
+        description: "Envoyez-nous votre demande : un coordinateur de projet vous répond sous un jour ouvré avec les disponibilités et un devis.",
+      },
+    },
+  },
   notFound: {
     title: "Page introuvable",
     body: "La page que vous recherchez n’existe pas ou a été déplacée.",
@@ -232,7 +345,8 @@ const fr: Dictionary = {
   },
   footer: {
     company: "KTechnology s.r.o.",
-    tagline: "Mise à disposition de personnel industriel depuis la Slovaquie, pour des projets en Europe et dans le monde.",
+    tagline: "Mise à disposition de personnel industriel depuis la Slovaquie, pour des projets en Europe et en Scandinavie.",
+    pages: "Pages",
     rights: "Tous droits réservés.",
     top: "Haut de page",
   },

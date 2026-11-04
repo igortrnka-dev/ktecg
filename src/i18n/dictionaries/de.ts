@@ -4,15 +4,16 @@ const de: Dictionary = {
   meta: {
     title: "KTechnology – Arbeitnehmerüberlassung für die Industrie: Schweißer, Monteure, Elektriker",
     description:
-      "KTechnology s.r.o. überlässt praxisgeprüfte Schweißer, Rohrschlosser, Elektriker, Mechaniker und Maschinenbediener für Industrieprojekte in ganz Europa und weltweit. A1, Anreise und Unterkunft übernehmen wir; das Team ist in rund 14 Tagen vor Ort.",
+      "KTechnology s.r.o. überlässt praxisgeprüfte Schweißer, Rohrschlosser, Elektriker, Mechaniker und Maschinenbediener für Industrieprojekte in ganz Europa und Skandinavien. A1, Anreise und Unterkunft übernehmen wir; das Team ist in rund 14 Tagen vor Ort.",
   },
   nav: {
+    home: "Startseite",
     services: "Leistungen",
-    trades: "Berufe",
     sectors: "Branchen",
-    process: "Ablauf",
-    faq: "FAQ",
+    projects: "Projekte",
+    about: "Über uns",
     contact: "Kontakt",
+    breadcrumb: "Pfadnavigation",
     cta: "Fachkräfte anfragen",
     language: "Sprache",
     menu: "Menü",
@@ -21,7 +22,7 @@ const de: Dictionary = {
     ctaShort: "Anfragen",
   },
   hero: {
-    eyebrow: "Arbeitnehmerüberlassung für die Industrie\u00a0· Europa\u00a0&\u00a0weltweit",
+    eyebrow: "Arbeitnehmerüberlassung für die Industrie\u00a0· Europa\u00a0&\u00a0Skandinavien",
     title: "Schweißer, Monteure und Elektriker in rund 14\u00a0Tagen bei Ihnen vor Ort",
     lead:
       "Wir überlassen geprüfte Industriefachkräfte an Hersteller, Anlagenbauer und EPC-Unternehmen in ganz Europa\u00a0– und übernehmen Verträge, A1/Genehmigungen, Versicherung, Anreise und Unterkunft. Ein Ansprechpartner, eine Rechnung.",
@@ -52,6 +53,7 @@ const de: Dictionary = {
     label: "Leistungen",
     title: "Was wir anbieten",
     lead: "Arbeitnehmerüberlassung für die Industrie: von einer einzelnen Fachkraft bis zum kompletten Team, für die gesamte Projektdauer.",
+    more: "Alle Leistungen und Berufe",
     items: [
       {
         title: "Arbeitnehmerüberlassung",
@@ -75,17 +77,59 @@ const de: Dictionary = {
     title: "Wen wir stellen",
     lead: "Erfahrene Fachkräfte. Jede absolviert vor dem Einsatz einen praktischen Eignungstest und eine Zertifikatsprüfung.",
     items: [
-      { name: "Schweißer", skills: ["MIG/MAG", "WIG", "E-Hand", "Stahl & Edelstahl"] },
-      { name: "Rohrschlosser", skills: ["Industrierohrleitungen", "Isometrien", "Vorfertigung", "Montage"] },
-      { name: "Stahlbauschlosser", skills: ["Stahlbau", "Technische Zeichnungen", "Montage", "Schraubverbindungen"] },
-      { name: "Industrieelektriker", skills: ["Installation", "Kabel & Trassen", "Schaltschränke"] },
-      { name: "Automatisierungstechniker", skills: ["SPS", "Inbetriebnahme", "Fehlersuche"] },
-      { name: "Mechaniker & Industriemonteure", skills: ["Maschinenaufstellung", "Ausrichtung", "Revisionsarbeiten"] },
-      { name: "CNC- & Maschinenbediener", skills: ["Drehen & Fräsen", "Maschineneinrichtung", "Messen"] },
-      { name: "Montagemitarbeiter", skills: ["Linienmontage", "Qualitätsprüfung", "Schichtarbeit"] },
-      { name: "MSR-Techniker", skills: ["Mess-, Steuer- und Regelungstechnik", "Kalibrierung von Messgeräten", "Sensorik & Regelkreise"] },
+      {
+        name: "Schweißer",
+        skills: ["MIG/MAG", "WIG", "E-Hand", "Stahl & Edelstahl"],
+        body: "Schweißer mit Erfahrung im MIG/MAG-, WIG- und E-Hand-Schweißen von Kohlenstoffstahl und Edelstahl.",
+      },
+      {
+        name: "Rohrschlosser",
+        skills: ["Industrierohrleitungen", "Isometrien", "Vorfertigung", "Montage"],
+        body: "Rohrschlosser, die Industrierohrleitungen nach Isometrien vorfertigen und montieren.",
+      },
+      {
+        name: "Stahlbauschlosser",
+        skills: ["Stahlbau", "Technische Zeichnungen", "Montage", "Schraubverbindungen"],
+        body: "Stahlbauschlosser, die Stahlkonstruktionen nach technischen Zeichnungen fertigen und montieren\u00a0– einschließlich Schraubverbindungen.",
+      },
+      {
+        name: "Industrieelektriker",
+        skills: ["Installation", "Kabel & Trassen", "Schaltschränke"],
+        body: "Elektriker für Industrieinstallationen: Kabel verlegen, Kabeltrassen montieren und Schaltschränke verdrahten.",
+      },
+      {
+        name: "Automatisierungstechniker",
+        skills: ["SPS", "Inbetriebnahme", "Fehlersuche"],
+        body: "Techniker für SPS-Programmierung, die Inbetriebnahme von Anlagen und die Fehlersuche.",
+      },
+      {
+        name: "Mechaniker & Industriemonteure",
+        skills: ["Maschinenaufstellung", "Ausrichtung", "Revisionsarbeiten"],
+        body: "Mechaniker, die Maschinen aufstellen und ausrichten und Instandhaltungsarbeiten während Revisionen durchführen.",
+      },
+      {
+        name: "CNC- & Maschinenbediener",
+        skills: ["Drehen & Fräsen", "Maschineneinrichtung", "Messen"],
+        body: "Maschinenbediener für Dreh- und Fräsarbeiten, das Einrichten von Maschinen und das Messen von Teilen.",
+      },
+      {
+        name: "Montagemitarbeiter",
+        skills: ["Linienmontage", "Qualitätsprüfung", "Schichtarbeit"],
+        body: "Mitarbeiter für Linienmontage und Qualitätsprüfung, mit Erfahrung in Schichtarbeit.",
+      },
+      {
+        name: "MSR-Techniker",
+        skills: ["Mess-, Steuer- und Regelungstechnik", "Kalibrierung von Messgeräten", "Sensorik & Regelkreise"],
+        body: "Techniker für Mess-, Steuer- und Regelungstechnik: Kalibrierung von Messgeräten, Sensorik und Regelkreise.",
+      },
     ],
     note: "Der gesuchte Beruf ist nicht dabei? Fragen Sie uns\u00a0– unser Netzwerk deckt die meisten Industrieberufe ab.",
+    open: "Details zum Beruf",
+    skillsTitle: "Kenntnisse",
+    vetting: "Jede Fachkraft absolviert vor dem Einsatz einen praktischen Eignungstest und eine Zertifikatsprüfung.",
+    projectsTitle: "Passende Projekte",
+    others: "Weitere Berufe",
+    metaSuffix: "Arbeitnehmerüberlassung für die Industrie | KTechnology",
   },
   included: {
     label: "Alles inklusive",
@@ -107,6 +151,7 @@ const de: Dictionary = {
   sectors: {
     label: "Branchen",
     title: "Wo unsere Leute arbeiten",
+    lead: "Branchen, in denen unsere Leute die Teams von Herstellern, Anlagenbauern und EPC-Unternehmen verstärken.",
     items: [
       { name: "Automobil & Zulieferer", tags: "Automatisierung · Programmierung · Robotik" },
       { name: "Metallverarbeitung & Schweißen", tags: "MIG/MAG · WIG · Stahlbau" },
@@ -114,6 +159,7 @@ const de: Dictionary = {
       { name: "Schiffbau & Offshore", tags: "Rumpf · Ausrüstung · Rohrleitungsmontage" },
       { name: "Elektro & Automatisierung", tags: "Installation · SPS · Inbetriebnahme" },
       { name: "Logistik & Produktion", tags: "Maschinenbediener · Stapler · Lager" },
+      { name: "Gewerbe- und Bürogebäude", tags: "Elektrotechnik · Betrieb & Wartung · MSR" },
     ],
   },
   process: {
@@ -154,7 +200,7 @@ const de: Dictionary = {
   },
   reach: {
     label: "Einsatzgebiete",
-    title: "Mit Sitz in der Slowakei\u00a0– im Einsatz in ganz Europa und darüber hinaus",
+    title: "Mit Sitz in der Slowakei\u00a0– im Einsatz in ganz Europa und Skandinavien",
     countries: [
       "Deutschland", "Österreich", "Schweden", "Norwegen", "Finnland", "Dänemark",
       "Niederlande", "Belgien", "Frankreich", "Polen", "Tschechien", "Slowakei", "VAE",
@@ -225,6 +271,73 @@ const de: Dictionary = {
       consent: "Ihre Angaben verwenden wir ausschließlich, um Ihre Anfrage zu beantworten und ein Angebot zu erstellen.",
     },
   },
+  projects: {
+    label: "Projekte",
+    title: "Projekte und Referenzen",
+    lead: "Ausgewählte Projekte, an denen unsere Schweißer, Monteure, Elektriker und Techniker mitgearbeitet haben.",
+    empty: "Wir stellen gerade die Übersicht unserer abgeschlossenen Projekte zusammen. Schreiben Sie uns\u00a0– gern berichten wir Ihnen von Projekten in Ihrer Branche.",
+    open: "Projektdetails",
+    metaSuffix: "Projekt | KTechnology",
+    facts: { country: "Land", sector: "Branche", year: "Jahr", team: "Fachkräfte", duration: "Dauer" },
+    scopeTitle: "Leistungsumfang",
+    tradesTitle: "Berufe im Projekt",
+    stats: {
+      label: "In Zahlen",
+      title: "KTechnology in Zahlen",
+      projects: "Abgeschlossene Projekte",
+      countries: "Länder",
+      workers: "Geprüfte Fachkräfte",
+    },
+  },
+  about: {
+    label: "Über uns",
+    title: "Industriefachkräfte aus der Slowakei für Projekte in ganz Europa und Skandinavien",
+    lead: "KTechnology s.r.o. ist ein slowakisches Unternehmen, das qualifizierte Industriefachkräfte an Hersteller, Anlagenbauer und EPC-Unternehmen überlässt.",
+    body: [
+      "Wir stellen Schweißer, Rohrschlosser, Stahlbauschlosser, Elektriker, Mechaniker, Techniker und Maschinenbediener\u00a0– von einer einzelnen Fachkraft bis zum kompletten Team, für die gesamte Projektdauer. Jede Fachkraft absolviert vor dem Einsatz einen praktischen Eignungstest und eine Zertifikatsprüfung.",
+      "Wir kümmern uns um alles rund um das Team: Verträge, A1-Bescheinigungen und Genehmigungen, Versicherung, PSA, Anreise und Unterkunft. Während des Projekts haben Sie einen Koordinator als Ansprechpartner und erhalten eine einzige Rechnung.",
+    ],
+  },
+  cta: {
+    title: "Möchten Sie Ihr Team verstärken?",
+    body: "Senden Sie uns Ihre Anfrage, und wir antworten innerhalb eines Werktags mit Verfügbarkeit und Angebot.",
+    email: "Oder schreiben Sie uns per E-\u2060Mail",
+  },
+  pages: {
+    services: {
+      meta: {
+        title: "Leistungen und Berufe – Arbeitnehmerüberlassung für die Industrie | KTechnology",
+        description:
+          "Arbeitnehmerüberlassung, Teams für Revisionen und Hochläufe, komplette Mobilisierung: Schweißer, Rohrschlosser, Elektriker, Mechaniker, Techniker und Maschinenbediener, vor dem Einsatz praxisgeprüft.",
+      },
+    },
+    sectors: {
+      meta: {
+        title: "Branchen – KTechnology",
+        description:
+          "Wo unsere Leute arbeiten: Automobil, Metallverarbeitung, Energie, Schiffbau und Offshore, Elektro und Automatisierung, Logistik und Produktion, Gewerbe- und Bürogebäude.",
+      },
+    },
+    projects: {
+      meta: {
+        title: "Projekte und Referenzen – KTechnology",
+        description: "Projekte, an denen unsere Schweißer, Monteure, Elektriker und Techniker in ganz Europa und Skandinavien mitgearbeitet haben.",
+      },
+    },
+    about: {
+      meta: {
+        title: "Über uns – KTechnology",
+        description:
+          "KTechnology s.r.o. ist ein slowakisches Unternehmen, das qualifizierte Industriefachkräfte an Hersteller, Anlagenbauer und EPC-Unternehmen in ganz Europa und Skandinavien überlässt.",
+      },
+    },
+    contact: {
+      meta: {
+        title: "Kontakt – Fachkräfte anfragen | KTechnology",
+        description: "Senden Sie uns Ihre Anfrage: Ein Projektkoordinator meldet sich innerhalb eines Werktags mit Verfügbarkeit und Angebot.",
+      },
+    },
+  },
   notFound: {
     title: "Seite nicht gefunden",
     body: "Die gesuchte Seite existiert nicht oder wurde verschoben.",
@@ -232,7 +345,8 @@ const de: Dictionary = {
   },
   footer: {
     company: "KTechnology s.r.o.",
-    tagline: "Arbeitnehmerüberlassung aus der Slowakei für Industrieprojekte in ganz Europa und weltweit.",
+    tagline: "Arbeitnehmerüberlassung aus der Slowakei für Industrieprojekte in ganz Europa und Skandinavien.",
+    pages: "Seiten",
     rights: "Alle Rechte vorbehalten.",
     top: "Nach oben",
   },

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
+import { notFoundMetadata } from "@/lib/site/metadata";
 
 /**
  * Title of the localized 404, without the homepage canonical and hreflang links inherited from [locale]. It lives in
@@ -10,12 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getDictionary(locale);
-  return {
-    title: `${t.notFound.title} – KTechnology`,
-    description: t.notFound.body,
-    alternates: null,
-    openGraph: null,
-  };
+  return notFoundMetadata(t.notFound.title, t.notFound.body);
 }
 
 export default function NotFoundLayout({ children }: { children: React.ReactNode }) {
