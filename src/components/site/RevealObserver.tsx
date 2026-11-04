@@ -8,8 +8,13 @@ import { useEffect } from "react";
  */
 export default function RevealObserver() {
   useEffect(() => {
+    // What is already on the first screen shows at once; only what lies below waits for the scroll.
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]")).filter((el) => {
+      if (el.getBoundingClientRect().top >= window.innerHeight) return true;
+      el.classList.add("is-in");
+      return false;
+    });
     document.documentElement.classList.add("js");
-    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
