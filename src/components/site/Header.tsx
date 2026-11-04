@@ -4,28 +4,34 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { localeNames, locales } from "@/i18n/config";
+import { href, pages, type PageKey } from "@/content/site";
 
 type Nav = Dictionary["nav"];
 
 /**
- * Floating pill navbar. Desktop: wordmark, links with a sliding hover highlight and
- * scroll-spy active state, language dropdown, glowing CTA (the short label up to 1199px).
- * Below 960px the links and languages move into a sheet opened by the burger; the short
- * CTA stays in the bar.
- * `hrefBase` prefixes the section links on pages other than the homepage.
+ * Floating pill navbar. Desktop: wordmark, page links with a sliding hover highlight, language
+ * dropdown, glowing CTA (the short label up to 1199px). Below 960px the links and languages move
+ * into a sheet opened by the burger; the short CTA stays in the bar.
+ * `current` is the menu page the visitor is on or under (null on the 404 page), `path` the page
+ * itself ("services/welders"): the language links keep it.
  */
-export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; locale: Locale; hrefBase?: string }) {
-  const links = [
-    ["services", nav.services],
-    ["trades", nav.trades],
-    ["sectors", nav.sectors],
-    ["process", nav.process],
-    ["faq", nav.faq],
-    ["contact", nav.contact],
-  ] as const;
+export default function Header({
+  nav,
+  locale,
+  path,
+  current,
+}: {
+  nav: Nav;
+  locale: Locale;
+  path: string;
+  current: PageKey | null;
+}) {
+  const links = pages.map((p) => ({ ...p, label: nav[p.key] }));
+  /** "page" on the page itself, "true" on its subpages (a trade under Services). */
+  const ariaCurrent = (key: PageKey, linkPath: string) =>
+    key !== current ? undefined : linkPath === path ? ("page" as const) : ("true" as const);
 
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState<string | null>(null);
   const [langOpen, setLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hl, setHl] = useState<{ x: number; y: number; w: number; on: boolean }>({ x: 0, y: 0, w: 0, on: false });
@@ -42,28 +48,6 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Scroll-spy: the section crossing the upper-middle band of the viewport is active.
-  useEffect(() => {
-    const sections = links
-      .map(([id]) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
-    const visible = new Set<string>();
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) visible.add(e.target.id);
-          else visible.delete(e.target.id);
-        }
-        const first = links.find(([id]) => visible.has(id));
-        setActive(first ? first[0] : null);
-      },
-      { rootMargin: "-35% 0px -55% 0px" },
-    );
-    sections.forEach((s) => io.observe(s));
-    return () => io.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Close the language dropdown on outside click.
@@ -156,16 +140,16 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
             style={{ transform: `translate(${hl.x}px, ${hl.y}px)`, width: hl.w }}
             aria-hidden
           />
-          {links.map(([id, label]) => (
+          {links.map((l) => (
             <a
-              key={id}
-              href={`${hrefBase}#${id}`}
-              className={active === id ? "is-active" : undefined}
-              aria-current={active === id ? "location" : undefined}
+              key={l.key}
+              href={href(locale, l.path)}
+              className={l.key === current ? "is-active" : undefined}
+              aria-current={ariaCurrent(l.key, l.path)}
               onMouseEnter={(e) => moveHighlight(e.currentTarget)}
               onFocus={(e) => moveHighlight(e.currentTarget)}
             >
-              {label}
+              {l.label}
             </a>
           ))}
         </nav>
@@ -197,7 +181,7 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
               {locales.map((l) => (
                 <li key={l}>
                   <a
-                    href={`/${l}`}
+                    href={href(l, path)}
                     hrefLang={l}
                     lang={l}
                     className={l === locale ? "is-active" : undefined}
@@ -211,7 +195,7 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
             </ul>
           </div>
 
-          <a href={`${hrefBase}#contact`} className="glow-btn nav__cta">
+          <a href={href(locale, "contact")} className="glow-btn nav__cta">
             <span className="glow-btn__glow" aria-hidden />
             <span className="glow-btn__fill">
               <span className="nav__cta-long">{nav.cta}</span>
@@ -243,15 +227,15 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
         hidden={!menuOpen}
       >
         <nav className="sheet__links" aria-label={nav.mainNav}>
-          {links.map(([id, label]) => (
+          {links.map((l) => (
             <a
-              key={id}
-              href={`${hrefBase}#${id}`}
-              className={active === id ? "is-active" : undefined}
-              aria-current={active === id ? "location" : undefined}
+              key={l.key}
+              href={href(locale, l.path)}
+              className={l.key === current ? "is-active" : undefined}
+              aria-current={ariaCurrent(l.key, l.path)}
               onClick={() => setMenuOpen(false)}
             >
-              {label}
+              {l.label}
             </a>
           ))}
         </nav>
@@ -259,7 +243,7 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
           {locales.map((l) => (
             <li key={l}>
               <a
-                href={`/${l}`}
+                href={href(l, path)}
                 hrefLang={l}
                 lang={l}
                 aria-label={`${l.toUpperCase()} – ${localeNames[l]}`}
@@ -271,7 +255,7 @@ export default function Header({ nav, locale, hrefBase = "" }: { nav: Nav; local
             </li>
           ))}
         </ul>
-        <a href={`${hrefBase}#contact`} className="glow-btn sheet__cta" onClick={() => setMenuOpen(false)}>
+        <a href={href(locale, "contact")} className="glow-btn sheet__cta" onClick={() => setMenuOpen(false)}>
           <span className="glow-btn__glow" aria-hidden />
           <span className="glow-btn__fill">{nav.cta}</span>
         </a>

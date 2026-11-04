@@ -1,5 +1,7 @@
 import { Fragment } from "react";
 import type { Dictionary } from "@/i18n";
+import type { Locale } from "@/i18n/config";
+import { href } from "@/content/site";
 import Icon from "./Icon";
 import Photo from "./Photo";
 
@@ -16,10 +18,10 @@ function HeroArt() {
   );
 }
 
-export default function Hero({ t }: { t: Dictionary }) {
+export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
   const words = t.hero.title.split(" ");
   return (
-    <section className="hero" id="top">
+    <section className="hero">
       <div className="hero__copy">
         <span className="pill mono enter enter--up">{t.hero.eyebrow}</span>
         <h1 className="hero__title">
@@ -34,11 +36,11 @@ export default function Hero({ t }: { t: Dictionary }) {
         </h1>
         <p className="hero__lead enter enter--up">{t.hero.lead}</p>
         <div className="hero__ctas enter enter--up">
-          <a href="#contact" className="glow-btn">
+          <a href={href(locale, "contact")} className="glow-btn">
             <span className="glow-btn__glow" aria-hidden />
             <span className="glow-btn__fill">{t.hero.primary}</span>
           </a>
-          <a href="#trades" className="btn btn--ghost">
+          <a href={`${href(locale, "services")}#trades`} className="btn btn--ghost">
             {t.hero.secondary}
             <Icon name="arrow" size={16} />
           </a>

@@ -2,15 +2,16 @@ const en = {
   meta: {
     title: "KTechnology — Industrial Staff Leasing: Welders, Fitters, Electricians",
     description:
-      "KTechnology s.r.o. leases skills-tested welders, pipe fitters, electricians, mechanics and operators to industrial projects across Europe and worldwide. A1, travel and housing handled, crew on site in about 14 days.",
+      "KTechnology s.r.o. leases skills-tested welders, pipe fitters, electricians, mechanics and operators to industrial projects across Europe and Scandinavia. A1, travel and housing handled, crew on site in about 14 days.",
   },
   nav: {
+    home: "Home",
     services: "Services",
-    trades: "Trades",
     sectors: "Industries",
-    process: "How it works",
-    faq: "FAQ",
+    projects: "Projects",
+    about: "About us",
     contact: "Contact",
+    breadcrumb: "Breadcrumb",
     cta: "Request workers",
     language: "Language",
     menu: "Menu",
@@ -19,7 +20,7 @@ const en = {
     ctaShort: "Get a quote",
   },
   hero: {
-    eyebrow: "Industrial staff leasing\u00a0· Europe\u00a0&\u00a0worldwide",
+    eyebrow: "Industrial staff leasing\u00a0· Europe\u00a0&\u00a0Scandinavia",
     title: "Skilled welders, fitters and electricians on your site in about 14\u00a0days",
     lead:
       "We lease tested industrial tradespeople to manufacturers, contractors and EPC companies across Europe, and handle contracts, A1/permits, insurance, travel and housing. One contact, one invoice.",
@@ -50,6 +51,7 @@ const en = {
     label: "Services",
     title: "What we offer",
     lead: "Industrial staff leasing: from a single specialist to a complete crew, for as long as your project runs.",
+    more: "All services and trades",
     items: [
       {
         title: "Staff leasing",
@@ -73,17 +75,59 @@ const en = {
     title: "Who we supply",
     lead: "Experienced tradespeople. Every one passes a practical skills test and a certificate check before deployment.",
     items: [
-      { name: "Welders", skills: ["MIG/MAG", "TIG", "MMA", "Steel & stainless"] },
-      { name: "Pipe fitters", skills: ["Industrial piping", "Isometric drawings", "Prefabrication", "Installation"] },
-      { name: "Steel fitters", skills: ["Steel structures", "Technical drawings", "Assembly", "Bolting"] },
-      { name: "Industrial electricians", skills: ["Installation", "Cabling & trays", "Switchboards"] },
-      { name: "Automation technicians", skills: ["PLC", "Commissioning", "Troubleshooting"] },
-      { name: "Mechanics & millwrights", skills: ["Machine installation", "Alignment", "Outage maintenance"] },
-      { name: "CNC & machine operators", skills: ["Turning & milling", "Machine set-up", "Measuring"] },
-      { name: "Assembly operators", skills: ["Line assembly", "Quality inspection", "Shift work"] },
-      { name: "Instrumentation & control technicians", skills: ["Measurement & control", "Instrument calibration", "Sensors & control loops"] },
+      {
+        name: "Welders",
+        skills: ["MIG/MAG", "TIG", "MMA", "Steel & stainless"],
+        body: "Welders experienced in MIG/MAG, TIG and MMA welding on carbon steel and stainless.",
+      },
+      {
+        name: "Pipe fitters",
+        skills: ["Industrial piping", "Isometric drawings", "Prefabrication", "Installation"],
+        body: "Pipe fitters who prefabricate and install industrial piping from isometric drawings.",
+      },
+      {
+        name: "Steel fitters",
+        skills: ["Steel structures", "Technical drawings", "Assembly", "Bolting"],
+        body: "Steel fitters who fabricate and assemble steel structures from technical drawings, bolted joints included.",
+      },
+      {
+        name: "Industrial electricians",
+        skills: ["Installation", "Cabling & trays", "Switchboards"],
+        body: "Electricians for industrial installations: pulling cable, fitting cable trays and wiring switchboards.",
+      },
+      {
+        name: "Automation technicians",
+        skills: ["PLC", "Commissioning", "Troubleshooting"],
+        body: "Technicians for PLC programming, commissioning of equipment and troubleshooting.",
+      },
+      {
+        name: "Mechanics & millwrights",
+        skills: ["Machine installation", "Alignment", "Outage maintenance"],
+        body: "Mechanics who install and align machines and carry out maintenance during outages.",
+      },
+      {
+        name: "CNC & machine operators",
+        skills: ["Turning & milling", "Machine set-up", "Measuring"],
+        body: "Operators for turning and milling, machine set-up and measuring parts.",
+      },
+      {
+        name: "Assembly operators",
+        skills: ["Line assembly", "Quality inspection", "Shift work"],
+        body: "Operators for line assembly and quality inspection, used to shift work.",
+      },
+      {
+        name: "Instrumentation & control technicians",
+        skills: ["Measurement & control", "Instrument calibration", "Sensors & control loops"],
+        body: "Technicians for measurement and control: instrument calibration, sensors and control loops.",
+      },
     ],
     note: "Looking for another profession? Ask us. Our network covers most industrial trades.",
+    open: "Trade details",
+    skillsTitle: "Skills",
+    vetting: "Every worker passes a practical skills test and a certificate check before deployment.",
+    projectsTitle: "Relevant projects",
+    others: "Other trades",
+    metaSuffix: "industrial staff leasing | KTechnology",
   },
   included: {
     label: "All included",
@@ -105,6 +149,7 @@ const en = {
   sectors: {
     label: "Industries",
     title: "Where our people work",
+    lead: "Industries in which our people strengthen the teams of manufacturers, contractors and EPC companies.",
     items: [
       { name: "Automotive & suppliers", tags: "Automation · Programming · Robotics" },
       { name: "Metalworking & welding", tags: "MIG/MAG · TIG · Steel structures" },
@@ -112,6 +157,7 @@ const en = {
       { name: "Shipbuilding & offshore", tags: "Hull · Outfitting · Pipe fitting" },
       { name: "Electrical & automation", tags: "Installation · PLC · Commissioning" },
       { name: "Logistics & production", tags: "Operators · Forklift · Warehousing" },
+      { name: "Commercial & office buildings", tags: "Electrical · Building services · I&C" },
     ],
   },
   process: {
@@ -152,7 +198,7 @@ const en = {
   },
   reach: {
     label: "Where we deploy",
-    title: "Based in Slovakia, working on sites across Europe and beyond",
+    title: "Based in Slovakia, working on sites across Europe and Scandinavia",
     countries: [
       "Germany", "Austria", "Sweden", "Norway", "Finland", "Denmark",
       "Netherlands", "Belgium", "France", "Poland", "Czechia", "Slovakia", "UAE",
@@ -223,6 +269,73 @@ const en = {
       consent: "We use your details only to answer this request and prepare a quote.",
     },
   },
+  projects: {
+    label: "Projects",
+    title: "Projects and references",
+    lead: "Selected projects our welders, fitters, electricians and technicians have worked on.",
+    empty: "We are putting together the overview of our completed projects. Write to us and we will gladly tell you about projects in your industry.",
+    open: "Project details",
+    metaSuffix: "project | KTechnology",
+    facts: { country: "Country", sector: "Industry", year: "Year", team: "Workers", duration: "Duration" },
+    scopeTitle: "Scope of work",
+    tradesTitle: "Trades on the project",
+    stats: {
+      label: "In numbers",
+      title: "KTechnology in numbers",
+      projects: "Completed projects",
+      countries: "Countries",
+      workers: "Verified workers",
+    },
+  },
+  about: {
+    label: "About us",
+    title: "Industrial specialists from Slovakia for projects across Europe and Scandinavia",
+    lead: "KTechnology s.r.o. is a Slovak company that leases skilled industrial workers to manufacturers, contractors and EPC companies.",
+    body: [
+      "We provide welders, pipe fitters, steel fitters, electricians, mechanics, technicians and operators, from a single specialist to a complete crew, for the full length of your project. Every worker passes a practical skills test and a certificate check before deployment.",
+      "We take care of everything around the crew: contracts, A1 forms and permits, insurance, PPE, travel and accommodation. During the project you have one coordinator and receive one invoice.",
+    ],
+  },
+  cta: {
+    title: "Need to strengthen your crew?",
+    body: "Send us your request and within one business day we will reply with worker availability and a quote.",
+    email: "Or e-mail us",
+  },
+  pages: {
+    services: {
+      meta: {
+        title: "Services and trades – Industrial staff leasing | KTechnology",
+        description:
+          "Staff leasing, crews for outages and ramp-ups, full mobilisation: welders, pipe fitters, electricians, mechanics, technicians and operators, skills-tested before deployment.",
+      },
+    },
+    sectors: {
+      meta: {
+        title: "Industries – KTechnology",
+        description:
+          "Where our people work: automotive, metalworking, energy, shipbuilding and offshore, electrical and automation, logistics and production, commercial and office buildings.",
+      },
+    },
+    projects: {
+      meta: {
+        title: "Projects and references – KTechnology",
+        description: "Projects our welders, fitters, electricians and technicians have worked on across Europe and Scandinavia.",
+      },
+    },
+    about: {
+      meta: {
+        title: "About us – KTechnology",
+        description:
+          "KTechnology s.r.o. is a Slovak company leasing skilled industrial workers to manufacturers, contractors and EPC companies across Europe and Scandinavia.",
+      },
+    },
+    contact: {
+      meta: {
+        title: "Contact – Request workers | KTechnology",
+        description: "Send us your request: a project coordinator replies within one business day with worker availability and a quote.",
+      },
+    },
+  },
   notFound: {
     title: "Page not found",
     body: "The page you are looking for does not exist or has moved.",
@@ -230,7 +343,8 @@ const en = {
   },
   footer: {
     company: "KTechnology s.r.o.",
-    tagline: "Industrial staff leasing from Slovakia, for projects across Europe and worldwide.",
+    tagline: "Industrial staff leasing from Slovakia, for projects across Europe and Scandinavia.",
+    pages: "Pages",
     rights: "All rights reserved.",
     top: "Back to top",
   },

@@ -4,15 +4,16 @@ const sv: Dictionary = {
   meta: {
     title: "KTechnology – Personaluthyrning för industrin: svetsare, montörer, elektriker",
     description:
-      "KTechnology s.r.o. hyr ut kompetenstestade svetsare, rörmontörer, elektriker, mekaniker och operatörer till industriprojekt i hela Europa och världen. Vi ordnar A1-intyg, resor och boende – team på plats inom cirka 14 dagar.",
+      "KTechnology s.r.o. hyr ut kompetenstestade svetsare, rörmontörer, elektriker, mekaniker och operatörer till industriprojekt i Europa och Skandinavien. Vi ordnar A1-intyg, resor och boende – team på plats inom cirka 14 dagar.",
   },
   nav: {
+    home: "Hem",
     services: "Tjänster",
-    trades: "Yrken",
     sectors: "Branscher",
-    process: "Så går det till",
-    faq: "Vanliga frågor",
+    projects: "Projekt",
+    about: "Om oss",
     contact: "Kontakt",
+    breadcrumb: "Brödsmulor",
     cta: "Beställ personal",
     language: "Språk",
     menu: "Meny",
@@ -21,7 +22,7 @@ const sv: Dictionary = {
     ctaShort: "Begär offert",
   },
   hero: {
-    eyebrow: "Personaluthyrning för industrin\u00a0· Europa\u00a0&\u00a0världen",
+    eyebrow: "Personaluthyrning för industrin\u00a0· Europa\u00a0&\u00a0Skandinavien",
     title: "Yrkeskunniga svetsare, montörer och elektriker på plats hos er inom cirka 14\u00a0dagar",
     lead:
       "Vi hyr ut kompetenstestade yrkesarbetare inom industrin till tillverkare, entreprenörer och EPC-företag i hela Europa. Vi sköter avtal, A1-intyg eller arbetstillstånd, försäkring, resor och boende. En kontakt, en faktura.",
@@ -52,6 +53,7 @@ const sv: Dictionary = {
     label: "Tjänster",
     title: "Vad vi erbjuder",
     lead: "Personaluthyrning för industrin: från en enskild specialist till ett komplett team, under hela projektets löptid.",
+    more: "Alla tjänster och yrken",
     items: [
       {
         title: "Personaluthyrning",
@@ -75,17 +77,59 @@ const sv: Dictionary = {
     title: "Vilka vi hyr ut",
     lead: "Erfarna yrkesarbetare. Alla genomgår ett praktiskt kompetenstest och en certifikatkontroll före uppdraget.",
     items: [
-      { name: "Svetsare", skills: ["MIG/MAG", "TIG", "MMA", "Stål & rostfritt"] },
-      { name: "Rörmontörer", skills: ["Industrirör", "Isometriritningar", "Prefabricering", "Montage"] },
-      { name: "Stålmontörer", skills: ["Stålkonstruktioner", "Tekniska ritningar", "Montage", "Skruvförband"] },
-      { name: "Industrielektriker", skills: ["Installation", "Kablage & kabelstegar", "Elcentraler"] },
-      { name: "Automationstekniker", skills: ["PLC", "Driftsättning", "Felsökning"] },
-      { name: "Mekaniker & industrimontörer", skills: ["Maskininstallation", "Uppriktning", "Underhåll vid stopp"] },
-      { name: "CNC- & maskinoperatörer", skills: ["Svarvning & fräsning", "Maskinställning", "Mätning"] },
-      { name: "Monteringsoperatörer", skills: ["Linjemontering", "Kvalitetskontroll", "Skiftarbete"] },
-      { name: "Instrumenttekniker", skills: ["Mät- och reglerteknik", "Kalibrering av instrument", "Givare & reglerkretsar"] },
+      {
+        name: "Svetsare",
+        skills: ["MIG/MAG", "TIG", "MMA", "Stål & rostfritt"],
+        body: "Svetsare med erfarenhet av MIG/MAG-, TIG- och MMA-svetsning i kolstål och rostfritt.",
+      },
+      {
+        name: "Rörmontörer",
+        skills: ["Industrirör", "Isometriritningar", "Prefabricering", "Montage"],
+        body: "Rörmontörer som prefabricerar och monterar industrirör enligt isometriritningar.",
+      },
+      {
+        name: "Stålmontörer",
+        skills: ["Stålkonstruktioner", "Tekniska ritningar", "Montage", "Skruvförband"],
+        body: "Stålmontörer som tillverkar och monterar stålkonstruktioner enligt tekniska ritningar, inklusive skruvförband.",
+      },
+      {
+        name: "Industrielektriker",
+        skills: ["Installation", "Kablage & kabelstegar", "Elcentraler"],
+        body: "Elektriker för industriinstallationer: kabeldragning, montage av kabelstegar och inkoppling av elcentraler.",
+      },
+      {
+        name: "Automationstekniker",
+        skills: ["PLC", "Driftsättning", "Felsökning"],
+        body: "Tekniker för PLC-programmering, driftsättning av utrustning och felsökning.",
+      },
+      {
+        name: "Mekaniker & industrimontörer",
+        skills: ["Maskininstallation", "Uppriktning", "Underhåll vid stopp"],
+        body: "Mekaniker som installerar och riktar upp maskiner och utför underhåll under revisionsstopp.",
+      },
+      {
+        name: "CNC- & maskinoperatörer",
+        skills: ["Svarvning & fräsning", "Maskinställning", "Mätning"],
+        body: "Operatörer för svarvning och fräsning, maskinställning och mätning av detaljer.",
+      },
+      {
+        name: "Monteringsoperatörer",
+        skills: ["Linjemontering", "Kvalitetskontroll", "Skiftarbete"],
+        body: "Operatörer för linjemontering och kvalitetskontroll, vana vid skiftarbete.",
+      },
+      {
+        name: "Instrumenttekniker",
+        skills: ["Mät- och reglerteknik", "Kalibrering av instrument", "Givare & reglerkretsar"],
+        body: "Tekniker inom mät- och reglerteknik: kalibrering av instrument, givare och reglerkretsar.",
+      },
     ],
     note: "Behöver ni en annan yrkesgrupp? Fråga oss\u00a0– vårt nätverk täcker de flesta industriyrken.",
+    open: "Mer om yrket",
+    skillsTitle: "Kompetenser",
+    vetting: "Alla genomgår ett praktiskt kompetenstest och en certifikatkontroll före uppdraget.",
+    projectsTitle: "Relevanta projekt",
+    others: "Andra yrken",
+    metaSuffix: "personaluthyrning för industrin | KTechnology",
   },
   included: {
     label: "Allt ingår",
@@ -107,6 +151,7 @@ const sv: Dictionary = {
   sectors: {
     label: "Branscher",
     title: "Där vår personal arbetar",
+    lead: "Branscher där vår personal förstärker teamen hos tillverkare, entreprenörer och EPC-företag.",
     items: [
       { name: "Fordon & underleverantörer", tags: "Automation · Programmering · Robotik" },
       { name: "Metallindustri & svetsning", tags: "MIG/MAG · TIG · Stålkonstruktioner" },
@@ -114,6 +159,7 @@ const sv: Dictionary = {
       { name: "Varv & offshore", tags: "Skrov · Utrustning · Rörmontage" },
       { name: "El & automation", tags: "Installation · PLC · Driftsättning" },
       { name: "Logistik & produktion", tags: "Operatörer · Truck · Lager" },
+      { name: "Kommersiella byggnader & kontor", tags: "El · Fastighetsteknik · Mät- och reglerteknik" },
     ],
   },
   process: {
@@ -154,7 +200,7 @@ const sv: Dictionary = {
   },
   reach: {
     label: "Var vi arbetar",
-    title: "Med bas i Slovakien\u00a0– på arbetsplatser i hela Europa och utanför",
+    title: "Med bas i Slovakien\u00a0– på arbetsplatser i hela Europa och Skandinavien",
     countries: [
       "Tyskland", "Österrike", "Sverige", "Norge", "Finland", "Danmark",
       "Nederländerna", "Belgien", "Frankrike", "Polen", "Tjeckien", "Slovakien", "Förenade Arabemiraten",
@@ -225,6 +271,73 @@ const sv: Dictionary = {
       consent: "Vi använder dina personuppgifter enbart för att besvara förfrågan och ta fram en offert.",
     },
   },
+  projects: {
+    label: "Projekt",
+    title: "Projekt och referenser",
+    lead: "Ett urval av projekt där våra svetsare, montörer, elektriker och tekniker har arbetat.",
+    empty: "Vi håller på att sammanställa en översikt över våra genomförda projekt. Skriv till oss, så berättar vi gärna om projekt inom er bransch.",
+    open: "Mer om projektet",
+    metaSuffix: "projekt | KTechnology",
+    facts: { country: "Land", sector: "Bransch", year: "År", team: "Antal personer", duration: "Längd" },
+    scopeTitle: "Arbetsomfattning",
+    tradesTitle: "Yrken i projektet",
+    stats: {
+      label: "I siffror",
+      title: "KTechnology i siffror",
+      projects: "Genomförda projekt",
+      countries: "Länder",
+      workers: "Kontrollerade yrkesarbetare",
+    },
+  },
+  about: {
+    label: "Om oss",
+    title: "Industrispecialister från Slovakien för projekt i Europa och Skandinavien",
+    lead: "KTechnology s.r.o. är ett slovakiskt företag som hyr ut kvalificerade yrkesarbetare inom industrin till tillverkare, entreprenörer och EPC-företag.",
+    body: [
+      "Vi tillhandahåller svetsare, rörmontörer, stålmontörer, elektriker, mekaniker, tekniker och operatörer\u00a0– från en enskild specialist till ett komplett team, under hela ert projekt. Alla genomgår ett praktiskt kompetenstest och en certifikatkontroll före uppdraget.",
+      "Vi sköter allt runt teamet: avtal, A1-intyg och tillstånd, försäkring, skyddsutrustning, resor och boende. Under projektet har ni en och samma koordinator och får allt samlat på en faktura.",
+    ],
+  },
+  cta: {
+    title: "Behöver ni förstärka ert team?",
+    body: "Skicka er förfrågan så återkommer vi inom en arbetsdag med tillgänglighet och offert.",
+    email: "Eller mejla oss",
+  },
+  pages: {
+    services: {
+      meta: {
+        title: "Tjänster och yrken – Personaluthyrning för industrin | KTechnology",
+        description:
+          "Personaluthyrning, team för revisionsstopp och upprampning, komplett mobilisering: svetsare, rörmontörer, elektriker, mekaniker, tekniker och operatörer, kompetenstestade före uppdraget.",
+      },
+    },
+    sectors: {
+      meta: {
+        title: "Branscher – KTechnology",
+        description:
+          "Där vår personal arbetar: fordonsindustri, metallindustri, energi, varv och offshore, el och automation, logistik och produktion, kommersiella byggnader och kontor.",
+      },
+    },
+    projects: {
+      meta: {
+        title: "Projekt och referenser – KTechnology",
+        description: "Projekt där våra svetsare, montörer, elektriker och tekniker har arbetat i Europa och Skandinavien.",
+      },
+    },
+    about: {
+      meta: {
+        title: "Om oss – KTechnology",
+        description:
+          "KTechnology s.r.o. är ett slovakiskt företag som hyr ut kvalificerade yrkesarbetare inom industrin till tillverkare, entreprenörer och EPC-företag i Europa och Skandinavien.",
+      },
+    },
+    contact: {
+      meta: {
+        title: "Kontakt – Beställ personal | KTechnology",
+        description: "Skicka er förfrågan: en projektkoordinator återkommer inom en arbetsdag med tillgänglighet och offert.",
+      },
+    },
+  },
   notFound: {
     title: "Sidan hittades inte",
     body: "Sidan du letar efter finns inte eller har flyttats.",
@@ -232,7 +345,8 @@ const sv: Dictionary = {
   },
   footer: {
     company: "KTechnology s.r.o.",
-    tagline: "Personaluthyrning från Slovakien till industriprojekt i hela Europa och världen.",
+    tagline: "Personaluthyrning från Slovakien till industriprojekt i Europa och Skandinavien.",
+    pages: "Sidor",
     rights: "Alla rättigheter förbehållna.",
     top: "Till toppen",
   },

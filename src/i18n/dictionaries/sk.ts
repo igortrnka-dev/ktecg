@@ -4,15 +4,16 @@ const sk: Dictionary = {
   meta: {
     title: "KTechnology – Leasing pracovníkov pre priemysel: zvárači, montéri, elektrikári",
     description:
-      "KTechnology s.r.o. prenajíma zváračov, potrubárov, elektrikárov, mechanikov a operátorov pre priemyselné projekty v Európe aj vo svete. Zručnosti pracovníkov overí testom, vybaví A1, dopravu aj ubytovanie a tím nasadí približne do 14 dní.",
+      "KTechnology s.r.o. prenajíma zváračov, potrubárov, elektrikárov, mechanikov a operátorov pre priemyselné projekty v Európe a v Škandinávii. Zručnosti pracovníkov overí testom, vybaví A1, dopravu aj ubytovanie a tím nasadí približne do 14 dní.",
   },
   nav: {
+    home: "Domov",
     services: "Služby",
-    trades: "Profesie",
     sectors: "Odvetvia",
-    process: "Ako to funguje",
-    faq: "Otázky",
-    contact: "Kontakt",
+    projects: "Projekty",
+    about: "O nás",
+    contact: "Kontakty",
+    breadcrumb: "Navigačná cesta",
     cta: "Poslať dopyt",
     language: "Jazyk",
     menu: "Menu",
@@ -21,7 +22,7 @@ const sk: Dictionary = {
     ctaShort: "Poslať dopyt",
   },
   hero: {
-    eyebrow: "Leasing pracovníkov pre priemysel\u00a0· Európa\u00a0a\u00a0svet",
+    eyebrow: "Leasing pracovníkov pre priemysel\u00a0· Európa\u00a0a\u00a0Škandinávia",
     title: "Kvalifikovaní zvárači, montéri a\u00a0elektrikári na vašom pracovisku približne do 14\u00a0dní",
     lead:
       "Prenajímame overených priemyselných odborníkov výrobcom, zhotoviteľom a EPC spoločnostiam v celej Európe. Postaráme sa o zmluvy, A1 a povolenia, poistenie, dopravu aj ubytovanie. Jeden kontakt, jedna faktúra.",
@@ -52,6 +53,7 @@ const sk: Dictionary = {
     label: "Služby",
     title: "Čo ponúkame",
     lead: "Leasing pracovníkov pre priemysel: od jedného špecialistu po kompletný tím, na celú dobu vášho projektu.",
+    more: "Všetky služby a profesie",
     items: [
       {
         title: "Leasing pracovníkov",
@@ -75,17 +77,59 @@ const sk: Dictionary = {
     title: "Koho vám dodáme",
     lead: "Skúsených odborníkov. Každý pred nasadením prejde praktickým testom zručností a kontrolou certifikátov.",
     items: [
-      { name: "Zvárači", skills: ["MIG/MAG", "TIG", "MMA", "Oceľ a nerez"] },
-      { name: "Potrubári", skills: ["Priemyselné potrubia", "Izometrické výkresy", "Prefabrikácia", "Montáž"] },
-      { name: "Zámočníci a montéri konštrukcií", skills: ["Oceľové konštrukcie", "Technické výkresy", "Montáž", "Skrutkové spoje"] },
-      { name: "Priemyselní elektrikári", skills: ["Inštalácie", "Káble a žľaby", "Rozvádzače"] },
-      { name: "Technici automatizácie", skills: ["PLC", "Uvádzanie do prevádzky", "Diagnostika porúch"] },
-      { name: "Mechanici a montéri strojov", skills: ["Inštalácia strojov", "Ustavovanie", "Údržba počas odstávok"] },
-      { name: "Operátori CNC a strojov", skills: ["Sústruženie a frézovanie", "Nastavovanie strojov", "Meranie"] },
-      { name: "Montážni operátori", skills: ["Montáž na linke", "Kontrola kvality", "Zmenová práca"] },
-      { name: "Technici pre meranie a reguláciu", skills: ["MaR", "Kalibrácia prístrojov", "Snímače a regulačné slučky"] },
+      {
+        name: "Zvárači",
+        skills: ["MIG/MAG", "TIG", "MMA", "Oceľ a nerez"],
+        body: "Zvárači so skúsenosťami s metódami MIG/MAG, TIG a MMA pri zváraní ocele aj nerezu.",
+      },
+      {
+        name: "Potrubári",
+        skills: ["Priemyselné potrubia", "Izometrické výkresy", "Prefabrikácia", "Montáž"],
+        body: "Potrubári na prefabrikáciu a montáž priemyselných potrubí podľa izometrických výkresov.",
+      },
+      {
+        name: "Zámočníci a montéri konštrukcií",
+        skills: ["Oceľové konštrukcie", "Technické výkresy", "Montáž", "Skrutkové spoje"],
+        body: "Zámočníci a montéri, ktorí podľa technických výkresov zhotovujú a montujú oceľové konštrukcie vrátane skrutkových spojov.",
+      },
+      {
+        name: "Priemyselní elektrikári",
+        skills: ["Inštalácie", "Káble a žľaby", "Rozvádzače"],
+        body: "Elektrikári na priemyselné inštalácie: ťahanie káblov, montáž káblových žľabov a zapojenie rozvádzačov.",
+      },
+      {
+        name: "Technici automatizácie",
+        skills: ["PLC", "Uvádzanie do prevádzky", "Diagnostika porúch"],
+        body: "Technici na programovanie PLC, uvádzanie zariadení do prevádzky a diagnostiku porúch.",
+      },
+      {
+        name: "Mechanici a montéri strojov",
+        skills: ["Inštalácia strojov", "Ustavovanie", "Údržba počas odstávok"],
+        body: "Mechanici na inštaláciu a ustavovanie strojov aj na údržbu počas odstávok.",
+      },
+      {
+        name: "Operátori CNC a strojov",
+        skills: ["Sústruženie a frézovanie", "Nastavovanie strojov", "Meranie"],
+        body: "Operátori na sústruženie a frézovanie, nastavovanie strojov a meranie dielov.",
+      },
+      {
+        name: "Montážni operátori",
+        skills: ["Montáž na linke", "Kontrola kvality", "Zmenová práca"],
+        body: "Operátori na montáž na linke a kontrolu kvality, zvyknutí na prácu na zmeny.",
+      },
+      {
+        name: "Technici pre meranie a reguláciu",
+        skills: ["MaR", "Kalibrácia prístrojov", "Snímače a regulačné slučky"],
+        body: "Technici pre meranie a reguláciu: kalibrácia prístrojov, snímače a regulačné slučky.",
+      },
     ],
     note: "Hľadáte inú profesiu? Opýtajte sa nás – naša sieť pokrýva väčšinu priemyselných odborností.",
+    open: "Detail profesie",
+    skillsTitle: "Zručnosti",
+    vetting: "Každý pracovník pred nasadením prejde praktickým testom zručností a kontrolou certifikátov.",
+    projectsTitle: "Relevantné projekty",
+    others: "Ďalšie profesie",
+    metaSuffix: "leasing pracovníkov | KTechnology",
   },
   included: {
     label: "Komplexná služba",
@@ -107,6 +151,7 @@ const sk: Dictionary = {
   sectors: {
     label: "Odvetvia",
     title: "Kde pracujú naši ľudia",
+    lead: "Odvetvia, v ktorých naši ľudia posilňujú tímy výrobcov, zhotoviteľov a EPC spoločností.",
     items: [
       { name: "Automobilový priemysel a dodávatelia", tags: "Automatizácia · Programovanie · Robotika" },
       { name: "Kovovýroba a zváranie", tags: "MIG/MAG · TIG · Oceľové konštrukcie" },
@@ -114,6 +159,7 @@ const sk: Dictionary = {
       { name: "Lodiarstvo a offshore", tags: "Trup · Vystrojovanie · Potrubárstvo" },
       { name: "Elektrotechnika a automatizácia", tags: "Inštalácia · PLC · Uvádzanie do prevádzky" },
       { name: "Logistika a výroba", tags: "Operátori · VZV · Sklady" },
+      { name: "Komerčné a administratívne budovy", tags: "Elektroinštalácie · TZB · MaR" },
     ],
   },
   process: {
@@ -154,7 +200,7 @@ const sk: Dictionary = {
   },
   reach: {
     label: "Kde pôsobíme",
-    title: "Sídlime na Slovensku, pracujeme na projektoch v\u00a0celej Európe aj mimo nej",
+    title: "Sídlime na Slovensku, pracujeme na projektoch v\u00a0celej Európe a\u00a0v\u00a0Škandinávii",
     countries: [
       "Nemecko", "Rakúsko", "Švédsko", "Nórsko", "Fínsko", "Dánsko",
       "Holandsko", "Belgicko", "Francúzsko", "Poľsko", "Česko", "Slovensko", "SAE",
@@ -225,6 +271,73 @@ const sk: Dictionary = {
       consent: "Vaše osobné údaje spracúvame len na vybavenie tohto dopytu a prípravu cenovej ponuky.",
     },
   },
+  projects: {
+    label: "Projekty",
+    title: "Projekty a referencie",
+    lead: "Vybrané projekty, na ktorých pracovali naši zvárači, montéri, elektrikári a technici.",
+    empty: "Prehľad realizovaných projektov práve dopĺňame. Napíšte nám a radi vám povieme o projektoch vo vašom odvetví.",
+    open: "Detail projektu",
+    metaSuffix: "projekt | KTechnology",
+    facts: { country: "Krajina", sector: "Odvetvie", year: "Rok", team: "Počet pracovníkov", duration: "Trvanie" },
+    scopeTitle: "Rozsah prác",
+    tradesTitle: "Profesie na projekte",
+    stats: {
+      label: "V číslach",
+      title: "KTechnology v číslach",
+      projects: "Realizovaných projektov",
+      countries: "Krajín",
+      workers: "Overených pracovníkov",
+    },
+  },
+  about: {
+    label: "O nás",
+    title: "Priemyselní odborníci zo Slovenska pre projekty v Európe a v Škandinávii",
+    lead: "KTechnology s.r.o. je slovenská spoločnosť, ktorá prenajíma kvalifikovaných priemyselných pracovníkov výrobcom, zhotoviteľom a EPC spoločnostiam.",
+    body: [
+      "Dodávame zváračov, potrubárov, montérov, elektrikárov, mechanikov, technikov aj operátorov – od jedného špecialistu po celý tím, na celú dobu vášho projektu. Každý pracovník pred nasadením prejde praktickým testom zručností a kontrolou certifikátov.",
+      "Postaráme sa o všetko okolo tímu: zmluvy, formuláre A1 a povolenia, poistenie, OOPP, dopravu aj ubytovanie. Počas projektu máte jedného koordinátora a dostanete jednu faktúru.",
+    ],
+  },
+  cta: {
+    title: "Potrebujete posilniť tím?",
+    body: "Pošlite nám dopyt a do jedného pracovného dňa vám odpovieme s informáciou o dostupnosti pracovníkov a s cenovou ponukou.",
+    email: "Alebo nám napíšte",
+  },
+  pages: {
+    services: {
+      meta: {
+        title: "Služby a profesie – leasing pracovníkov pre priemysel | KTechnology",
+        description:
+          "Leasing pracovníkov, posily na odstávky a nábehy výroby, kompletná mobilizácia: zvárači, potrubári, elektrikári, mechanici, technici a operátori, overení pred nasadením.",
+      },
+    },
+    sectors: {
+      meta: {
+        title: "Odvetvia – KTechnology",
+        description:
+          "Kde pracujú naši ľudia: automobilový priemysel, kovovýroba, energetika, lodiarstvo a offshore, elektrotechnika a automatizácia, logistika a výroba, komerčné a administratívne budovy.",
+      },
+    },
+    projects: {
+      meta: {
+        title: "Projekty a referencie – KTechnology",
+        description: "Projekty, na ktorých pracovali naši zvárači, montéri, elektrikári a technici v Európe a v Škandinávii.",
+      },
+    },
+    about: {
+      meta: {
+        title: "O nás – KTechnology",
+        description:
+          "KTechnology s.r.o. je slovenská spoločnosť, ktorá prenajíma kvalifikovaných priemyselných pracovníkov výrobcom, zhotoviteľom a EPC spoločnostiam v Európe a v Škandinávii.",
+      },
+    },
+    contact: {
+      meta: {
+        title: "Kontakt – poslať dopyt | KTechnology",
+        description: "Pošlite nám dopyt: projektový koordinátor sa vám do jedného pracovného dňa ozve s dostupnosťou pracovníkov a s cenovou ponukou.",
+      },
+    },
+  },
   notFound: {
     title: "Stránka sa nenašla",
     body: "Stránka, ktorú hľadáte, neexistuje alebo bola presunutá.",
@@ -232,7 +345,8 @@ const sk: Dictionary = {
   },
   footer: {
     company: "KTechnology s.r.o.",
-    tagline: "Leasing pracovníkov pre priemysel zo Slovenska, pre projekty v celej Európe aj vo svete.",
+    tagline: "Leasing pracovníkov pre priemysel zo Slovenska, pre projekty v Európe a v Škandinávii.",
+    pages: "Stránky",
     rights: "Všetky práva vyhradené.",
     top: "Späť hore",
   },

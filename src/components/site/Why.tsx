@@ -2,6 +2,7 @@ import type { Dictionary } from "@/i18n";
 import Icon from "./Icon";
 import SectionHead from "./SectionHead";
 
+/** "Why KTechnology": on the homepage and the about page. */
 export default function Why({ t }: { t: Dictionary }) {
   return (
     <section className="block" id="why">
@@ -15,21 +16,26 @@ export default function Why({ t }: { t: Dictionary }) {
           </article>
         ))}
       </div>
-
-      <div className="reach" data-reveal>
-        <div className="reach__head">
-          <span className="tile__icon"><Icon name="globe" /></span>
-          <div>
-            <span className="mono faint">{t.reach.label}</span>
-            <p className="reach__title">{t.reach.title}</p>
-          </div>
-        </div>
-        <ul className="reach__list" aria-label={t.reach.label}>
-          {t.reach.countries.map((c) => (
-            <li key={c}>{c}</li>
-          ))}
-        </ul>
-      </div>
     </section>
+  );
+}
+
+/** The countries we deploy to. */
+export function Reach({ t }: { t: Dictionary }) {
+  return (
+    <div className="reach" data-reveal>
+      <div className="reach__head">
+        <span className="tile__icon"><Icon name="globe" /></span>
+        <div>
+          <span className="mono faint">{t.reach.label}</span>
+          <p className="reach__title">{t.reach.title}</p>
+        </div>
+      </div>
+      <ul className="reach__list" aria-label={t.reach.label}>
+        {t.reach.countries.map((c) => (
+          <li key={c}>{c}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
