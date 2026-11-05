@@ -1,34 +1,45 @@
 import type { Dictionary } from "@/i18n";
-import Icon, { type IconName } from "./Icon";
+import type { Locale } from "@/i18n/config";
+import { divisionSlugs, href } from "@/content/site";
+import { divisionIcons, divisionPhoto } from "./catalog";
+import Icon from "./Icon";
 import Photo from "./Photo";
 
-const icons: IconName[] = ["people", "chart", "route"];
-/**
- * A missing file shows the art instead (see Photo). Photos here, and in the "All included" panel, must show every
- * worker in full PPE for the task: they sit next to "PPE included".
- */
-const photos = ["service-leasing", "service-outages", "service-mobilisation"];
-
-/** The three services as photo tiles: on the homepage and the services page. */
-export function ServiceTiles({ t, heading: Heading = "h3" }: { t: Dictionary; heading?: "h2" | "h3" }) {
+/** The four service divisions as photo cards, each opening its division page: on the homepage and the services page. */
+export function DivisionCards({
+  t,
+  locale,
+  heading: Heading = "h3",
+}: {
+  t: Dictionary;
+  locale: Locale;
+  heading?: "h2" | "h3";
+}) {
   return (
-    <div className="grid grid--3">
-      {t.services.items.map((s, i) => (
-        <article key={s.title} className="tile tile--service" data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
-          <div className="tile__media">
-            <Photo slug={photos[i]} variant={i + 2} />
-            <span className="tile__icon tile__icon--accent"><Icon name={icons[i]} /></span>
-          </div>
-          <Heading className="tile__title">{s.title}</Heading>
-          <p className="muted">{s.body}</p>
-          <ul className="ticks">
-            {s.points.map((p) => (
-              <li key={p}><Icon name="check" size={16} />{p}</li>
-            ))}
-          </ul>
-        </article>
-      ))}
-    </div>
+    <ul className="divisions">
+      {t.services.divisions.map((d, i) => {
+        const slug = divisionSlugs[i];
+        return (
+          <li key={slug} data-reveal style={{ transitionDelay: `${i * 70}ms` }}>
+            <a href={href(locale, `services/${slug}`)} className="card card--link division">
+              <div className="card__media">
+                <Photo slug={divisionPhoto(slug)} variant={i + 2} />
+                <span className="tile__icon tile__icon--accent division__icon"><Icon name={divisionIcons[slug]} /></span>
+              </div>
+              <div className="card__body">
+                <span className="mono faint">{t.services.division} {String(i + 1).padStart(2, "0")}</span>
+                <Heading className="card__title">{d.name}</Heading>
+                <p className="muted card__text">{d.short}</p>
+                <span className="tile__more mono">
+                  {t.services.open}
+                  <Icon name="arrow" size={16} />
+                </span>
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

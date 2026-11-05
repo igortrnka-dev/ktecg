@@ -6,7 +6,8 @@ import sv from "./dictionaries/sv";
 import sk from "./dictionaries/sk";
 import pl from "./dictionaries/pl";
 
-export type Dictionary = typeof en;
+/** The Slovak dictionary is the source: every other language has exactly its keys. */
+export type Dictionary = typeof sk;
 
 const NBSP = "\u00a0";
 

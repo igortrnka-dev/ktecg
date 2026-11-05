@@ -1,28 +1,35 @@
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { href } from "@/content/site";
-import { EMAIL } from "./email";
+import { firstPhoto } from "@/lib/photo";
+import Icon from "./Icon";
+import Photo from "./Photo";
 
-const [mailbox, domain] = EMAIL.split("@");
+export type CtaText = { title: string; body: string };
 
-/** Inquiry band, the last section of every page but the contact page. */
-export default function CtaBand({ t, locale }: { t: Dictionary; locale: Locale }) {
+/**
+ * Inquiry band, the last section of every page but the contact page. A division or project page passes its own,
+ * more specific question; the button is always the same. Background: public/img/cta.jpg, until it is there the
+ * energy sector photo (warm-lit pipes).
+ */
+export default function CtaBand({ t, locale, text }: { t: Dictionary; locale: Locale; text?: CtaText }) {
+  const { title, body } = text ?? t.cta;
+  const photo = firstPhoto("cta", "sector-energy");
   return (
     <section className="ctaband" aria-labelledby="ctaband-title" data-reveal>
+      {photo && (
+        <div className="ctaband__bg" aria-hidden>
+          <Photo slug={photo} />
+        </div>
+      )}
       <div className="ctaband__copy">
-        <h2 className="ctaband__title" id="ctaband-title">{t.cta.title}</h2>
-        <p className="ctaband__text">{t.cta.body}</p>
+        <h2 className="ctaband__title" id="ctaband-title">{title}</h2>
+        <p className="ctaband__text">{body}</p>
       </div>
-      <div className="ctaband__actions">
-        <a href={href(locale, "contact")} className="glow-btn">
-          <span className="glow-btn__glow" aria-hidden />
-          <span className="glow-btn__fill">{t.nav.cta}</span>
-        </a>
-        <a href={`mailto:${EMAIL}`} className="ctaband__mail">
-          <span className="mono faint">{t.cta.email}</span>
-          <span>{mailbox}@<wbr />{domain}</span>
-        </a>
-      </div>
+      <a href={href(locale, "contact")} className="btn btn--accent btn--lg ctaband__btn">
+        {t.cta.button}
+        <Icon name="arrow" size={16} />
+      </a>
     </section>
   );
 }

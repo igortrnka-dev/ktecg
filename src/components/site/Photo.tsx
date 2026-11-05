@@ -12,13 +12,13 @@ export default function Photo({
   fallback,
   eager = false,
 }: {
-  slug: string;
+  slug: string | undefined;
   variant?: number;
   alt?: string;
   fallback?: React.ReactNode;
   eager?: boolean;
 }) {
-  if (hasPhoto(slug)) {
+  if (slug && hasPhoto(slug)) {
     return (
       <div className="photo">
         {/* eslint-disable-next-line @next/next/no-img-element */}

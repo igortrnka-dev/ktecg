@@ -15,28 +15,41 @@ export const pages = [
 ] as const;
 export type PageKey = (typeof pages)[number]["key"];
 
-/** URL slugs of the trade detail pages, in the order of `trades.items` in every dictionary. */
-export const tradeSlugs = [
-  "welders",
-  "pipe-fitters",
-  "steel-fitters",
-  "industrial-electricians",
-  "automation-technicians",
-  "mechanical-fitters",
-  "cnc-operators",
-  "assembly-operators",
-  "instrumentation-technicians",
+/** URL slugs of the service divisions (/services/<slug>), in the order of `services.divisions` in every dictionary. */
+export const divisionSlugs = [
+  "electrical-automation",
+  "welding-piping",
+  "mechanical-maintenance",
+  "supervision-qa",
 ] as const;
-export type TradeSlug = (typeof tradeSlugs)[number];
+export type DivisionSlug = (typeof divisionSlugs)[number];
+
+/**
+ * Trade pages of the earlier site version, each sent on to the division that took it over (permanent redirect in the
+ * middleware), so links already shared keep working.
+ */
+export const legacyTradeRedirects: Record<string, DivisionSlug> = {
+  welders: "welding-piping",
+  "pipe-fitters": "welding-piping",
+  "steel-fitters": "mechanical-maintenance",
+  "industrial-electricians": "electrical-automation",
+  "automation-technicians": "electrical-automation",
+  "mechanical-fitters": "mechanical-maintenance",
+  "cnc-operators": "mechanical-maintenance",
+  "assembly-operators": "mechanical-maintenance",
+  "instrumentation-technicians": "electrical-automation",
+};
 
 /** Sector keys, in the order of `sectors.items` in every dictionary; also the sector-<key>.jpg photo slugs. */
 export const sectorSlugs = [
-  "automotive",
-  "metalworking",
   "energy",
+  "chemical",
+  "pharma",
+  "food",
+  "automotive",
   "shipbuilding",
-  "electrical",
-  "logistics",
+  "datacenter",
+  "manufacturing",
   "buildings",
 ] as const;
 export type SectorSlug = (typeof sectorSlugs)[number];
@@ -54,7 +67,7 @@ export const stats: { projects: number | null; countries: number; workers: strin
 /** Every page path under /<locale>, without the locale ("" is the homepage). */
 export const sitePaths: readonly string[] = [
   ...pages.map((p) => p.path),
-  ...tradeSlugs.map((s) => `services/${s}`),
+  ...divisionSlugs.map((s) => `services/${s}`),
   ...projects.map((p) => `projects/${p.slug}`),
 ];
 

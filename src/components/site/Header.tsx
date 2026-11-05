@@ -13,7 +13,7 @@ type Nav = Dictionary["nav"];
  * dropdown, glowing CTA (the short label up to 1199px). Below 960px the links and languages move
  * into a sheet opened by the burger; the short CTA stays in the bar.
  * `current` is the menu page the visitor is on or under (null on the 404 page), `path` the page
- * itself ("services/welders"): the language links keep it.
+ * itself ("services/welding-piping"): the language links keep it.
  */
 export default function Header({
   nav,
@@ -123,7 +123,7 @@ export default function Header({
     <>
       <header ref={headerRef} className={`nav${scrolled ? " is-scrolled" : ""}${menuOpen ? " is-open" : ""}`}>
         <a href={`/${locale}`} className="nav__mark" aria-label="KTechnology">
-          KTechnology<span className="nav__dot" aria-hidden />
+          <span className="nav__k" aria-hidden>K</span>Technology
         </a>
 
         <nav
