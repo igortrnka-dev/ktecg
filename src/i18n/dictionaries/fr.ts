@@ -23,7 +23,7 @@ const fr: Dictionary = {
   },
   hero: {
     eyebrow: "Capacités techniques et projets industriels | Europe et\u00a0Scandinavie",
-    title: "Des spécialistes qualifiés au service de l’industrie",
+    title: "Nous mettons en relation spécialistes et industrie",
     subtitle: "Services de sous-traitance industrielle pour des projets en Europe et en Scandinavie.",
     lead:
       "KTechnology accompagne les industriels, les fournisseurs d’équipements de procédé et les contractants généraux dans la réalisation de projets exigeants en électricité, automatisme, soudage, tuyauterie, montage mécanique et maintenance industrielle.",
@@ -152,7 +152,7 @@ const fr: Dictionary = {
     people: { one: "spécialiste", many: "spécialistes", other: "spécialistes" } as Record<string, string>,
     scopeTitle: "Périmètre du projet",
     activitiesTitle: "Principales activités",
-    galleryTitle: "Photos du chantier",
+    galleryTitle: "Photos de la réalisation",
     resultsTitle: "Résultat et bénéfices pour le client",
     othersTitle: "Autres projets réalisés",
     morePhotos: "autres photos",

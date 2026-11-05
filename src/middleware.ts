@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
   const path = rest.filter(Boolean).join("/");
   // Trade pages of the earlier version now live under their service division.
   const legacy = path.match(/^services\/([^/]+)$/)?.[1];
-  if (legacy && legacy in legacyTradeRedirects) {
+  if (legacy && Object.hasOwn(legacyTradeRedirects, legacy)) {
     url.pathname = `/${locale}/services/${legacyTradeRedirects[legacy]}`;
     return NextResponse.redirect(url, 308);
   }

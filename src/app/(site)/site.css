@@ -1630,9 +1630,7 @@ a.card:hover .card__media .photo {
   .contact {
     grid-template-columns: minmax(0, 1fr);
   }
-  /* the facts answer what/where/how fast, so they come before the example card */
   .hero__media {
-    order: 1;
     min-height: 460px;
   }
   .grid--3 {
@@ -2496,13 +2494,16 @@ a.card:hover .card__media .photo {
     display: none;
   }
   .footer {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .footer__brand {
     grid-column: 1 / -1;
   }
 }
 @media (max-width: 1023px) {
+  .footer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .dhero {
     grid-template-columns: minmax(0, 1fr);
   }
