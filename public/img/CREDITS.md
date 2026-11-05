@@ -22,6 +22,15 @@ Downloaded on 2026-10-29, resized to max 1600px wide.
 | included.jpg | Ümit Yıldırım | https://unsplash.com/photos/Ass0DusYDk4 (downloaded 2026-11-02) |
 | service-mobilisation.jpg | Armin Iranzad | https://unsplash.com/photos/1YkvAHgw6fo (downloaded 2026-11-02, cropped to the crew) |
 | sector-buildings.jpg | K. K. Yam Amot | https://unsplash.com/photos/zRmCWjppTV0 (downloaded 2026-11-04, finished office tower at night, cropped 4:3) |
+| sector-chemical.jpg | Bosco Shots | https://unsplash.com/photos/Q1tBl7IfFD0 (downloaded 2026-11-05, process plant at night) |
+| sector-pharma.jpg | Crystal Kwok | https://unsplash.com/photos/xD5SWy7hMbw (downloaded 2026-11-05) |
+| sector-food.jpg | Crystal Kwok | https://unsplash.com/photos/28U1dQ9FUSg (downloaded 2026-11-05) |
+| sector-datacenter.jpg | Tyler (@tylergm) | https://unsplash.com/photos/OnI_TNcIv9U (downloaded 2026-11-05) |
+| sector-manufacturing.jpg | Shavr IK | https://unsplash.com/photos/IKLG_PzSKSQ (downloaded 2026-11-05; two distant workers in hard hats) |
+| division-electrical.jpg | Toolmash Expo | https://unsplash.com/photos/PkHf7BUWbtk (downloaded 2026-11-05; insulated gloves) |
+| division-welding.jpg | Kyle Levesque | https://unsplash.com/photos/TB-GyBM8Kpc (downloaded 2026-11-05; welding helmet, gloves, coveralls) |
+| division-mechanical.jpg | Ricardo Gomez Angel | https://unsplash.com/photos/41X6FwTwPh4 (downloaded 2026-11-05) |
+| cta.jpg | Axel Lopez | https://unsplash.com/photos/ZqC8zRr4JoI (downloaded 2026-11-05) |
 
 ## Removed
 
