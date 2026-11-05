@@ -23,7 +23,7 @@ export default async function SectorsPage({ params }: { params: Promise<{ locale
     <SiteShell t={t} locale={locale} path="sectors" current="sectors">
       <div className="block">
         <PageHead label={t.sectors.label} title={t.sectors.title} lead={t.sectors.lead} />
-        <Sectors t={t} />
+        <Sectors t={t} heading="h2" />
       </div>
     </SiteShell>
   );

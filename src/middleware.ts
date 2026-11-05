@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
-import { isSitePath } from "@/content/site";
+import { isSitePath, legacyTradeRedirects } from "@/content/site";
 import { updateSession } from "@/lib/supabase/middleware";
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
@@ -52,8 +52,14 @@ export async function middleware(request: NextRequest) {
 
   // Paths that are not a page of the site (content/site.ts) are rewritten to the localized 404 page in
   // [locale]/[...rest], which cannot set its own status. The rewrite also keeps an unknown trade or project slug away
-  // from services/[trade] and projects/[slug], which only render the slugs they were built with.
+  // from services/[division] and projects/[slug], which only render the slugs they were built with.
   const path = rest.filter(Boolean).join("/");
+  // Trade pages of the earlier version now live under their service division.
+  const legacy = path.match(/^services\/([^/]+)$/)?.[1];
+  if (legacy && legacy in legacyTradeRedirects) {
+    url.pathname = `/${locale}/services/${legacyTradeRedirects[legacy]}`;
+    return NextResponse.redirect(url, 308);
+  }
   let response: NextResponse;
   if (isSitePath(path)) {
     response = NextResponse.next();

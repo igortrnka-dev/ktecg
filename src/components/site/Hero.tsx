@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { href } from "@/content/site";
-import Icon from "./Icon";
+import Icon, { type IconName } from "./Icon";
 import Photo from "./Photo";
 
 /** Helmet-and-visor composition used until a hero photo is supplied. */
@@ -18,6 +18,10 @@ function HeroArt() {
   );
 }
 
+/** Icons of the four feature cards under the hero, in the order of `hero.features`. */
+const featureIcons: IconName[] = ["gear", "globe", "people", "route"];
+
+/** Homepage opening: label, the page's h1 with its accent dot, subtitle, lead, two buttons, photo, four feature cards. */
 export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
   const words = t.hero.title.split(" ");
   return (
@@ -30,54 +34,39 @@ export default function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
               {i > 0 && " "}
               <span className="hero__word" style={{ animationDelay: `${0.3 + i * 0.06}s` }}>
                 {word}
+                {i === words.length - 1 && <span className="hero__dot">.</span>}
               </span>
             </Fragment>
           ))}
         </h1>
+        <p className="hero__subtitle enter enter--up">{t.hero.subtitle}</p>
         <p className="hero__lead enter enter--up">{t.hero.lead}</p>
         <div className="hero__ctas enter enter--up">
-          <a href={href(locale, "contact")} className="glow-btn">
-            <span className="glow-btn__glow" aria-hidden />
-            <span className="glow-btn__fill">{t.hero.primary}</span>
-          </a>
-          <a href={`${href(locale, "services")}#trades`} className="btn btn--ghost">
-            {t.hero.secondary}
+          <a href={href(locale, "contact")} className="btn btn--accent btn--lg">
+            {t.hero.primary}
             <Icon name="arrow" size={16} />
+          </a>
+          <a href={href(locale, "services")} className="btn btn--ghost">
+            {t.hero.secondary}
           </a>
         </div>
       </div>
 
       <div className="hero__media enter enter--rise">
         <Photo slug="hero" alt="" fallback={<HeroArt />} eager />
-        <div className="req">
-          <div className="req__head">
-            <span className="mono faint">{t.hero.card.label}</span>
-            <span className="req__status mono"><span className="req__dot" />{t.hero.card.status}</span>
-          </div>
-          <ul className="req__rows">
-            {t.hero.card.rows.map((r) => (
-              <li key={r.role}>
-                <span>{r.role}</span>
-                <span className="mono">{r.count}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="req__meta">
-            {t.hero.card.meta.map((m) => (
-              <span key={m.k}><span className="mono faint">{m.k}</span> {m.v}</span>
-            ))}
-          </div>
-        </div>
       </div>
 
-      <dl className="facts-bar enter enter--rise">
-        {t.hero.facts.map((f) => (
-          <div key={f.k}>
-            <dt className="mono faint">{f.k}</dt>
-            <dd>{f.v}</dd>
-          </div>
+      <ul className="features enter enter--rise">
+        {t.hero.features.map((f, i) => (
+          <li key={f.title} className="feature">
+            <span className="tile__icon tile__icon--accent"><Icon name={featureIcons[i]} /></span>
+            <div>
+              <p className="feature__title">{f.title}</p>
+              <p className="muted">{f.body}</p>
+            </div>
+          </li>
         ))}
-      </dl>
+      </ul>
     </section>
   );
 }
