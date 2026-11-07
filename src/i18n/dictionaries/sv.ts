@@ -145,17 +145,21 @@ const sv: Dictionary = {
     empty: "Vi håller på att sammanställa en översikt över våra genomförda projekt. Skriv till oss, så berättar vi gärna om projekt inom er bransch.",
     more: "Alla projekt",
     open: "Mer om projektet",
-    badge: "Referensprojekt",
     metaSuffix: "referensprojekt | KTechnology",
-    facts: { period: "Genomförandeperiod", team: "Teamstorlek", country: "Land", sector: "Bransch" },
+    facts: { location: "Land", industry: "Bransch", site: "Arbetsplats", name: "Projekt", period: "Period", team: "Personal", status: "Status" },
+    /** Roles of the companies on a project, shown once the owner approves the names. */
+    parties: { client: "Kund", endClient: "Slutkund", partner: "Projektpartner", mainContractor: "Huvudentreprenör" } as Record<string, string>,
+    status: { ongoing: "Pågår", completed: "Avslutat" },
     /** Unit after the team size, by plural category of the language (Intl.PluralRules); "other" is the fallback. */
     people: { one: "specialist", other: "specialister" } as Record<string, string>,
-    scopeTitle: "Projektets omfattning",
-    activitiesTitle: "Huvudsakliga arbeten",
-    galleryTitle: "Bilder från genomförandet",
-    resultsTitle: "Resultat och nytta för kunden",
+    infoTitle: "Fakta om projektet",
+    descriptionTitle: "Projektbeskrivning",
+    scopeTitle: "Utförda arbeten",
+    galleryTitle: "Bilder från projektet",
     othersTitle: "Fler genomförda projekt",
-    morePhotos: "fler bilder",
+    back: "Tillbaka till alla projekt",
+    /** Caption on the main photo while it is a stock photo, not one from the project. */
+    illustrative: "Illustrationsbild",
     stats: {
       label: "KTechnology i siffror",
       projects: "Genomförda projekt",

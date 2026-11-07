@@ -145,17 +145,21 @@ const fr: Dictionary = {
     empty: "Nous préparons actuellement la présentation de nos projets réalisés. Écrivez-nous\u00a0: nous vous parlerons volontiers de projets dans votre secteur.",
     more: "Tous les projets",
     open: "Détails du projet",
-    badge: "Projet de référence",
     metaSuffix: "projet de référence | KTechnology",
-    facts: { period: "Période de réalisation", team: "Taille de l’équipe", country: "Pays", sector: "Secteur" },
+    facts: { location: "Pays", industry: "Secteur", site: "Lieu de réalisation", name: "Projet", period: "Période", team: "Personnel", status: "Statut" },
+    /** Roles of the companies on a project, shown once the owner approves the names. */
+    parties: { client: "Client", endClient: "Client final", partner: "Partenaire de projet", mainContractor: "Entreprise générale" } as Record<string, string>,
+    status: { ongoing: "En cours", completed: "Terminé" },
     /** Unit after the team size, by plural category of the language (Intl.PluralRules); "other" is the fallback. */
     people: { one: "spécialiste", many: "spécialistes", other: "spécialistes" } as Record<string, string>,
-    scopeTitle: "Périmètre du projet",
-    activitiesTitle: "Principales activités",
-    galleryTitle: "Photos de la réalisation",
-    resultsTitle: "Résultat et bénéfices pour le client",
+    infoTitle: "Informations clés",
+    descriptionTitle: "Description du projet",
+    scopeTitle: "Travaux réalisés",
+    galleryTitle: "Photos du projet",
     othersTitle: "Autres projets réalisés",
-    morePhotos: "autres photos",
+    back: "Retour à tous les projets",
+    /** Caption on the main photo while it is a stock photo, not one from the project. */
+    illustrative: "Photo d’illustration",
     stats: {
       label: "KTechnology en chiffres",
       projects: "Projets réalisés",

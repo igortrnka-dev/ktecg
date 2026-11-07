@@ -145,17 +145,21 @@ const en: Dictionary = {
     empty: "We are still adding our completed projects to this overview. Get in touch and we will be happy to tell you about projects in your industry.",
     more: "All projects",
     open: "Project details",
-    badge: "Reference project",
     metaSuffix: "reference project | KTechnology",
-    facts: { period: "Project period", team: "Team size", country: "Country", sector: "Industry" },
+    facts: { location: "Country", industry: "Industry", site: "Site", name: "Project", period: "Period", team: "Staff", status: "Status" },
+    /** Roles of the companies on a project, shown once the owner approves the names. */
+    parties: { client: "Client", endClient: "End client", partner: "Project partner", mainContractor: "Main contractor" } as Record<string, string>,
+    status: { ongoing: "In progress", completed: "Completed" },
     /** Unit after the team size, by plural category of the language (Intl.PluralRules); "other" is the fallback. */
     people: { one: "specialist", other: "specialists" } as Record<string, string>,
-    scopeTitle: "Project scope",
-    activitiesTitle: "Main activities",
-    galleryTitle: "Project photos",
-    resultsTitle: "Outcome and value for the client",
+    infoTitle: "Key facts",
+    descriptionTitle: "Project description",
+    scopeTitle: "Scope of work",
+    galleryTitle: "Photos from the project",
     othersTitle: "More completed projects",
-    morePhotos: "more photos",
+    back: "Back to all projects",
+    /** Caption on the main photo while it is a stock photo, not one from the project. */
+    illustrative: "Illustrative photo",
     stats: {
       label: "KTechnology in numbers",
       projects: "Completed projects",

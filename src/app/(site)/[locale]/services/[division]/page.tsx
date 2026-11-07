@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { isLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
 import { divisionSlugs, href, type DivisionSlug } from "@/content/site";
-import { projects } from "@/content/projects";
+import { siteProjects } from "@/lib/projects";
 import { pageMetadata } from "@/lib/site/metadata";
 import Breadcrumbs from "@/components/site/Breadcrumbs";
 import { divisionIcons, divisionPhoto } from "@/components/site/catalog";
@@ -17,6 +17,8 @@ type Params = Promise<{ locale: string; division: string }>;
 
 // Only the divisions in content/site.ts; the middleware sends any other slug to the 404 page.
 export const dynamicParams = false;
+// Its projects come from the database (see lib/projects.ts).
+export const revalidate = 300;
 export function generateStaticParams() {
   return locales.flatMap((locale) => divisionSlugs.map((division) => ({ locale, division })));
 }
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 /**
- * A service division: photo and lead, its activities, the sectors it serves, up to four of its projects in one row
+ * A service division: photo and lead, its activities, the sectors it serves, up to three of its projects in one row
  * (left out while there are none) and the inquiry band with the division's own question.
  */
 export default async function DivisionPage({ params }: { params: Params }) {
@@ -42,7 +44,7 @@ export default async function DivisionPage({ params }: { params: Params }) {
   const slug = divisionSlugs[i];
   const d = t.services.divisions[i];
   const photo = divisionPhoto(slug);
-  const related = projects.filter((p) => p.divisions.includes(slug)).slice(0, 4);
+  const related = (await siteProjects(locale)).filter((p) => p.divisions.includes(slug)).slice(0, 3);
 
   return (
     <SiteShell

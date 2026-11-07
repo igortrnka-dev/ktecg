@@ -43,6 +43,11 @@ const DEFAULTS: Record<string, () => Row> = {
     roles: [], industries: [], question: "", status: "running", report: null, log: null, error: null, usage: null,
     created_at: now(), finished_at: null,
   }),
+  projects: () => ({
+    position: 100, published: false, sector: "manufacturing", divisions: [], period_to: null, status: null, team: null,
+    team_approx: false, parties: [], photo: null, gallery: [], stock_photo: null, parties_approved: false,
+    team_approved: false, photos_approved: false, text: {}, created_at: now(), updated_at: now(),
+  }),
   lead_emails: () => ({
     folder: null, kind: "normal", from_email: null, from_name: null, to_emails: [], cc_emails: [], subject: null,
     snippet: null, body: null, sent_at: null, in_reply_to: null, created_at: now(),
@@ -51,7 +56,11 @@ const DEFAULTS: Record<string, () => Row> = {
 
 const PRIMARY_KEY: Record<string, string> = { settings: "key" };
 /** Unique column sets: a row clashes when another row has the same non-null values in all of them. */
-const UNIQUE: Record<string, string[][]> = { leads: [["domain"]], lead_emails: [["lead_id", "message_id"]] };
+const UNIQUE: Record<string, string[][]> = {
+  leads: [["domain"]],
+  lead_emails: [["lead_id", "message_id"]],
+  projects: [["slug"]],
+};
 /** Embeddable relations, e.g. `select("*, campaigns(name)")`. */
 const EMBEDS: Record<string, { fk: string; table: string }> = {
   campaigns: { fk: "campaign_id", table: "campaigns" },

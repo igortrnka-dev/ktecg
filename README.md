@@ -42,7 +42,9 @@ Stack: Next.js 15 (App Router), Supabase (Postgres + Auth), Anthropic API (`clau
    `supabase/migrations/0004_mail.sql` in the SQL editor. 0002–0004 are safe to run again; a project set up with an
    older 0001 needs 0002, or every website inquiry fails, an existing project needs 0003 for *Analýzy trhu* and 0004
    for *Pošta*. Run 0004 before deploying the version with *Pošta*; until then *Pošta* and the mail card of *Prehľad*
-   say the e-mails could not be loaded.
+   say the e-mails could not be loaded. `supabase/migrations/0005_projects.sql` adds the *Projekty* table with the
+   owner's projects and the public `project-photos` storage bucket; until it has run, the site shows the projects from
+   `src/content/projects.ts` and *Projekty* in the admin asks for the migration.
    In *Authentication → Users* add the admin user(s) with a password and tick *Auto Confirm User*
    (the admin only accepts confirmed e-mails listed in `ADMIN_EMAILS`).
    Then in *Authentication → Sign In / Providers* turn off *Allow new users to sign up* (it is on by default)

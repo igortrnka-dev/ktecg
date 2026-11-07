@@ -143,17 +143,21 @@ const sk = {
     empty: "Prehľad realizovaných projektov práve dopĺňame. Napíšte nám a radi vám povieme o projektoch vo vašom odvetví.",
     more: "Všetky projekty",
     open: "Detail projektu",
-    badge: "Referenčný projekt",
     metaSuffix: "referenčný projekt | KTechnology",
-    facts: { period: "Obdobie realizácie", team: "Veľkosť tímu", country: "Krajina", sector: "Odvetvie" },
+    facts: { location: "Krajina", industry: "Odvetvie", site: "Miesto realizácie", name: "Projekt", period: "Obdobie", team: "Personál", status: "Stav" },
+    /** Roles of the companies on a project, shown once the owner approves the names. */
+    parties: { client: "Zákazník", endClient: "Koncový zákazník", partner: "Projektový partner", mainContractor: "Hlavný dodávateľ" } as Record<string, string>,
+    status: { ongoing: "Prebieha", completed: "Ukončené" },
     /** Unit after the team size, by plural category of the language (Intl.PluralRules); "other" is the fallback. */
     people: { one: "odborník", few: "odborníci", other: "odborníkov" } as Record<string, string>,
-    scopeTitle: "Rozsah projektu",
-    activitiesTitle: "Hlavné činnosti",
-    galleryTitle: "Fotodokumentácia z realizácie",
-    resultsTitle: "Výsledok a prínos pre zákazníka",
+    infoTitle: "Základné informácie",
+    descriptionTitle: "Popis projektu",
+    scopeTitle: "Rozsah vykonaných prác",
+    galleryTitle: "Fotografie z realizácie",
     othersTitle: "Ďalšie realizované projekty",
-    morePhotos: "ďalšie fotografie",
+    back: "Späť na všetky projekty",
+    /** Caption on the main photo while it is a stock photo, not one from the project. */
+    illustrative: "Ilustračná fotografia",
     stats: {
       label: "KTechnology v číslach",
       projects: "Realizovaných projektov",

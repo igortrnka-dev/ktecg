@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   // Node-only mail libraries (sockets, charset tables loaded at runtime): required from node_modules, not bundled.
   serverExternalPackages: ["imapflow", "mailparser"],
+  // Project photos are uploaded through an admin server action (several photos per save, up to 10 MB each).
+  experimental: {
+    serverActions: { bodySizeLimit: "40mb" },
+    middlewareClientMaxBodySize: "40mb",
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

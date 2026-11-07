@@ -2,8 +2,6 @@
  * Page structure of the public site, shared by the pages, the middleware (which 404s every other path), the
  * sitemap and the navigation. Plain data only: the middleware runs on the edge runtime.
  */
-import { projects } from "./projects";
-
 /** The pages behind the main menu, in menu order. "" is the locale homepage. */
 export const pages = [
   { key: "home", path: "" },
@@ -64,16 +62,19 @@ export const stats: { projects: number | null; countries: number; workers: strin
   workers: "200+",
 };
 
-/** Every page path under /<locale>, without the locale ("" is the homepage). */
+/**
+ * Every fixed page path under /<locale>, without the locale ("" is the homepage). Project pages come from the
+ * database (edited in the admin), so the middleware lets through any well-formed projects/<slug> and the project
+ * page itself answers for a slug it does not know.
+ */
 export const sitePaths: readonly string[] = [
   ...pages.map((p) => p.path),
   ...divisionSlugs.map((s) => `services/${s}`),
-  ...projects.map((p) => `projects/${p.slug}`),
 ];
 
 const known = new Set(sitePaths);
 export function isSitePath(path: string): boolean {
-  return known.has(path);
+  return known.has(path) || /^projects\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(path);
 }
 
 /** Link to a page path in a locale: href("sk", "services") is "/sk/services", href("sk", "") is "/sk". */

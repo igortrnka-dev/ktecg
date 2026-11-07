@@ -173,6 +173,13 @@ const paths: Record<string, React.ReactNode> = {
     </>
   ),
   chevron: <path d="M6 9l6 6 6-6" />,
+  back: <path d="M19 12H5M11 6l-6 6 6 6" />,
+  user: (
+    <>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
+    </>
+  ),
 };
 
 export type IconName = keyof typeof paths;
