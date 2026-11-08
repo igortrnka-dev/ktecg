@@ -7,6 +7,7 @@ import { db } from "@/lib/supabase/admin";
 import { locales, localeNames } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
 import { divisionSlugs, sectorSlugs } from "@/content/site";
+import { divisionPhoto, sectorPhoto } from "@/components/site/catalog";
 import { partyRoles, type ProjectRecord } from "@/content/projects";
 import { fromRow, type ProjectRow } from "@/lib/project-rows";
 import Icon from "@/components/admin/Icon";
@@ -17,12 +18,30 @@ import { deleteProject, saveProject } from "../../../project-actions";
 const sk = getDictionary("sk");
 const ROLE_LABEL: Record<string, string> = sk.projects.parties;
 
-/** Photos in public/img that can stand in for a project's own photos. */
-function stockPhotos(): string[] {
+/** Photos the site already shows elsewhere: the hero, contact, call-to-action, "all included", service and sector cards. */
+function reservedPhotos(): Set<string> {
+  const slots = [
+    "hero",
+    "contact",
+    "cta",
+    "included",
+    ...divisionSlugs.map(divisionPhoto),
+    ...sectorSlugs.map(sectorPhoto),
+  ];
+  return new Set(slots.filter((s): s is string => !!s));
+}
+
+/**
+ * Photos in public/img that can stand in for a project's own photos: every photo appears on the site only once, so
+ * the list leaves out the photos of the other sections and of the other projects (the project's own choice stays).
+ */
+function stockPhotos(current: string | null, takenByProjects: string[]): string[] {
+  const taken = new Set([...reservedPhotos(), ...takenByProjects]);
   try {
     return readdirSync(path.join(process.cwd(), "public", "img"))
       .filter((f) => f.endsWith(".jpg"))
       .map((f) => f.replace(/\.jpg$/, ""))
+      .filter((s) => s === current || !taken.has(s))
       .sort();
   } catch {
     return [];
@@ -66,6 +85,10 @@ export default async function ProjectEdit({
     p = fromRow(data as ProjectRow);
   }
   const isNew = !p.id;
+  const { data: others } = await db().from("projects").select("id, stock_photo");
+  const takenByProjects = ((others ?? []) as { id: string; stock_photo: string | null }[])
+    .filter((o) => o.id !== p.id && o.stock_photo)
+    .map((o) => o.stock_photo as string);
   const parties = [...p.parties, ...Array(Math.max(0, 4 - p.parties.length)).fill(null)].slice(0, 4);
   // Fields are keyed by the saved project so a save shows the stored values, not the ones from page load.
   const k = `${p.id ?? "new"}-${p.slug}-${p.position}-${String(saved)}`;
@@ -174,7 +197,7 @@ export default async function ProjectEdit({
                 <span>Ilustračná fotka (kým nie sú schválené vlastné)</span>
                 <select name="stock_photo" defaultValue={p.stockPhoto ?? ""}>
                   <option value="">Bez fotky</option>
-                  {stockPhotos().map((s) => <option key={s} value={s}>{s}</option>)}
+                  {stockPhotos(p.stockPhoto, takenByProjects).map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
                 {p.stockPhoto && (
                   // eslint-disable-next-line @next/next/no-img-element

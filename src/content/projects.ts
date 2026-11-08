@@ -87,7 +87,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "LTH-Baas GmbH" }],
     photo: null,
     gallery: [],
-    stockPhoto: "sector-shipbuilding",
+    stockPhoto: "trade-welding",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -214,7 +214,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "Fiegl & Spielberger GmbH" }],
     photo: null,
     gallery: [],
-    stockPhoto: "sector-buildings",
+    stockPhoto: "trade-electrical",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -450,7 +450,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "R11 Automation Sp. z o.o." }],
     photo: null,
     gallery: [],
-    stockPhoto: "sector-manufacturing",
+    stockPhoto: "sector-logistics",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -577,7 +577,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "AS LTH-Baas" }],
     photo: null,
     gallery: [],
-    stockPhoto: "division-electrical",
+    stockPhoto: "service-leasing",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -704,7 +704,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "CHEMCOMEX, a.s. – organizačná zložka Slovensko" }],
     photo: null,
     gallery: [],
-    stockPhoto: "sector-energy",
+    stockPhoto: "service-outages",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -829,7 +829,7 @@ export const seedProjects: ProjectRecord[] = [
     ],
     photo: null,
     gallery: [],
-    stockPhoto: "sector-chemical",
+    stockPhoto: "trade-machining",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -959,7 +959,7 @@ export const seedProjects: ProjectRecord[] = [
     ],
     photo: null,
     gallery: [],
-    stockPhoto: "division-welding",
+    stockPhoto: "sector-metalworking",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
