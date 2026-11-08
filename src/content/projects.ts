@@ -319,7 +319,7 @@ export const seedProjects: ProjectRecord[] = [
     slug: "electrical-installation-european-projects",
     position: 3,
     published: true,
-    sector: "shipbuilding",
+    sector: "manufacturing",
     divisions: ["electrical-automation"],
     periodFrom: 2026,
     periodTo: 2027,
@@ -335,7 +335,7 @@ export const seedProjects: ProjectRecord[] = [
       sk: {
         title: "Elektromontážne práce na európskych projektoch",
         location: "Rakúsko / ďalšie európske lokality",
-        industry: "Lodný priemysel",
+        industry: "Elektrotechnika a priemyselné inštalácie",
         site: "Celá Európa",
         summary:
           "Poskytovanie kvalifikovaných elektrotechnikov na realizáciu elektroinštalácií, montáž a zapájanie elektrických zariadení a rozvádzačov, základné merania a technickú podporu pri realizácii projektov.",
@@ -352,7 +352,7 @@ export const seedProjects: ProjectRecord[] = [
       en: {
         title: "Electrical installation work on European projects",
         location: "Austria / other European locations",
-        industry: "Shipbuilding",
+        industry: "Electrical engineering and industrial installations",
         site: "Across Europe",
         summary:
           "Qualified electricians for electrical installations, mounting and wiring of electrical equipment and switchboards, basic measurements and technical support on projects.",
@@ -369,7 +369,7 @@ export const seedProjects: ProjectRecord[] = [
       de: {
         title: "Elektromontagearbeiten bei europäischen Projekten",
         location: "Österreich / weitere europäische Standorte",
-        industry: "Schiffbau",
+        industry: "Elektrotechnik und Industrieinstallationen",
         site: "Ganz Europa",
         summary:
           "Qualifizierte Elektrotechniker für Elektroinstallationen, Montage und Anschluss elektrischer Anlagen und Schaltschränke, Grundmessungen und technische Unterstützung bei Projekten.",
@@ -386,7 +386,7 @@ export const seedProjects: ProjectRecord[] = [
       fr: {
         title: "Travaux de montage électrique sur des projets européens",
         location: "Autriche / autres sites en Europe",
-        industry: "Construction navale",
+        industry: "Électrotechnique et installations industrielles",
         site: "Toute l'Europe",
         summary:
           "Électriciens qualifiés pour les installations électriques, le montage et le raccordement d'équipements et d'armoires électriques, les mesures de base et l'assistance technique sur les projets.",
@@ -403,7 +403,7 @@ export const seedProjects: ProjectRecord[] = [
       sv: {
         title: "Elmontage i europeiska projekt",
         location: "Österrike / andra platser i Europa",
-        industry: "Varvsindustri",
+        industry: "Elteknik och industriinstallationer",
         site: "Hela Europa",
         summary:
           "Kvalificerade elektriker för elinstallationer, montage och inkoppling av elutrustning och ställverk, grundläggande mätningar och tekniskt stöd i projekten.",
@@ -420,7 +420,7 @@ export const seedProjects: ProjectRecord[] = [
       pl: {
         title: "Prace elektromontażowe przy projektach europejskich",
         location: "Austria / inne lokalizacje w Europie",
-        industry: "Przemysł stoczniowy",
+        industry: "Elektrotechnika i instalacje przemysłowe",
         site: "Cała Europa",
         summary:
           "Wykwalifikowani elektrycy do instalacji elektrycznych, montażu i podłączania urządzeń elektrycznych i rozdzielnic, podstawowych pomiarów oraz wsparcia technicznego przy projektach.",
