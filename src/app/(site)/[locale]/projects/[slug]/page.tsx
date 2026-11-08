@@ -75,7 +75,7 @@ function facts(t: ReturnType<typeof getDictionary>, locale: Locale, p: PublicPro
 
 /**
  * A reference project, one template for all: back link, a wide main photo with the number and title, the key facts
- * beside the description and the scope of work, the project's own photos when approved, the inquiry button, other
+ * beside the description and the scope of work, the project's own photos when approved, the back link again, other
  * projects and the inquiry band. On phones everything stacks.
  */
 export default async function ProjectPage({ params }: { params: Params }) {
@@ -194,10 +194,6 @@ export default async function ProjectPage({ params }: { params: Params }) {
         )}
 
         <p className="pdetail__actions" data-reveal>
-          <a href={href(locale, "contact")} className="btn btn--accent btn--lg">
-            {t.cta.button}
-            <Icon name="arrow" size={16} />
-          </a>
           <a href={projectsHref} className="pback">
             <Icon name="back" size={16} />
             {t.projects.back}
