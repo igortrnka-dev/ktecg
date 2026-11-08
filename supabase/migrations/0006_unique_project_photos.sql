@@ -8,3 +8,15 @@ update projects set stock_photo = 'service-leasing' where slug = 'disney-adventu
 update projects set stock_photo = 'service-outages' where slug = 'mochovce-nuclear-power-plant-piping' and stock_photo = 'sector-energy';
 update projects set stock_photo = 'trade-machining' where slug = 'ineos-project-one-antwerp' and stock_photo = 'sector-chemical';
 update projects set stock_photo = 'sector-metalworking' where slug = 'orlen-unipetrol-vacuum-distillation-litvinov' and stock_photo = 'division-welding';
+
+-- The electrical works for SES Ship Electric Service are shipbuilding work, not general manufacturing.
+update projects
+set sector = 'shipbuilding',
+    text = jsonb_set(jsonb_set(jsonb_set(jsonb_set(jsonb_set(jsonb_set(text,
+      '{sk,industry}', '"Lodný priemysel"'),
+      '{en,industry}', '"Shipbuilding"'),
+      '{de,industry}', '"Schiffbau"'),
+      '{fr,industry}', '"Construction navale"'),
+      '{sv,industry}', '"Varvsindustri"'),
+      '{pl,industry}', '"Przemysł stoczniowy"')
+where slug = 'electrical-installation-european-projects' and sector = 'manufacturing';
