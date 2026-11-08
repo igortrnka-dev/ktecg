@@ -6,6 +6,8 @@ import { NEXT_ACTION } from "../inquiries";
 import { COMPANY_MAILBOX } from "../mail/config";
 import { snippetOf } from "../mail/parse";
 import { CHECK_ADDRESS, mailLog } from "../mail/text";
+import { seedProjects } from "../../content/projects";
+import { toRow } from "../project-rows";
 
 /*
  * Sample data for the local admin preview. Every company is fictional and uses the
@@ -902,5 +904,6 @@ export function seed(): Record<string, Row[]> {
     ],
     market_reports,
     lead_emails,
+    projects: seedProjects.map((p) => ({ id: randomUUID(), ...toRow(p), created_at: ago(1), updated_at: ago(1) })),
   };
 }

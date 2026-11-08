@@ -145,17 +145,21 @@ const pl: Dictionary = {
     empty: "Właśnie uzupełniamy przegląd zrealizowanych projektów. Prosimy o kontakt – chętnie opowiemy o projektach w Państwa branży.",
     more: "Wszystkie projekty",
     open: "Szczegóły projektu",
-    badge: "Projekt referencyjny",
     metaSuffix: "projekt referencyjny | KTechnology",
-    facts: { period: "Okres realizacji", team: "Wielkość zespołu", country: "Kraj", sector: "Branża" },
+    facts: { location: "Kraj", industry: "Branża", site: "Miejsce realizacji", name: "Projekt", period: "Okres", team: "Personel", status: "Status" },
+    /** Roles of the companies on a project, shown once the owner approves the names. */
+    parties: { client: "Klient", endClient: "Klient końcowy", partner: "Partner projektu", mainContractor: "Generalny wykonawca" } as Record<string, string>,
+    status: { ongoing: "W toku", completed: "Zakończony" },
     /** Unit after the team size, by plural category of the language (Intl.PluralRules); "other" is the fallback. */
     people: { one: "specjalista", few: "specjaliści", many: "specjalistów", other: "specjalisty" } as Record<string, string>,
-    scopeTitle: "Zakres projektu",
-    activitiesTitle: "Główne prace",
-    galleryTitle: "Dokumentacja zdjęciowa z realizacji",
-    resultsTitle: "Rezultat i korzyści dla klienta",
+    infoTitle: "Podstawowe informacje",
+    descriptionTitle: "Opis projektu",
+    scopeTitle: "Zakres wykonanych prac",
+    galleryTitle: "Zdjęcia z realizacji",
     othersTitle: "Inne zrealizowane projekty",
-    morePhotos: "więcej zdjęć",
+    back: "Powrót do wszystkich projektów",
+    /** Caption on the main photo while it is a stock photo, not one from the project. */
+    illustrative: "Zdjęcie poglądowe",
     stats: {
       label: "KTechnology w liczbach",
       projects: "Zrealizowane projekty",

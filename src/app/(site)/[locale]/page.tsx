@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n";
 import { href } from "@/content/site";
-import { projects } from "@/content/projects";
+import { siteProjects } from "@/lib/projects";
 import Hero from "@/components/site/Hero";
 import Icon from "@/components/site/Icon";
 import Process from "@/components/site/Process";
@@ -21,6 +21,9 @@ function More({ to, children }: { to: string; children: React.ReactNode }) {
   );
 }
 
+// The latest projects come from the database (see lib/projects.ts).
+export const revalidate = 300;
+
 /**
  * Homepage: hero with the four feature cards, the service divisions, the sectors, the latest projects (once there
  * are any), a short about passage and how working with us goes. The inquiry band closes it, as every page.
@@ -29,6 +32,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getDictionary(locale);
+  const projects = await siteProjects(locale);
 
   return (
     <SiteShell t={t} locale={locale} path="" current="home">
@@ -46,7 +50,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {projects.length > 0 && (
         <section className="block" id="projects">
           <SectionHead label={t.projects.label} title={t.projects.title} />
-          <ProjectGrid t={t} locale={locale} projects={projects.slice(0, 4)} />
+          <ProjectGrid t={t} locale={locale} projects={projects.slice(0, 3)} />
           <More to={href(locale, "projects")}>{t.projects.more}</More>
         </section>
       )}

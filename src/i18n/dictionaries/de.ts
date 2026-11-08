@@ -144,17 +144,21 @@ const de: Dictionary = {
     empty: "Wir stellen gerade die Übersicht unserer abgeschlossenen Projekte zusammen. Schreiben Sie uns\u00a0– gern berichten wir Ihnen von Projekten in Ihrer Branche.",
     more: "Alle Projekte",
     open: "Projektdetails",
-    badge: "Referenzprojekt",
     metaSuffix: "Referenzprojekt | KTechnology",
-    facts: { period: "Ausführungszeitraum", team: "Teamgröße", country: "Land", sector: "Branche" },
+    facts: { location: "Land", industry: "Branche", site: "Einsatzort", name: "Projekt", period: "Zeitraum", team: "Personal", status: "Status" },
+    /** Roles of the companies on a project, shown once the owner approves the names. */
+    parties: { client: "Auftraggeber", endClient: "Endkunde", partner: "Projektpartner", mainContractor: "Generalunternehmer" } as Record<string, string>,
+    status: { ongoing: "Laufend", completed: "Abgeschlossen" },
     /** Unit after the team size, by plural category of the language (Intl.PluralRules); "other" is the fallback. */
     people: { one: "Fachkraft", other: "Fachkräfte" } as Record<string, string>,
-    scopeTitle: "Projektumfang",
-    activitiesTitle: "Haupttätigkeiten",
-    galleryTitle: "Fotodokumentation der Ausführung",
-    resultsTitle: "Ergebnis und Nutzen für den Kunden",
+    infoTitle: "Eckdaten",
+    descriptionTitle: "Projektbeschreibung",
+    scopeTitle: "Ausgeführte Leistungen",
+    galleryTitle: "Fotos aus dem Projekt",
     othersTitle: "Weitere Projekte",
-    morePhotos: "weitere Fotos",
+    back: "Zurück zu allen Projekten",
+    /** Caption on the main photo while it is a stock photo, not one from the project. */
+    illustrative: "Symbolbild",
     stats: {
       label: "KTechnology in Zahlen",
       projects: "Abgeschlossene Projekte",

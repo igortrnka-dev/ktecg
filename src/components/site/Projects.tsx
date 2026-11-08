@@ -1,36 +1,58 @@
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
-import { href, sectorSlugs, stats } from "@/content/site";
-import type { Project } from "@/content/projects";
+import { href, stats } from "@/content/site";
+import type { PublicProject } from "@/content/projects";
+import { hasPhoto } from "@/lib/photo";
+import Art from "./Art";
 import Icon from "./Icon";
 import Photo from "./Photo";
 
-/** Country name in the page's language, from an ISO code ("DE" is "Nemecko" on the Slovak site). */
-export function countryName(locale: Locale, code: string): string {
-  return new Intl.DisplayNames([locale], { type: "region" }).of(code) ?? code;
+/** "2025 – 2026", or one year. */
+export function periodText(p: Pick<PublicProject, "periodFrom" | "periodTo">): string {
+  return p.periodTo && p.periodTo !== p.periodFrom ? `${p.periodFrom} – ${p.periodTo}` : String(p.periodFrom);
 }
 
-export function sectorName(t: Dictionary, project: Project): string {
-  return t.sectors.items[sectorSlugs.indexOf(project.sector)] ?? "";
-}
-
-/** "03/2024 – 07/2024" from the project's year-month period; one month is shown once. */
-export function periodText(project: Project): string {
-  const fmt = (ym: string) => {
-    const [y, m] = ym.split("-");
-    return `${m}/${y}`;
-  };
-  const { from, to } = project.period;
-  return from === to ? fmt(from) : `${fmt(from)} – ${fmt(to)}`;
-}
-
-/** "12 odborníkov": the team size with the unit in the right plural form of the language. */
-export function teamText(t: Dictionary, locale: Locale, team: number): string {
+/** "≈ 250 odborníkov": the headcount with the unit in the right plural form of the language. */
+export function teamText(t: Dictionary, locale: Locale, team: number, approx = false): string {
   const unit = t.projects.people[new Intl.PluralRules(locale).select(team)] ?? t.projects.people.other;
-  return `${team} ${unit}`;
+  return `${approx ? "≈ " : ""}${team} ${unit}`;
 }
 
-/** Project cards, each opening its project page; up to four in a row. */
+/** "01" */
+export function projectNumber(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+/**
+ * The project's main photo: its own photo once approved (an uploaded file), otherwise the illustrative photo chosen
+ * in the admin, otherwise the CSS art.
+ */
+export function ProjectPhoto({ project, eager = false, alt = "" }: { project: PublicProject; eager?: boolean; alt?: string }) {
+  if (project.photo) return <RemotePhoto src={project.photo} eager={eager} alt={alt} />;
+  if (project.stockPhoto && hasPhoto(project.stockPhoto)) return <Photo slug={project.stockPhoto} eager={eager} />;
+  return <Art variant={project.number} />;
+}
+
+/** A photo from the project photo storage (full URL). */
+export function RemotePhoto({ src, eager = false, alt = "" }: { src: string; eager?: boolean; alt?: string }) {
+  return (
+    <div className="photo">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async" />
+      <div className="grain" />
+    </div>
+  );
+}
+
+/** The first party on the card: the customer, or the project partner when that is who we worked for. */
+export function mainParty(p: PublicProject) {
+  return p.parties.find((x) => x.role === "client") ?? p.parties.find((x) => x.role === "partner") ?? p.parties[0];
+}
+
+/**
+ * Project cards, three in a row on wide screens, each opening its project page: number and period on the photo,
+ * then title, place, industry and customer, headcount and status when known, the short text and "Detail projektu".
+ */
 export function ProjectGrid({
   t,
   locale,
@@ -39,36 +61,48 @@ export function ProjectGrid({
 }: {
   t: Dictionary;
   locale: Locale;
-  projects: Project[];
+  projects: PublicProject[];
   heading?: "h2" | "h3";
 }) {
   return (
     <ul className="pgrid">
       {projects.map((p, i) => {
-        const text = p.text[locale];
+        const party = mainParty(p);
+        const link = href(locale, `projects/${p.slug}`);
         return (
-          <li key={p.slug} data-reveal style={{ transitionDelay: `${(i % 4) * 70}ms` }}>
-            <a href={href(locale, `projects/${p.slug}`)} className="card card--link">
-              <div className="card__media">
-                <Photo slug={p.photo ?? `project-${p.slug}`} variant={i} />
-              </div>
-              <div className="card__body">
-                <ul className="ptags">
-                  <li className="mono">{countryName(locale, p.country)}</li>
-                  <li className="mono">{sectorName(t, p)}</li>
+          <li key={p.slug} data-reveal style={{ transitionDelay: `${(i % 3) * 70}ms` }}>
+            <article className="pcard">
+              <a href={link} className="pcard__media" tabIndex={-1} aria-hidden>
+                <ProjectPhoto project={p} />
+                <span className="pcard__num mono">{projectNumber(p.number)}</span>
+                <span className="pcard__period mono">{periodText(p)}</span>
+              </a>
+              <div className="pcard__body">
+                <Heading className="pcard__title">
+                  <a href={link}>{p.text.title}</a>
+                </Heading>
+                <ul className="pinfo">
+                  <li><Icon name="pin" size={16} />{p.text.location}</li>
+                  <li><Icon name="factory" size={16} />{p.text.industry}</li>
+                  {party && <li><Icon name="user" size={16} />{party.name}</li>}
                 </ul>
-                <Heading className="card__title">{text.title}</Heading>
-                <ul className="pmeta muted">
-                  <li><Icon name="calendar" size={16} />{periodText(p)}</li>
-                  {p.team !== undefined && <li><Icon name="people" size={16} />{teamText(t, locale, p.team)}</li>}
-                </ul>
-                <p className="muted card__text">{text.summary}</p>
-                <span className="tile__more mono">
+                {(p.team !== null || p.status) && (
+                  <ul className="pinfo">
+                    {p.team !== null && <li><Icon name="people" size={16} />{teamText(t, locale, p.team, p.teamApprox)}</li>}
+                    {p.status && (
+                      <li className={`pstatus pstatus--${p.status}`}>
+                        <Icon name="check" size={16} />{t.projects.status[p.status]}
+                      </li>
+                    )}
+                  </ul>
+                )}
+                <p className="pcard__text">{p.text.summary}</p>
+                <a href={link} className="pcard__more" aria-label={`${t.projects.open}: ${p.text.title}`}>
                   {t.projects.open}
                   <Icon name="arrow" size={16} />
-                </span>
+                </a>
               </div>
-            </a>
+            </article>
           </li>
         );
       })}
