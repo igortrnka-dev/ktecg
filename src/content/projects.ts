@@ -87,7 +87,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "LTH-Baas GmbH" }],
     photo: null,
     gallery: [],
-    stockPhoto: "trade-welding",
+    stockPhoto: "project-ship-2",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -329,7 +329,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "SES Ship Electric Service GmbH" }],
     photo: null,
     gallery: [],
-    stockPhoto: "sector-electrical",
+    stockPhoto: "project-ship-3",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
@@ -577,7 +577,7 @@ export const seedProjects: ProjectRecord[] = [
     parties: [{ role: "client", name: "AS LTH-Baas" }],
     photo: null,
     gallery: [],
-    stockPhoto: "service-leasing",
+    stockPhoto: "project-ship-1",
     approved: { parties: false, team: false, photos: false },
     text: {
       sk: {
