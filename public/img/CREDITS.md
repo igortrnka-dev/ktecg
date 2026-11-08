@@ -31,6 +31,9 @@ Downloaded on 2026-10-29, resized to max 1600px wide.
 | division-welding.jpg | Kyle Levesque | https://unsplash.com/photos/TB-GyBM8Kpc (downloaded 2026-11-05; welding helmet, gloves, coveralls) |
 | division-mechanical.jpg | Ricardo Gomez Angel | https://unsplash.com/photos/41X6FwTwPh4 (downloaded 2026-11-05) |
 | cta.jpg | Axel Lopez | https://unsplash.com/photos/ZqC8zRr4JoI (downloaded 2026-11-05) |
+| project-ship-1.jpg | Thomas Lohmann | https://unsplash.com/photos/h8m5XN7D_ac (downloaded 2026-11-08; ship hull in dry dock, Wilhelmshaven) |
+| project-ship-2.jpg | iSawRed | https://unsplash.com/photos/WB9HyqF8lKA (downloaded 2026-11-08; ship engine room pipework) |
+| project-ship-3.jpg | Korina Kasum | https://unsplash.com/photos/pHrpPbkd4xs (downloaded 2026-11-08; ship under repair in dry dock, Helsinki, cropped 3:2) |
 
 ## Removed
 
